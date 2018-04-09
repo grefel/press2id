@@ -10,11 +10,11 @@
 
 var px = {
 	projectName:"press2id",
-	version:"2018-04-04-v1.0",
+	version:"2018-04-09-v1.0",
 	
-	blogURL:"https://www.indesignblog.com", 
+//~ 	blogURL:"https://www.indesignblog.com", 
 //~ 	blogURL:"https://www.publishingx.de", 
-//~ 	blogURL:"https://www.publishingblog.ch", 
+	blogURL:"https://www.publishingblog.ch", 
 //~ 	blogURL:"https://wordpress.org/news", 
 	
 
@@ -31,10 +31,11 @@ var px = {
 // Debug Stuff
 if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor-") {
 	app.insertLabel("wp2id:blogURL", px.blogURL);
-	px.debugPost = {postObject:{id:12580, blogTitle:"Debug Run 12580" }, downloadImages:true, localImageFolder:Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL:px.blogURL};
+	px.debugPost = {postObject:{id:12628, blogTitle:"Debug Run 12628" }, downloadImages:true, localImageFolder:Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL:px.blogURL};
 
 	px.showGUI = false;
 	px.debug = true;
+	px.runWithUndo = false;
 }
 
 main();
@@ -180,11 +181,13 @@ function processDok(dok) {
 	var localImageFolder = retval.localImageFolder;
 	var blogURL = retval.blogURL;
 	
+	blogURL = fixBlogUrlWordpressCom(blogURL);
+		
 	log.info("Verarbeite Post mit ID " + postObject.id + " titel " + postObject.blogTitle + " mode downloadImages: " + downloadImages + " folder " + localImageFolder);
 	
 	var request = {
 		url:blogURL,
-		command:"wp-json/wp/v2/posts/" + postObject.id, 
+		command:"posts/" + postObject.id, 
 	}
 	var response = restix.fetch(request);
 	try {
@@ -198,10 +201,16 @@ function processDok(dok) {
 		return;
 	}
 
+	if (singlePost.hasOwnProperty("code")) {
+		log.warn( "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + singlePost.code + " Message: " + singlePost.message);
+		return;
+	}
+
 	if (singlePost.length == 0) {
 		log.warn("Der Beitrag mit der ID [" + postObject.id + "] konnte nicht heruntergeladen werden!");
 		return;
 	}	
+
 
 	try {
 		var pBar = new $.ProgressBar(ui.progressBar, 350, 100);
@@ -209,11 +218,13 @@ function processDok(dok) {
 
 		// HTML zusammebauen 
 		var content = '<html><head><title>' + postObject.id + '</title></head><body>'
+		
+		
 		// Featured Image einbinden
-		if (singlePost.featured_media != 0) {			
+		if (singlePost.featured_media != 0 && singlePost.featured_media != undefined) {			
 			var request = {
 				url:blogURL,
-				command:"wp-json/wp/v2/media/" + singlePost.featured_media, 
+				command:"media/" + singlePost.featured_media, 
 			}
 			var response = restix.fetch(request);
 			try {
@@ -227,7 +238,13 @@ function processDok(dok) {
 				return;
 			}		
 
-			content += '<div id="featuredImage">'  + featuredImage.guid.rendered + '</div>'
+			if (featuredImage.hasOwnProperty("code")) {
+				log.info( "Bild [featuredImage] konnte nicht geladen werden:\nCode: " + featuredImage.code + " Message: " + featuredImage.message);
+			}
+			else {
+				content += '<div id="featuredImage">'  + featuredImage.guid.rendered + '</div>'
+			}
+
 		}
 		content += '<div id="content"><h1 class="title">'  + postObject.blogTitle + '</h1>\r' +  singlePost.content.rendered +  '</div>'
 		content += '</body></html>';
@@ -668,8 +685,8 @@ function getListOfBlogEntries(blogURL, verbose) {
 	log.info("getListOfBlogEntries: " + blogURL +  "/wp-json/wp/v2/posts/?per_page=100&context=embed");
 
 	var request = {
-		url:blogURL,
-		command:"/wp-json/wp/v2/posts/?per_page=100&context=embed", 
+		url:fixBlogUrlWordpressCom(blogURL),
+		command:"posts/?per_page=100&context=embed", 
 	}
 	var response = restix.fetch(request);
 	try {
@@ -736,6 +753,13 @@ function getTemplateFile() {
 	return null;
 }
 
+
+function fixBlogUrlWordpressCom(blogURL) {
+	if (blogURL.match (/\.wordpress.com.$/)) return "https://public-api.wordpress.com/wp/v2/sites/" + blogURL.replace(/^https?:\/\//, '').replace(/\/$/, "") + "/";
+	else return blogURL.replace(/\/$/, "") + "/wp-json/wp/v2/";
+}
+
+
 /* Bookmarks und Metadaten einfügen */
 function runTidy (xmlTempFile) {	
 	try {
@@ -766,6 +790,9 @@ function runTidy (xmlTempFile) {
 		}
 		else { // Mac
 			var tidyBinPath = '"' + libPath.fsName + '/tidy-mac/tidy"';
+			systemCmd = 'do shell script "chmod u+x \'' +libPath.fsName + '/tidy-mac/tidy' + '\'"';
+			app.doScript(systemCmd, ScriptLanguage.APPLESCRIPT_LANGUAGE);						
+			
 			var tidyConfigPath = '"' + libPath.fsName + '/tidyconfig.txt"';
 			var tidyErrorPath = '"' + libPath.parent.fsName + '/log/tidyError.txt"';	
 			
@@ -779,10 +806,7 @@ function runTidy (xmlTempFile) {
 
 			systemScriptFile = File (Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "system.sh" );
 			writeTextFileLocal (systemScriptFile, cmd, "UTF-8", "UNIX");
-												
-//~ 			systemScriptFile.parent.execute();
-//~ 			exit();
-																								
+																																				
 			systemCmd = 'do shell script "chmod u+x \'' +systemScriptFile.fsName + '\'"';
 			app.doScript(systemCmd, ScriptLanguage.APPLESCRIPT_LANGUAGE);						
 			
