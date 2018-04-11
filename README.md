@@ -2,9 +2,10 @@
 Connect Adobe InDesign to a Wordpress Blog via REST
 
 # Table of contents
-* [Install information](Install)
-* [Workflow](Some notes on the Workflow)
-* [Deutsche Anleitung](Wie geht das?)
+* [Install information](#Install)
+* [Workflow](#Some notes on the Workflow)
+* [Deutsche Anleitung](#Wie geht das?)
+
 
 * Works with *Adobe InDesign* CS 6 and higher
 * Connects to any *Wordpress* 4.7 or higher
