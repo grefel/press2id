@@ -1,15 +1,6 @@
 line 1 column 1 - Warning: missing <!DOCTYPE> declaration
-line 44 column 312 - Warning: unescaped & or unknown entity "&text"
-line 44 column 561 - Warning: <svg> attribute "width" has invalid value "32px"
-line 44 column 561 - Warning: <svg> attribute "height" has invalid value "20px"
-line 44 column 1532 - Warning: <svg> attribute "width" has invalid value "32px"
-line 44 column 1532 - Warning: <svg> attribute "height" has invalid value "20px"
-line 44 column 2242 - Warning: <svg> attribute "width" has invalid value "32px"
-line 44 column 2242 - Warning: <svg> attribute "height" has invalid value "20px"
-line 44 column 3046 - Warning: <svg> attribute "width" has invalid value "32px"
-line 44 column 3046 - Warning: <svg> attribute "height" has invalid value "20px"
 Info: Document content looks like XHTML5
-Tidy found 10 warnings and 0 errors!
+Tidy found 1 warning and 0 errors!
 
 About HTML Tidy: https://github.com/htacg/tidy-html5
 Bug reports and comments: https://github.com/htacg/tidy-html5/issues
