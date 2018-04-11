@@ -12,6 +12,7 @@ Connect Adobe InDesign to a Wordpress Blog via REST
 
 ## Install
 Copy the contents of the folder **Scripts Panel** to your InDesign **Scripts Panel**
+
 ![Scripts Panel](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/scriptsPanel.png)
 
 * [How to install a script](https://indesignsecrets.com/how-to-install-scripts-in-indesign.php)
@@ -29,11 +30,17 @@ The script will place an Worpress post in the active Document. See details in th
 * You can link to local image files with the same name.
 
 ## Wie geht das?
-* Nach der [Installation](https://www.publishingx.de/skripte-installieren/) sollte das Bedienfeld Skript das Skript, die Hilfsprogramme und die Template-Datei beinhalten: ![Scripts Panel](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/scriptsPanel.png)
-* Starte das Skript mit einem Doppelklick auf **press2id.jsx**. Das Fenster mit den Einstellungen erscheint. ![Importeinstellungen](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/gui.png)
+* Nach der [Installation](https://www.publishingx.de/skripte-installieren/) sollte das Bedienfeld Skript das Skript, die Hilfsprogramme und die Template-Datei beinhalten: 
+![Scripts Panel](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/scriptsPanel.png)
+* Starte das Skript mit einem Doppelklick auf **press2id.jsx**. Das Fenster mit den Einstellungen erscheint.
+![Importeinstellungen](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/gui.png)
 * Hier kannst du deinen eigenen Wordpress-Blog eintragen. Oder erstmal einen Artikel von meinem [Blog](https://www.indesignblog.com/) verwenden z.B. den Beitrag [	
 XML suchen und Text hinzufügen
-](https://www.indesignblog.com/2017/05/xml-suchen-und-text-hinzufuegen/) ![Screenshot](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/blog.png).
+](https://www.indesignblog.com/2017/05/xml-suchen-und-text-hinzufuegen/) 
+![Screenshot](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/blog.png).
 * Nach der Auswahl einen Artikels drücke auf **Platzieren**. 
-* *press2id* lädt nun den Inhalt und die Bilder herunter und lädt Sie in die PlaceGun. Nach dem Platzieren sieht das Ergebnis so aus ![InDesign Import](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/result.png)
-* Das Layout basiert auf den Formaten aus der Datei **wordpress_basic.idml** ![Formate](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/styles.png) Diese kannst du natürlich anpassen.
+* *press2id* lädt nun den Inhalt und die Bilder herunter und lädt Sie in die PlaceGun. Nach dem Platzieren sieht das Ergebnis so aus:
+![InDesign Import](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/result.png)
+* Das Layout basiert auf den Formaten aus der Datei **wordpress_basic.idml** 
+![Formate](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/styles.png) 
+Diese kannst du natürlich anpassen.
