@@ -23,9 +23,9 @@ The script will place an Worpress post in the active Document. See details in th
 * Start the script and enter a Blog URL
 * REST Access with [restix](https://github.com/grefel/restix)
 * Based on XHTML cleaned by [HTML Tidy](http://www.html-tidy.org/)
-* XSLT (InDesign Processor, 1.0)
-* JavaScript/Extendscript 
-* Template based: Uses an InDesign File in folder **templates**  for basic styling. Change any style here
+* XSLT (InDesign XSLT Processor -> only 1.0)
+* JavaScript/Extendscript for postprocessing.
+* Template based: Uses an InDesign File in folder **templates**  for basic styling. HTML element names are mapped to InDesign styles by element names. Change any style here.
 * Loads the Post content and featured image into the place gun.
 * You can link to local image files with the same name.
 
@@ -42,13 +42,13 @@ The script will place an Worpress post in the active Document. See details in th
 XML suchen und Text hinzufügen
 ](https://www.indesignblog.com/2017/05/xml-suchen-und-text-hinzufuegen/).
 
-![Screenshot](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/blog.png)
+![Screenshot](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/blog.png?s=200)
 
 * Nach der Auswahl einen Artikels drücke auf **Platzieren**. 
 * *press2id* lädt nun den Inhalt und die Bilder herunter und lädt Sie in die PlaceGun. Nach dem Platzieren sieht das Ergebnis so aus:
 
-![InDesign Import](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/result.png)
+![InDesign Import](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/result.png?s=200)
 
-* Das Layout basiert auf den Formaten aus der Datei **wordpress_basic.idml**  Diese kannst du natürlich anpassen.
+* Für die Formatierung der Texte werden Absatz- und Zeichenformate entsprechend den Namen der HTML-Elemente verwendet. Ein ganz normaler Absatz `<p>` wird entsprechend in InDesign mit dem Absatzformat `p` ausgezeichnet. Das Layout basiert auf den Formaten aus der Datei **wordpress_basic.idml**  Diese kannst du natürlich anpassen.
 
 ![Formate](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/styles.png) 
