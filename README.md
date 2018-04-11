@@ -1,14 +1,14 @@
 # press2id
 Connect Adobe InDesign to a Wordpress Blog via REST
+- Works with *Adobe InDesign* CS 6 and higher
+- Connects to any *Wordpress* 4.7 or higher
 
 # Table of contents
-* [Install information](#Install)
-* [Workflow](#Some notes on the Workflow)
-* [Deutsche Anleitung](#Wie geht das?)
+* [Install information](#install)
+* [Workflow](#some-notes-on-the-workflow)
+* [Deutsche Anleitung](#wie-geht-das)
 
 
-* Works with *Adobe InDesign* CS 6 and higher
-* Connects to any *Wordpress* 4.7 or higher
 
 ## Install
 Copy the contents of the folder **Scripts Panel** to your InDesign **Scripts Panel**
