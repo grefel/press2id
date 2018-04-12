@@ -42,22 +42,22 @@ The script places Worpress posts in the active Document. See details in the [ger
 * Bevor du loslegen kannst, brauchst du ein geöffnetes Dokument. Das kann ganz leer sein. Wichtig ist nur, dass es gespeichert ist. Der Speicherort ist notwendig, da *press2id* die Bider im Ordner Links neben dem Dokument speichert.
 * Starte jetzt das Skript mit einem Doppelklick auf `press2id.jsx`. Das Fenster mit den Einstellungen erscheint.
 
-![Importeinstellungen](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/gui.png)
+  ![Importeinstellungen](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/gui.png)
 
 * DU kannst deinen eigenen Wordpress-Blog eintragen oder erstmal einen Artikel von meinem [Blog](https://www.indesignblog.com/) verwenden z.B. den Beitrag [	
 XML suchen und Text hinzufügen
 ](https://www.indesignblog.com/2017/05/xml-suchen-und-text-hinzufuegen/).
 
-![Screenshot](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/blog.png)
+  ![Screenshot](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/blog.png)
 
 * Nach der Auswahl einen Artikels drücke auf **Platzieren**. 
 * *press2id* lädt nun den Inhalt und die Bilder herunter und lädt Sie in die PlaceGun. Die benötigten Formate werden automatisch erstellt.  Nach dem Platzieren sieht das Ergebnis so aus:
 
-![InDesign Import](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/result.png)
+  ![InDesign Import](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/result.png)
 
 * Für die Formatierung der Texte werden Absatz- und Zeichenformate entsprechend den Namen der HTML-Elemente verwendet. Ein ganz normaler Absatz `<p>` wird entsprechend in InDesign mit dem Absatzformat `p` ausgezeichnet. Die Bilder `<img>` werden wiederum mit dem Objektformat `img` ausgezeichnet. 
 
-![Formate](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/styles.png) 
+  ![Formate](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/styles.png) 
 
 ### Das Layout anpassen
 * Du kannst nun einfach die Formate nach deinen Wünschen anpassen. 
