@@ -57,8 +57,6 @@ XML suchen und Text hinzufügen
 
 * Für die Formatierung der Texte werden Absatz- und Zeichenformate entsprechend den Namen der HTML-Elemente verwendet. Ein ganz normaler Absatz `<p>` wird entsprechend in InDesign mit dem Absatzformat `p` ausgezeichnet. Die Bilder `<img>` werden wiederum mit dem Objektformat `img` ausgezeichnet. 
 
-  ![Formate](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/styles.png) 
-
 ### Das Layout anpassen
 * Du kannst nun einfach die Formate nach deinen Wünschen anpassen. 
 * Wenn die Formate bereits **vor** dem Platzieren existieren, werden die Werte aus den Formaten erstellt. Du kannst dir so einfach eine Vorlage bauen und die Standardformate von *press2id* überschreiben. Das ist auch der empfohlene Weg für Layoutanpassungen!
