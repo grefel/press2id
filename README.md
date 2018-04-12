@@ -44,7 +44,7 @@ The script places Worpress posts in the active Document. See details in the [ger
 
 ![Importeinstellungen](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/gui.png)
 
-* DU kannst deinen eigenen Wordpress-Blog eintragen, oder erstmal einen Artikel von meinem [Blog](https://www.indesignblog.com/) verwenden z.B. den Beitrag [	
+* DU kannst deinen eigenen Wordpress-Blog eintragen oder erstmal einen Artikel von meinem [Blog](https://www.indesignblog.com/) verwenden z.B. den Beitrag [	
 XML suchen und Text hinzufügen
 ](https://www.indesignblog.com/2017/05/xml-suchen-und-text-hinzufuegen/).
 
@@ -55,12 +55,12 @@ XML suchen und Text hinzufügen
 
 ![InDesign Import](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/result.png)
 
-* Für die Formatierung der Texte werden Absatz- und Zeichenformate entsprechend den Namen der HTML-Elemente verwendet. Ein ganz normaler Absatz `<p>` wird entsprechend in InDesign mit dem Absatzformat `p` ausgezeichnet. Die Bilder `<img>` werden wiederum mit dem Objektformat `img` ausgezeichnert. 
+* Für die Formatierung der Texte werden Absatz- und Zeichenformate entsprechend den Namen der HTML-Elemente verwendet. Ein ganz normaler Absatz `<p>` wird entsprechend in InDesign mit dem Absatzformat `p` ausgezeichnet. Die Bilder `<img>` werden wiederum mit dem Objektformat `img` ausgezeichnet. 
 
 ![Formate](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/styles.png) 
 
 ### Das Layout anpassen
 * Du kannst nun einfach die Formate nach deinen Wünschen anpassen. 
-* Wenn die Formate bereits **vor** dem Platzieren existieren, werden die Werte aus den Formaten erstellt. Du kannst dir so einfach eine Vorlage bauen, und die Standardformate von *press2id* überschreiben. Das ist auch der empfohlene Weg für Layoutanpassungen!
-* Die Formate kommen übrigens aus der Datei `wordrepss_basic.idml` die im Ordner `templates` neben dem Skript liegt. Diese kannst du natürlich auch anpassen oder austauschen. Allerdings musst du dann bei einem Update aufpassen, dass deine Datei nicht überschrieben wird. 
+* Wenn die Formate bereits **vor** dem Platzieren existieren, werden die Werte aus den Formaten erstellt. Du kannst dir so einfach eine Vorlage bauen und die Standardformate von *press2id* überschreiben. Das ist auch der empfohlene Weg für Layoutanpassungen!
+* Die Formate kommen übrigens aus der Datei `wordrepss_basic.idml`, die im Ordner `templates` neben dem Skript liegt. Diese kannst du natürlich auch anpassen oder austauschen. Allerdings musst du dann bei einem Update aufpassen, dass deine Datei nicht überschrieben wird. 
 
