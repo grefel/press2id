@@ -1,6 +1,18 @@
 line 1 column 1 - Warning: missing <!DOCTYPE> declaration
+line 15 column 2265 - Warning: <img> escaping malformed URI reference
+line 21 column 3893 - Warning: <img> escaping malformed URI reference
+line 27 column 5482 - Warning: <img> escaping malformed URI reference
 Info: Document content looks like XHTML5
-Tidy found 1 warning and 0 errors!
+Tidy found 4 warnings and 0 errors!
+
+URIs must be properly escaped, they must not contain unescaped
+characters below U+0021 including the space character and not
+above U+007E. Tidy escapes the URI for you as recommended by
+HTML 4.01 section B.2.1 and XML 1.0 section 4.2.2. Some user agents
+use another algorithm to escape such URIs and some server-sided
+scripts depend on that. If you want to depend on that, you must
+escape the URI on your own. For more information please refer to
+http://www.w3.org/International/O-URL-and-ident.html
 
 About HTML Tidy: https://github.com/htacg/tidy-html5
 Bug reports and comments: https://github.com/htacg/tidy-html5/issues
