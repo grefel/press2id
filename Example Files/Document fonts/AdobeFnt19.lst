@@ -1,0 +1,237 @@
+%!Adobe-FontList 1.19
+%Locale:0x407
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:Invalid
+OutlineFileName:C:\Users\hp\oc\publishingX\15-Auftraege\2018-02-26_Wordpress2ID\Document fonts\LICENSE.txt
+FileModTime:1521545550
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:NotoEmoji
+FamilyName:Noto Emoji
+StyleName:Regular
+FullName:Noto Emoji
+MenuName:Noto Emoji
+StyleBits:0
+WritingScript:Emoji
+OutlineFileName:C:\Users\hp\oc\publishingX\15-Auftraege\2018-02-26_Wordpress2ID\Document fonts\NotoEmoji-Regular.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:418804
+FileModTime:1521545368
+WeightClass:400
+WidthClass:5
+AngleClass:0
+NameArray:0,Win,1,Noto Emoji
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:NotoMono
+FamilyName:Noto Mono
+StyleName:Regular
+FullName:Noto Mono
+MenuName:Noto Mono
+StyleBits:0
+WritingScript:Roman
+OutlineFileName:C:\Users\hp\oc\publishingX\15-Auftraege\2018-02-26_Wordpress2ID\Document fonts\NotoMono-Regular.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:107848
+FileModTime:1521545807
+WeightClass:400
+WidthClass:5
+AngleClass:0
+NameArray:0,Win,1,Noto Mono
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:NotoSans-Bold
+FamilyName:Noto Sans
+StyleName:Bold
+FullName:Noto Sans Bold
+MenuName:Noto Sans
+StyleBits:2
+WritingScript:Roman
+OutlineFileName:C:\Users\hp\oc\publishingX\15-Auftraege\2018-02-26_Wordpress2ID\Document fonts\NotoSans-Bold.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:415132
+FileModTime:1521545550
+WeightClass:700
+WidthClass:5
+AngleClass:0
+NameArray:0,Win,1,Noto Sans
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:NotoSans-BoldItalic
+FamilyName:Noto Sans
+StyleName:Bold Italic
+FullName:Noto Sans Bold Italic
+MenuName:Noto Sans
+StyleBits:3
+WritingScript:Roman
+OutlineFileName:C:\Users\hp\oc\publishingX\15-Auftraege\2018-02-26_Wordpress2ID\Document fonts\NotoSans-BoldItalic.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:290436
+FileModTime:1521545550
+WeightClass:700
+WidthClass:5
+AngleClass:1
+NameArray:0,Win,1,Noto Sans
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:NotoSans-Italic
+FamilyName:Noto Sans
+StyleName:Italic
+FullName:Noto Sans Italic
+MenuName:Noto Sans
+StyleBits:1
+WritingScript:Roman
+OutlineFileName:C:\Users\hp\oc\publishingX\15-Auftraege\2018-02-26_Wordpress2ID\Document fonts\NotoSans-Italic.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:279268
+FileModTime:1521545550
+WeightClass:400
+WidthClass:5
+AngleClass:1
+NameArray:0,Win,1,Noto Sans
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:NotoSans
+FamilyName:Noto Sans
+StyleName:Regular
+FullName:Noto Sans
+MenuName:Noto Sans
+StyleBits:0
+WritingScript:Roman
+OutlineFileName:C:\Users\hp\oc\publishingX\15-Auftraege\2018-02-26_Wordpress2ID\Document fonts\NotoSans-Regular.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:414820
+FileModTime:1521545550
+WeightClass:400
+WidthClass:5
+AngleClass:0
+NameArray:0,Win,1,Noto Sans
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:NotoSerif-Bold
+FamilyName:Noto Serif
+StyleName:Bold
+FullName:Noto Serif Bold
+MenuName:Noto Serif
+StyleBits:2
+WritingScript:Roman
+OutlineFileName:C:\Users\hp\oc\publishingX\15-Auftraege\2018-02-26_Wordpress2ID\Document fonts\NotoSerif-Bold.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:370884
+FileModTime:1521545605
+WeightClass:700
+WidthClass:5
+AngleClass:0
+NameArray:0,Win,1,Noto Serif
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:NotoSerif-BoldItalic
+FamilyName:Noto Serif
+StyleName:Bold Italic
+FullName:Noto Serif Bold Italic
+MenuName:Noto Serif
+StyleBits:3
+WritingScript:Roman
+OutlineFileName:C:\Users\hp\oc\publishingX\15-Auftraege\2018-02-26_Wordpress2ID\Document fonts\NotoSerif-BoldItalic.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:333656
+FileModTime:1521545605
+WeightClass:700
+WidthClass:5
+AngleClass:1
+NameArray:0,Win,1,Noto Serif
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:NotoSerif-Italic
+FamilyName:Noto Serif
+StyleName:Italic
+FullName:Noto Serif Italic
+MenuName:Noto Serif
+StyleBits:1
+WritingScript:Roman
+OutlineFileName:C:\Users\hp\oc\publishingX\15-Auftraege\2018-02-26_Wordpress2ID\Document fonts\NotoSerif-Italic.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:323188
+FileModTime:1521545605
+WeightClass:400
+WidthClass:5
+AngleClass:1
+NameArray:0,Win,1,Noto Serif
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:NotoSerif
+FamilyName:Noto Serif
+StyleName:Regular
+FullName:Noto Serif
+MenuName:Noto Serif
+StyleBits:0
+WritingScript:Roman
+OutlineFileName:C:\Users\hp\oc\publishingX\15-Auftraege\2018-02-26_Wordpress2ID\Document fonts\NotoSerif-Regular.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:350668
+FileModTime:1521545605
+WeightClass:400
+WidthClass:5
+AngleClass:0
+NameArray:0,Win,1,Noto Serif
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:Invalid
+OutlineFileName:C:\Users\hp\oc\publishingX\15-Auftraege\2018-02-26_Wordpress2ID\Document fonts\SIL Open Font License.txt
+FileModTime:1521545807
+%EndFont
+

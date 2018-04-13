@@ -11,12 +11,14 @@ Connect Adobe InDesign to a Wordpress Blog via REST
 
 
 ## Install
-Copy the contents of the folder **Scripts Panel** to your InDesign **Scripts Panel**
+Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel**.
 
 ![Scripts Panel](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/scriptsPanel.png)
 
 * [How to install a script](https://indesignsecrets.com/how-to-install-scripts-in-indesign.php)
 * [Skripte in InDesign installieren](https://www.publishingx.de/skripte-installieren/) 
+
+For a simple start, use the file `press2id_example.indd` (CC 2018) from the `Example Files` folder.
 
 ## Some notes on the Workflow 
 The script places Worpress posts in the active Document. See details in the [german how to](#Wie geht das?)
@@ -39,7 +41,7 @@ The script places Worpress posts in the active Document. See details in the [ger
 
   ![Scripts Panel](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/scriptsPanel.png)
 
-* Bevor du loslegen kannst, brauchst du ein geöffnetes Dokument. Das kann ganz leer sein. Wichtig ist nur, dass es gespeichert ist. Der Speicherort ist notwendig, da *press2id* die Bider im Ordner Links neben dem Dokument speichert.
+* Bevor du loslegen kannst, brauchst du ein geöffnetes Dokument. Das kann ganz leer sein. Wichtig ist nur, dass es gespeichert ist. Der Speicherort ist notwendig, da *press2id* die Bider im Ordner Links neben dem Dokument speichert. Alternativ kannst du auch das CC 2018 Dokument `press2id_example.indd` (CC 2018) aus dem Ordner `Example Files` verwenden. Hier sind dann alle Schriften aus dem danebenliegenden Ordner `Document Fonts` aktiviert.
 * Starte jetzt das Skript mit einem Doppelklick auf `press2id.jsx`. Das Fenster mit den Einstellungen erscheint.
 
   ![Importeinstellungen](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/gui.png)
