@@ -14,24 +14,25 @@ var px = {
 	
 //~ 	blogURL:"https://www.indesignblog.com", 
 //~ 	blogURL:"https://www.publishingx.de", 
-	blogURL:"https://www.publishingblog.ch", 
+//~ 	blogURL:"https://www.publishingblog.ch", 
 //~ 	blogURL:"https://wordpress.org/news", 
-	
-
-
-	// Dokument muss gespeichert werden
-	saveDocBeforeRun:true, 
-	runWithUndo:true,
+	blogURL:"http://www.indesignblog.de", 
 	
 	// Verwaltung
+	runWithUndo:true,
 	showGUI:true,
 	debug:false
 }
 
 // Debug Stuff
 if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor-") {
+	px.debug = true;
+	px.runWithUndo = false;
+}
+
+if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor") {
 	app.insertLabel("wp2id:blogURL", px.blogURL);
-	px.debugPost = {postObject:{id:12628, blogTitle:"Debug Run 12628" }, downloadImages:true, localImageFolder:Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL:px.blogURL};
+	px.debugPost = {postObject:{id:8888, blogTitle:"Debug Run 8888" }, downloadImages:true, localImageFolder:Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL:px.blogURL};
 
 	px.showGUI = false;
 	px.debug = true;
@@ -62,7 +63,7 @@ function main() {
 	
 
 	if (px.debug) {
-		dok = saveDocBeforeRun(dok);
+		dok = findDocumentPath(dok);
 		var oldVals = idsTools.resetDefaults(dok);			
 		app.scriptPreferences.version = parseInt(app.version);
 		log.info("processDok mit app.scriptPreferences.version " + app.scriptPreferences.version  + " app.version " + app.version);
@@ -78,7 +79,7 @@ function main() {
 	}
 	else {
 		try {
-			dok = saveDocBeforeRun(dok);
+			dok = findDocumentPath(dok);
 			var oldVals = idsTools.resetDefaults(dok);			
 			
 			if(dok && dok.isValid) {		
@@ -120,8 +121,8 @@ function main() {
 }
 
 
-function saveDocBeforeRun(dok) {
-	if (!px.debug && px.saveDocBeforeRun && (!dok.saved || dok.modified)) {
+function findDocumentPath(dok) {
+	if (!dok.saved) {
 		if ( log.confirm ("Das Dokument muss zuerst gespeichert werden!\rSpeichern und fortfahren?", undefined, "Dokument ist nicht gespeichert")) {
 			 try {
 				app.scriptPreferences.userInteractionLevel = UserInteractionLevels.INTERACT_WITH_ALL;
@@ -334,6 +335,7 @@ function processDok(dok) {
 				}
 				var fileURL = imgXML.xmlAttributes.itemByName("src").value;
 				var fileName = fileURL.split("/").pop();
+				fileName = decodeURI(fileName);
 				if (downloadImages) {
 					log.info("Download image from URL " + fileURL);
 					var imageFile = File (linkPath + "/" +fileName);
@@ -344,7 +346,7 @@ function processDok(dok) {
 					var response = restix.fetchFile(request, imageFile);
 					try {
 						if (response.error ) {
-							throw Error (response.errorMsg);
+							throw Error ("Error while download image ["  + fileName +"]\nfrom URL [" + fileURL + "]\n\n" +response.errorMsg);
 						}
 					}
 					catch (e) {				
@@ -696,7 +698,7 @@ function getListOfBlogEntries(blogURL, verbose) {
 		var postEmbed = JSON.parse(response.body);		
 	}
 	catch (e) {				
-		var msg = "Could not connect to\n"+blogURL+"";
+		var msg = "Could not connect to\n"+blogURL+"\n\n" + e;
 		if (verbose) {
 			log.infoAlert(msg);
 		}
