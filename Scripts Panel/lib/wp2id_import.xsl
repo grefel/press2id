@@ -65,9 +65,9 @@
             <xsl:attribute name="src">
                 <xsl:apply-templates/>
             </xsl:attribute>
-            <xsl:attribute name="ostyle">
+            <!--<xsl:attribute name="ostyle">
                 <xsl:text>featuredImage</xsl:text>
-            </xsl:attribute>
+            </xsl:attribute>-->
         </featuredImage>
     </xsl:template>
 
