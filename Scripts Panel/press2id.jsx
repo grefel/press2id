@@ -10,7 +10,7 @@
 
 var px = {
 	projectName:"press2id",
-	version:"2018-04-09-v1.0",
+	version:"2018-04-18-v1.0",
 	
 //~ 	blogURL:"https://www.indesignblog.com", 
 //~ 	blogURL:"https://www.publishingx.de", 
@@ -30,9 +30,9 @@ if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor-") {
 	px.runWithUndo = false;
 }
 
-if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor") {
+if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor-") {
 	app.insertLabel("wp2id:blogURL", px.blogURL);
-	px.debugPost = {postObject:{id:8888, blogTitle:"Debug Run 8888" }, downloadImages:true, localImageFolder:Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL:px.blogURL};
+	px.debugPost = {postObject:{id:122, blogTitle:"Debug Run 122" }, downloadImages:true, localImageFolder:Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL:px.blogURL};
 
 	px.showGUI = false;
 	px.debug = true;
@@ -222,7 +222,8 @@ function processDok(dok) {
 		
 		
 		// Featured Image einbinden
-		if (singlePost.featured_media != 0 && singlePost.featured_media != undefined) {			
+		if (singlePost.featured_media != 0 && singlePost.featured_media != undefined) {	
+			log.info("Post has featured media with media ID " + singlePost.featured_media);
 			var request = {
 				url:blogURL,
 				command:"media/" + singlePost.featured_media, 
@@ -243,7 +244,7 @@ function processDok(dok) {
 				log.info( "Bild [featuredImage] konnte nicht geladen werden:\nCode: " + featuredImage.code + " Message: " + featuredImage.message);
 			}
 			else {
-				content += '<div id="featuredImage">'  + featuredImage.guid.rendered + '</div>'
+				content += '<div id="featuredImage">'  + featuredImage.source_url + '</div>'
 			}
 
 		}
