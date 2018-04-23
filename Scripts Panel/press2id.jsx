@@ -317,9 +317,20 @@ function processDok(dok) {
 					var oStyle = templateDok.objectStyles.itemByName(oStyleName);
 					if (!oStyle.isValid) {
 						log.warn("Create Objectstyle [" +oStyleName  + "]")
-						oStyle = templateDok.objetStyles.add({name:oStyleName});
+						oStyle = templateDok.objectStyles.add({name:oStyleName});
 					}
 				}
+				else if (imgXML.markupTag.name != "featuredImage") {
+					// Use markup tag for object style			
+					log.info("Element " + imgXML.markupTag.name + " has now Attribute ostyle, we use the tag name!");
+					var oStyleName = imgXML.markupTag.name;
+					var oStyle = templateDok.objectStyles.itemByName(oStyleName);
+					if (!oStyle.isValid) {
+						log.warn("Create Objectstyle [" +oStyleName  + "]")
+						oStyle = templateDok.objectStyles.add({name:oStyleName});
+					}
+				}
+			
 				var fileURL = imgXML.xmlAttributes.itemByName("src").value;
 				var fileName = fileURL.split("/").pop();				
 				fileName =  decodeURI(fileName);
@@ -360,7 +371,12 @@ function processDok(dok) {
 						rect = templateDok.rectangles.add();
 						rect.geometricBounds = [0,0,50,100]; // Default if not set in Object style
 						rect.appliedObjectStyle = oStyle;
-						rect.place(imageFile);
+						try {
+							rect.place(imageFile);
+						}
+						catch (e) {
+							log.warn ("Cannot place " + imageFile.name + "\nError: "+ e);
+						}
 						
 						if (rect.getElements()[0] instanceof TextFrame) {
 							log.warn("Found text instead of image data for [" + fileURL +"]");
