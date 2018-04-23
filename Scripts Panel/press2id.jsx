@@ -12,12 +12,12 @@ var px = {
 	projectName:"press2id",
 	version:"2018-04-23-v1.0",
 	
-//~ 	blogURL:"https://www.indesignblog.com", 
+	blogURL:"https://www.indesignblog.com", 
 //~ 	blogURL:"https://www.publishingx.de", 
 //~ 	blogURL:"https://www.publishingblog.ch", 
 //~ 	blogURL:"https://wordpress.org/news", 
 //~ 	blogURL:"http://www.indesignblog.de", 
-	blogURL:"https://www.rolanddreger.net/de",
+//~ 	blogURL:"https://www.rolanddreger.net/de",
 	
 	// Verwaltung
 	showGUI:true,
