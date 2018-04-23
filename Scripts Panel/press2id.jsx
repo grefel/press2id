@@ -16,10 +16,10 @@ var px = {
 //~ 	blogURL:"https://www.publishingx.de", 
 //~ 	blogURL:"https://www.publishingblog.ch", 
 //~ 	blogURL:"https://wordpress.org/news", 
-	blogURL:"http://www.indesignblog.de", 
+//~ 	blogURL:"http://www.indesignblog.de", 
+	blogURL:"https://www.rolanddreger.net/de",
 	
 	// Verwaltung
-	runWithUndo:true,
 	showGUI:true,
 	debug:false
 }
@@ -27,16 +27,14 @@ var px = {
 // Debug Stuff
 if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor-") {
 	px.debug = true;
-	px.runWithUndo = false;
 }
 
-if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor-") {
+if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor") {
 	app.insertLabel("wp2id:blogURL", px.blogURL);
-	px.debugPost = {postObject:{id:122, blogTitle:"Debug Run 122" }, downloadImages:true, localImageFolder:Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL:px.blogURL};
+	px.debugPost = {postObject:{id:9, blogTitle:"Debug Run 9" }, downloadImages:true, localImageFolder:Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL:px.blogURL};
 
 	px.showGUI = false;
-	px.debug = true;
-	px.runWithUndo = false;
+	px.debug = false;
 }
 
 main();
@@ -68,12 +66,7 @@ function main() {
 		app.scriptPreferences.version = parseInt(app.version);
 		log.info("processDok mit app.scriptPreferences.version " + app.scriptPreferences.version  + " app.version " + app.version);
 		if (checkDok(dok)) {
-			if (px.runWithUndo) {
-				app.doScript(processDok, ScriptLanguage.JAVASCRIPT, [dok], UndoModes.ENTIRE_SCRIPT, px.projectName);
-			}
-			else {
-				processDok(dok);
-			}
+			processDok(dok);
 		}	
 		idsTools.setDefaults(dok, oldVals);
 	}
@@ -90,12 +83,7 @@ function main() {
 				log.info("processDok: app.scriptPreferences.version " + app.scriptPreferences.version  + " app.version " + app.version);
 				
 				if (checkDok(dok)) {					
-					if (px.runWithUndo) {
-						app.doScript(processDok, ScriptLanguage.JAVASCRIPT, [dok], UndoModes.ENTIRE_SCRIPT, px.projectName);
-					}
-					else {
-						processDok(dok);
-					}
+					processDok(dok);
 				}
 			}
 		}
@@ -161,10 +149,6 @@ function processDok(dok) {
 	ui.progressBarOpenTemplate = localize({en:"Import Data", de:"Daten importieren"});
 	ui.progressBarDownloadImages = localize({en:"Download Images ", de:"Lade Bilder herunter"});
 	
-	if (px.runWithUndo) {
-		dok = dok[0]; 
-	}
-
 	if (px.showGUI ) {
 		var retval = getConfig();
 	}
