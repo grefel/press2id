@@ -10,7 +10,7 @@
 
 var px = {
 	projectName:"press2id",
-	version:"2018-04-18-v1.0",
+	version:"2018-04-23-v1.0",
 	
 //~ 	blogURL:"https://www.indesignblog.com", 
 //~ 	blogURL:"https://www.publishingx.de", 
@@ -26,15 +26,13 @@ var px = {
 
 // Debug Stuff
 if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor-") {
-	px.debug = true;
+	px.showGUI = false;
+	px.debug = false;
 }
 
 if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor") {
 	app.insertLabel("wp2id:blogURL", px.blogURL);
 	px.debugPost = {postObject:{id:9, blogTitle:"Debug Run 9" }, downloadImages:true, localImageFolder:Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL:px.blogURL};
-
-	px.showGUI = false;
-	px.debug = false;
 }
 
 main();
@@ -361,8 +359,22 @@ function processDok(dok) {
 					var imageFile = File (localImageFolder + "/" +fileName);
 					log.info("Link to local folder " + imageFile);				
 				}
+			
+				// Check for 404 Images
+				if (imageFile.exists && imageFile.length < 10000) {
+					var canOpen = imageFile.open("r");
+					if (canOpen) {
+						var contents = imageFile.read();
+						if (contents.match(/<body class="error404">/)) {
+							log.warn("Found an 404 Image: [" + fileURL + "]");
+							imageFile.remove();
+						}
+					}					
+				}
+				
 
 				if (imageFile.exists && imageFile.length > 0) {
+
 					var rect;
 					if (imgXML.markupTag.name == "featuredImage") {
 						placeGunArray.push(imageFile);

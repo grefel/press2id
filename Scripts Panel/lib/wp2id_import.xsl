@@ -3,7 +3,7 @@
     xmlns:aid="http://ns.adobe.com/AdobeInDesign/4.0/"
     xmlns:aid5="http://ns.adobe.com/AdobeInDesign/5.0/" version="1.0">
     <xsl:variable name="pxTransformationName">wp2id_import.xsl</xsl:variable>
-    <xsl:variable name="pxVersion">2018-03-27 v1.0</xsl:variable>
+    <xsl:variable name="pxVersion">2018-04-23 v1.0</xsl:variable>
     <xsl:variable name="pxCreator">Gregor Fellenz – https://www.publishingx.de/</xsl:variable>
 
     <!--Insert Version Info-->
@@ -43,7 +43,7 @@
     <xsl:template match="div" priority="-1">
         <xsl:apply-templates/>
     </xsl:template>
-    
+
     <xsl:template match="li/p">
         <xsl:apply-templates/>
     </xsl:template>
@@ -212,6 +212,21 @@
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>
         </figcaption>
+        <xsl:text>&#x0A;</xsl:text>
+    </xsl:template>
+
+    <xsl:template match="video">
+        <p_video aid:pstyle="p_video">
+            <video ostyle="img">
+                <xsl:choose>
+                    <xsl:when test="@poster">
+                        <xsl:attribute name="src">
+                            <xsl:value-of select="@poster"/>
+                        </xsl:attribute>
+                    </xsl:when>
+                </xsl:choose>
+            </video>
+        </p_video>
         <xsl:text>&#x0A;</xsl:text>
     </xsl:template>
 
