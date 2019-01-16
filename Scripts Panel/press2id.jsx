@@ -10,9 +10,10 @@
 
 var px = {
 	projectName:"press2id",
-	version:"2018-04-23-v1.0",
-	
-	blogURL:"https://www.indesignblog.com", 
+	version:"2019-01-16-v1.0",
+
+	blogURL:"https://www.publishingx.de/wp-testing-782345/", 	
+//	blogURL:"https://www.indesignblog.com", 
 //~ 	blogURL:"https://www.publishingx.de", 
 //~ 	blogURL:"https://www.publishingblog.ch", 
 //~ 	blogURL:"https://wordpress.org/news", 
@@ -58,44 +59,33 @@ function main() {
 	var scriptPrefVersion = app.scriptPreferences.version; 
 	
 
-	if (px.debug) {
+
+	try {
 		dok = findDocumentPath(dok);
 		var oldVals = idsTools.resetDefaults(dok);			
-		app.scriptPreferences.version = parseInt(app.version);
-		log.info("processDok mit app.scriptPreferences.version " + app.scriptPreferences.version  + " app.version " + app.version);
-		if (checkDok(dok)) {
-			processDok(dok);
-		}	
-		idsTools.setDefaults(dok, oldVals);
-	}
-	else {
-		try {
-			dok = findDocumentPath(dok);
-			var oldVals = idsTools.resetDefaults(dok);			
+		
+		if(dok && dok.isValid) {		
 			
-			if(dok && dok.isValid) {		
-				
-				app.scriptPreferences.userInteractionLevel = UserInteractionLevels.NEVER_INTERACT;
-				app.scriptPreferences.enableRedraw = false;
-				app.scriptPreferences.version = parseInt(app.version);
-				log.info("processDok: app.scriptPreferences.version " + app.scriptPreferences.version  + " app.version " + app.version);
-				
-				if (checkDok(dok)) {					
-					processDok(dok);
-				}
+			app.scriptPreferences.userInteractionLevel = UserInteractionLevels.NEVER_INTERACT;
+			app.scriptPreferences.enableRedraw = false;
+			app.scriptPreferences.version = parseInt(app.version);
+			log.info("processDok: app.scriptPreferences.version " + app.scriptPreferences.version  + " app.version " + app.version);
+			
+			if (checkDok(dok)) {					
+				processDok(dok);
 			}
 		}
-		catch (e) {
-			log.warn(e);
-		}
-		finally {
-			idsTools.setDefaults(dok, oldVals);
-			app.scriptPreferences.userInteractionLevel = ial;
-			app.scriptPreferences.enableRedraw = redraw;
-			app.scriptPreferences.version = scriptPrefVersion;			
-			app.findGrepPreferences = NothingEnum.NOTHING;
-			app.changeGrepPreferences = NothingEnum.NOTHING;
-		}
+	}
+	catch (e) {
+		log.warn(e);
+	}
+	finally {
+		idsTools.setDefaults(dok, oldVals);
+		app.scriptPreferences.userInteractionLevel = ial;
+		app.scriptPreferences.enableRedraw = redraw;
+		app.scriptPreferences.version = scriptPrefVersion;			
+		app.findGrepPreferences = NothingEnum.NOTHING;
+		app.changeGrepPreferences = NothingEnum.NOTHING;
 	}
 
 	if(log.getCounters().warn > 0) {
@@ -539,7 +529,7 @@ function getConfig() {
 	var groupBlogInfo = panelBlogInfo.add('group');
 	var edittextBlogInfoURL = groupBlogInfo.add ('edittext {text: "' + blogURL + '", preferredSize:[310, -1]}');				 
 		edittextBlogInfoURL.onChange = function () {
-			if (blogURL == edittextBlogInfoURL.text && listItems.length > 0) {				
+			if (blogURL == edittextBlogInfoURL.text) {
 				return;
 			}
 			buttonBlogInfoFetch.onClick();
@@ -552,6 +542,7 @@ function getConfig() {
 				log.infoAlert(localize(ui.buttonBlogInfoFetchonClickURLWrong) );
 				return;
 			}
+			log.info("buttonBlogInfoFetch.onClick");
 			listItems = getListOfBlogEntries(blogURL , true);
 			
 			saveBlogURL = (listItems.length > 0);
@@ -698,7 +689,10 @@ function getConfig() {
 
 /* Fetch Blog Posts */
 function getListOfBlogEntries(blogURL, verbose) {
-	log.info("getListOfBlogEntries: " + blogURL +  "/wp-json/wp/v2/posts/?per_page=100&context=embed");
+	var ui = {};
+	ui.noBlogPostsOnSite = {en:"No Blog entries on [%1]", de:"Keine Beiträge/Posts auf [%1]"};
+
+	log.info("getListOfBlogEntries: " + blogURL +  "/wp-json/wp/v2/posts/?per_page=100&context=embed" + " mode verbose " + verbose);
 
 	var request = {
 		url:fixBlogUrlWordpressCom(blogURL),
@@ -740,8 +734,9 @@ function getListOfBlogEntries(blogURL, verbose) {
 	for (var i = 0; i < postEmbed.length; i++) {
 		listItems[i] = {id:postEmbed[i].id, blogTitle:Encoder.htmlDecode(postEmbed[i].title.rendered)};
 	}
-	if (verbose && postEmbed.length == 0 && resultObject.statusCode == 200) {
-		log.infoAlert("Keine Beiträge/Posts auf " + blogURL + " vorhanden!");
+	log.info("listItems.length " + listItems.length + " response.httpStatus " + response.httpStatus);
+	if (verbose && postEmbed.length == 0 && response.httpStatus == 200) {
+		log.infoAlert(localize(ui.noBlogPostsOnSite, blogURL));
 	}
 	return listItems;
 }
