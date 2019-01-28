@@ -27,11 +27,11 @@ var px = {
 
 // Debug Stuff
 if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor-") {
-	px.showGUI = false;
-	px.debug = false;
+	px.showGUI = true;
+	px.debug = true;
 }
 
-if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor") {
+if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor-") {
 	app.insertLabel("wp2id:blogURL", px.blogURL);
 	px.debugPost = {postObject:{id:9, blogTitle:"Debug Run 9" }, downloadImages:true, localImageFolder:Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL:px.blogURL};
 }
@@ -227,7 +227,7 @@ function processDok(dok) {
 
 		var xmlTempFile = File (Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "result.html" );		
 		writeTextFile (xmlTempFile, content);
-		
+
 		xmlTempFile = runTidy(xmlTempFile);
 		pBar.hit(2);
 		

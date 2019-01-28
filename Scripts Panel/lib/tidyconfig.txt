@@ -45,7 +45,7 @@ literal-attributes: no
 logical-emphasis: no
 lower-literals: yes
 markup: yes
-merge-divs: auto
+merge-divs: yes
 merge-emphasis: yes
 merge-spans: auto
 mute: 
