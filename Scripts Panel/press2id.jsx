@@ -1,16 +1,16 @@
 ﻿//DESCRIPTION:press2id – Place Post from Wordpress Blogs 
 //Author: Gregor Fellenz - http://www.publishingx.de
 
-#include lib/encoder.js
-#include lib/json2.js
-#include lib/idsLog.jsx
-#include lib/idsTools2.jsx
-#include lib/ProgressBar.jsx
-#include lib/restix.jsx
+#include "lib/encoder.js"
+#include "lib/json2.js"
+#include "lib/idsLog.jsx"
+#include "lib/idsTools2.jsx"
+#include "lib/ProgressBar.jsx"
+#include "lib/restix.jsx"
 
 var px = {
 	projectName:"press2id",
-	version:"2019-01-16-v1.0",
+	version:"2019-01-28-v1.01",
 
 	blogURL:"https://www.publishingx.de/wp-testing-782345/", 	
 //	blogURL:"https://www.indesignblog.com", 
