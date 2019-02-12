@@ -338,7 +338,7 @@ function processDok(dok) {
 					var response = restix.fetchFile(request, imageFile);
 					try {
 						if (response.error ) {
-							throw Error ("Error while download image [" + fileName + "]\nfrom URL [" + fileURL + "]\n\n" +response.errorMsg);
+							throw Error ("Error while download image [" + fileName + "]\nfrom URL [" + fileURL + "]\nto local file [" + imageFile + "]\n\n" + response.errorMsg);
 						}
 					}
 					catch (e) {				
