@@ -941,12 +941,13 @@ function initLog() {
 /*Folder*/ function getScriptFolderPath() {
 	var skriptPath;
 	try {
+		$.level = 0;
 		skriptPath  = app.activeScript.parent;
 	} 
 	catch (e) { 
 		/* We're running from the ESTK*/
+		$.level = 2;
 		skriptPath = File(e.fileName).parent;
 	}
 	return skriptPath;
 }
-
