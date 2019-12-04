@@ -1,4 +1,4 @@
-﻿//DESCRIPTION:press2id – Place Post from Wordpress Blogs 
+//DESCRIPTION:press2id – Place Post from Wordpress Blogs 
 //Author: Gregor Fellenz - http://www.publishingx.de
 
 //@include "lib/encoder.js"
@@ -22,7 +22,7 @@ var px = {
 
 	// Verwaltung
 	showGUI: true,
-	debug: false
+	debug: true
 }
 
 // Debug Stuff
@@ -190,7 +190,13 @@ function processDok(dok) {
 		pBar.show(ui.progressBarOpenTemplate + " %1 / " + 4, 4, 0);
 
 		// HTML zusammebauen 
-		var content = '<html><head><title>' + postObject.id + '</title></head><body>'
+		var content = '<html><head><title>' + postObject.id + '</title>'
+		if (singlePost.acf != undefined) {
+			for (prop in singlePost.acf) {
+				content += '<meta name="' + prop + '" content="' + singlePost.acf[prop] + '"></acf>';
+			}
+		}
+		content += '</head><body>'
 
 
 		// Featured Image einbinden
