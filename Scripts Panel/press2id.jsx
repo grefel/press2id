@@ -10,7 +10,7 @@
 
 var px = {
 	projectName: "press2id",
-	version: "2019-12-04-v1.1",
+	version: "2020-01-20-v1.2",
 
 	blogURL: "https://www.publishingx.de/press2id/",
 	//	blogURL:"https://www.indesignblog.com", 
@@ -94,6 +94,8 @@ function main() {
 	//~ 	else {
 	//~ 		log.infoAlert("Fertig");
 	//~ 	}
+	log.info("Skriptlauf Ende");
+	log.elapsedTime();
 }
 
 
@@ -424,7 +426,12 @@ function processDok(dok) {
 		app.findGrepPreferences = NothingEnum.NOTHING;
 		app.changeGrepPreferences = NothingEnum.NOTHING;
 		app.findGrepPreferences.findWhat = "\\s+\\Z";
-		story.changeGrep();
+		try {
+			story.changeGrep();
+		}
+		catch(e) {
+			log.info("Could not run '\\s+\\Z' GREP . InDesign CC 2020 Bug?");
+		}
 
 		idsTools.untag(root);
 
@@ -526,7 +533,7 @@ function getConfig() {
 	var saveBlogURL = false;
 
 	var listItems = [];
-	listItems = getListOfBlogEntries(blogURL, false);
+	listItems = getListOfBlogEntries(blogURL, 1, false);
 
 	var win = new Window('dialog {text: "' + localize(ui.winTitle) + '  –  ' + px.projectName + ' ' + px.version + '", alignChildren: "fill"}');
 
@@ -549,7 +556,7 @@ function getConfig() {
 			return;
 		}
 		log.info("buttonBlogInfoFetch.onClick");
-		listItems = getListOfBlogEntries(blogURL, true);
+		listItems = getListOfBlogEntries(blogURL, 1, true);
 
 		saveBlogURL = (listItems.length > 0);
 		fillListboxSelectPost();
@@ -693,16 +700,24 @@ function getConfig() {
 
 }
 
-/* Fetch Blog Posts */
-function getListOfBlogEntries(blogURL, verbose) {
+/**
+ * Fetch Blog Posts 
+ * @param {*} blogURL 
+ * @param {*} page Results are paginated by 100 Entries, if page > 1 and no entries are found an empty array [] is returned
+ * @param {*} verbose 
+ */
+function getListOfBlogEntries(blogURL, page, verbose) {
 	var ui = {};
 	ui.noBlogPostsOnSite = { en: "No Blog entries on [%1]", de: "Keine Beiträge/Posts auf [%1]" };
+	var fixedURL = fixBlogUrlWordpressCom(blogURL);
+	page = 100;
+	var action = "posts/?per_page=100&page=" + page + "&context=embed";
 
-	log.info("getListOfBlogEntries: " + blogURL + "/wp-json/wp/v2/posts/?per_page=100&context=embed" + " mode verbose " + verbose);
+	log.info("getListOfBlogEntries: " + fixedURL + action + " mode verbose " + verbose);
 
 	var request = {
-		url: fixBlogUrlWordpressCom(blogURL),
-		command: "posts/?per_page=100&context=embed",
+		url: fixedURL,
+		command: action,
 	}
 	var response = restix.fetch(request);
 	try {
@@ -725,11 +740,17 @@ function getListOfBlogEntries(blogURL, verbose) {
 	}
 
 	if (postEmbed.hasOwnProperty("code")) {
-		var msg = "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message;
+		if (postEmbed.code == "rest_post_invalid_page_number" && page > 1) {
+			var msg = "Ende der Paginierung auf Seite [" + page + "]. Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message;
+		}
+		else {
+			var msg = "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message;
+		}
 		if (verbose) {
 			log.infoAlert(msg);
 		}
 		else {
+
 			log.info(msg);
 		}
 		return [];
