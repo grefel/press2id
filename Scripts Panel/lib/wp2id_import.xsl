@@ -73,7 +73,7 @@
 
 
     <!--Simple Block Elements-->
-    <xsl:template match="p | title | h1 | h2 | h3 | h4 | h5 | h6 | pre | hr">
+    <xsl:template match="title | h1 | h2 | h3 | h4 | h5 | h6">
         <xsl:variable name="textContents" select="normalize-space(.)"/>
 
         <!--Remove empty (whitespace only elements) blocks -->
@@ -81,6 +81,37 @@
             <xsl:copy>
                 <xsl:attribute name="aid:pstyle">
                     <xsl:choose>
+                        <!--simple example of class evaluating a wordpress class-->
+                        <xsl:when test="@class = 'has-text-align-center'">
+                            <xsl:text>p_center</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="@class">
+                            <xsl:value-of select="@class"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="name()"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:attribute>
+
+                <xsl:copy-of select="@*"/>
+                <xsl:apply-templates/>
+            </xsl:copy>
+            <xsl:text>&#x0A;</xsl:text>
+        </xsl:if>
+
+    </xsl:template>
+    <xsl:template match="p | pre | hr">
+        <xsl:variable name="textContents" select="normalize-space(.)"/>
+
+        <!--Remove empty (whitespace only elements) blocks -->
+        <xsl:if test="$textContents != ''">
+            <xsl:copy>
+                <xsl:attribute name="aid:pstyle">
+                    <xsl:choose>
+                        <xsl:when test="@class = 'has-text-align-center'">
+                            <xsl:text>mittig</xsl:text>
+                        </xsl:when>
                         <xsl:when test="@class">
                             <xsl:value-of select="@class"/>
                         </xsl:when>
@@ -98,6 +129,14 @@
 
     </xsl:template>
 
+    <xsl:template match="cite">
+        <xsl:element name="cite">
+            <xsl:attribute name="aid:pstyle">zitatquelle</xsl:attribute>
+            <xsl:copy-of select="@*"/>
+            <xsl:apply-templates/>
+        </xsl:element>
+        <xsl:text>&#x0A;</xsl:text>
+    </xsl:template>
 
     <!--Flatten blockquotes-->
     <xsl:template match="blockquote/p">

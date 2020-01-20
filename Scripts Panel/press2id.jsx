@@ -1,18 +1,18 @@
-﻿//DESCRIPTION:press2id – Place Post from Wordpress Blogs 
+//DESCRIPTION:press2id – Place Post from Wordpress Blogs 
 //Author: Gregor Fellenz - http://www.publishingx.de
 
-#include "lib/encoder.js"
-#include "lib/json2.js"
-#include "lib/idsLog.jsx"
-#include "lib/idsTools2.jsx"
-#include "lib/ProgressBar.jsx"
-#include "lib/restix.jsx"
+//@include "lib/encoder.js"
+//@include "lib/json2.js"
+//@include "lib/idsLog.jsx"
+//@include "lib/idsTools2.jsx"
+//@include "lib/ProgressBar.jsx"
+//@include "lib/restix.jsx"
 
 var px = {
 	projectName: "press2id",
-	version: "2019-01-28-v1.01",
+	version: "2019-12-04-v1.1",
 
-	blogURL: "https://www.publishingx.de/wp-testing-782345/",
+	blogURL: "https://www.publishingx.de/press2id/",
 	//	blogURL:"https://www.indesignblog.com", 
 	//~ 	blogURL:"https://www.publishingx.de", 
 	//~ 	blogURL:"https://www.publishingblog.ch", 
@@ -22,7 +22,7 @@ var px = {
 
 	// Verwaltung
 	showGUI: true,
-	debug: false
+	debug: true
 }
 
 // Debug Stuff
@@ -190,7 +190,13 @@ function processDok(dok) {
 		pBar.show(ui.progressBarOpenTemplate + " %1 / " + 4, 4, 0);
 
 		// HTML zusammebauen 
-		var content = '<html><head><title>' + postObject.id + '</title></head><body>'
+		var content = '<html><head><title>' + postObject.id + '</title>'
+		if (singlePost.acf != undefined) {
+			for (prop in singlePost.acf) {
+				content += '<meta name="' + prop + '" content="' + singlePost.acf[prop] + '"></acf>';
+			}
+		}
+		content += '</head><body>'
 
 
 		// Featured Image einbinden
