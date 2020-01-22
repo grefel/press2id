@@ -429,7 +429,7 @@ function processDok(dok) {
 		try {
 			story.changeGrep();
 		}
-		catch(e) {
+		catch (e) {
 			log.info("Could not run '\\s+\\Z' GREP . InDesign CC 2020 Bug?");
 		}
 
@@ -556,7 +556,8 @@ function getConfig() {
 			return;
 		}
 		log.info("buttonBlogInfoFetch.onClick");
-		listItems = getListOfBlogEntries(blogURL, 1, true);
+
+		listItems = getListOfBlogEntries(blogURL, 100, true);
 
 		saveBlogURL = (listItems.length > 0);
 		fillListboxSelectPost();
@@ -703,68 +704,72 @@ function getConfig() {
 /**
  * Fetch Blog Posts 
  * @param {*} blogURL 
- * @param {*} page Results are paginated by 100 Entries, if page > 1 and no entries are found an empty array [] is returned
+ * @param {*} maxPages Results are paginated by 100 entries, if page > 1 this functions reads until maxPages is reached, or no more entries are found
  * @param {*} verbose 
  */
-function getListOfBlogEntries(blogURL, page, verbose) {
+function getListOfBlogEntries(blogURL, maxPages, verbose) {
+	var listItems = [];
 	var ui = {};
 	ui.noBlogPostsOnSite = { en: "No Blog entries on [%1]", de: "Keine Beiträge/Posts auf [%1]" };
 	var fixedURL = fixBlogUrlWordpressCom(blogURL);
-	page = 100;
-	var action = "posts/?per_page=100&page=" + page + "&context=embed";
 
-	log.info("getListOfBlogEntries: " + fixedURL + action + " mode verbose " + verbose);
+	for (var page = 1; page <= maxPages; page++) {
+		var action = "posts/?per_page=100&page=" + page + "&context=embed";
+		log.info("getListOfBlogEntries: " + fixedURL + action + " mode verbose " + verbose);
 
-	var request = {
-		url: fixedURL,
-		command: action,
+		var request = {
+			url: fixedURL,
+			command: action,
+		}
+		var response = restix.fetch(request);
+		try {
+			if (response.error) {
+				throw Error(response.errorMsg);
+			}
+			var postEmbed = JSON.parse(response.body);
+		}
+		catch (e) {
+			var msg = "Could not connect to\n" + blogURL + "\n\n" + e;
+			if (verbose) {
+				log.infoAlert(msg);
+			}
+			else {
+				log.info(msg);
+			}
+			log.info(e);
+			return [];
+		}
+
+		if (postEmbed.hasOwnProperty("code")) {
+			if (postEmbed.code == "rest_post_invalid_page_number" && maxPages > 1) {
+				log.info("Ende der Paginierung auf Seite [" + page + "]. Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message);
+				break;
+			}
+			else {
+				if (verbose) {
+					var msg = "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message;
+					log.infoAlert(msg);
+				}
+				else {
+					log.info(msg);
+				}
+				return [];
+			}
+		}
+		for (var i = 0; i < postEmbed.length; i++) {
+			listItems.push({
+				id: postEmbed[i].id,
+				blogTitle: Encoder.htmlDecode(postEmbed[i].title.rendered)
+			});
+		}
+		log.info("listItems.length " + listItems.length + " response.httpStatus " + response.httpStatus);
+		if (verbose && postEmbed.length == 0 && listItems.length == 0 && response.httpStatus == 200) {
+			log.infoAlert(localize(ui.noBlogPostsOnSite, blogURL));
+			return;
+		}
 	}
-	var response = restix.fetch(request);
-	try {
-		if (response.error) {
-			throw Error(response.errorMsg);
-		}
-		var postEmbed = JSON.parse(response.body);
-	}
-	catch (e) {
-		var msg = "Could not connect to\n" + blogURL + "\n\n" + e;
-		if (verbose) {
-			log.infoAlert(msg);
-		}
-		else {
-			log.info(msg);
-		}
+	log.info("Processed [" + listItems.length + "] entries");
 
-		log.info(e);
-		return [];
-	}
-
-	if (postEmbed.hasOwnProperty("code")) {
-		if (postEmbed.code == "rest_post_invalid_page_number" && page > 1) {
-			var msg = "Ende der Paginierung auf Seite [" + page + "]. Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message;
-		}
-		else {
-			var msg = "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message;
-		}
-		if (verbose) {
-			log.infoAlert(msg);
-		}
-		else {
-
-			log.info(msg);
-		}
-		return [];
-	}
-
-
-	var listItems = [];
-	for (var i = 0; i < postEmbed.length; i++) {
-		listItems[i] = { id: postEmbed[i].id, blogTitle: Encoder.htmlDecode(postEmbed[i].title.rendered) };
-	}
-	log.info("listItems.length " + listItems.length + " response.httpStatus " + response.httpStatus);
-	if (verbose && postEmbed.length == 0 && response.httpStatus == 200) {
-		log.infoAlert(localize(ui.noBlogPostsOnSite, blogURL));
-	}
 	return listItems;
 }
 
