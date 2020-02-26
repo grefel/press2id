@@ -435,8 +435,12 @@ function processDok(dok) {
 
 		idsTools.untag(root);
 
-
 		// Export to TEMP ICML
+		if (app.userName == "") {
+			log.info("Setze einen generischen userName = press2id");
+			app.userName = "press2id";
+		}
+
 		var tempICMLFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp.icml");
 		story.exportFile(ExportFormat.INCOPY_MARKUP, tempICMLFile);
 		placeGunArray.unshift(tempICMLFile);
