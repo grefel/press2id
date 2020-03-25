@@ -22,7 +22,7 @@ var px = {
 
 	// Verwaltung
 	showGUI: true,
-	debug: true
+	debug: false
 }
 
 // Debug Stuff
