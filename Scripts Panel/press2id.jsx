@@ -138,6 +138,7 @@ function processDok(dok) {
 	ui.progressBar = localize({ en: "Download  –  " + px.projectName, de: "Download  –  " + px.projectName });
 	ui.progressBarOpenTemplate = localize({ en: "Import Data", de: "Daten importieren" });
 	ui.progressBarDownloadImages = localize({ en: "Download Images ", de: "Lade Bilder herunter" });
+	ui.missingMasterSpread = localize({ en: "A Masterspread with the name [W-Wordpress] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [W-Wordpress] benötigt."});
 
 	if (px.showGUI) {
 		var selectedPostsArray = getConfig();
@@ -164,10 +165,7 @@ function processDok(dok) {
 
 		log.info("Verarbeite Post mit ID " + postObject.id + " titel " + postObject.blogTitle + " mode downloadImages: " + downloadImages + " folder " + localImageFolder + " run " + r);
 
-
-
-
-		try {			
+		try {
 			var pBar = new $.ProgressBar(ui.progressBar + " " + postObject.blogTitle, 350, 100);
 			pBar.show(ui.progressBarOpenTemplate + " %1 / " + 4, 4, 0);
 
@@ -181,16 +179,17 @@ function processDok(dok) {
 
 			pBar.hit(2);
 
-
-			// Load Template we checked existence of file already in checkDok()	
-			var templateFile = getTemplateFile();
-			try {
-				templateDok = app.open(templateFile, px.debug, OpenOptions.OPEN_COPY);
-			}
-			catch (e) {
-				log.warn(localize(ui.couldNotOpenTemplate, templateFile.name));
-				log.warn(e);
-				return;
+			if (r == 0) {
+				// Load Template we checked existence of file already in checkDok()	
+				var templateFile = getTemplateFile();
+				try {
+					var templateDok = app.open(templateFile, px.debug, OpenOptions.OPEN_COPY);
+				}
+				catch (e) {
+					log.warn(localize(ui.couldNotOpenTemplate, templateFile.name));
+					log.warn(e);
+					return;
+				}
 			}
 			// Remove Existing XML
 			templateDok.xmlElements[0].contents = "";
@@ -339,6 +338,7 @@ function processDok(dok) {
 							rect.anchoredObjectSettings.insertAnchoredObject(imgXML.xmlContent.insertionPoints[0]);
 							rect.anchoredObjectSettings.properties = rect.appliedObjectStyle.anchoredObjectSettings.properties;
 
+							rect.clearObjectStyleOverrides();
 							// TODO fix image height > textFrame height
 
 
@@ -419,7 +419,9 @@ function processDok(dok) {
 			}
 			else {
 				try {
-					templateDok.close(SaveOptions.NO);
+					if (r == selectedPostsArray.length - 1) {
+						templateDok.close(SaveOptions.NO);
+					}
 				}
 				catch (e) {
 					log.info("Errro while cleanup")
@@ -443,6 +445,275 @@ function processDok(dok) {
 		}
 
 	}
+
+
+	if (selectedPostsArray.length > 1) {
+		var masterSpread = dok.masterSpreads.itemByName("W-Wordpress");
+		if (!masterSpread.isValid) {
+			log.warn(ui.missingMasterSpread);
+			return;
+		}		
+		for (var i = 0; i < dok.placeGuns.textFrames.length; i++) {
+			// Wenn das Template nur eine Seite enthält, wird diese zum Einstieg verwendet. Ansonsten wird eine neue Seite hinten angehangen 
+			var page = dok.pages[0]
+			if (!(i == 0 && dok.pages.length == 1)) {
+				page = dok.pages.add();
+			}
+			page.appliedMaster = masterSpread;
+			var textFrameContent = masterSpread.textFrames.itemByName("content");
+			var tf = textFrameContent.override(page);
+
+			dok.placeGuns.textFrames[i].parentStory.move(LocationOptions.AT_BEGINNING, tf.insertionPoints[0]);
+			fixOverflow(tf.parentStory);
+
+		}
+		dok.placeGuns.abortPlaceGun();
+	}
+
+}
+
+
+/**
+* Fix an overflowing textframe. Adds new pages as long as needed.
+* @param {Story} story The overflowing story
+* @param {String|MasterSpread} [masterSpreadName] Name of the masterpread or Masterspread for new pages. Defaults to the applied master of the last textframe parent page.
+* @param {Boolean} [deleteEmptyPages=false] Remove empty pages at end of the story. An empty page is considered, if the threaded textframe is empty.
+* @param {Boolean} [warnOverflow=false] Warn and mark page where overflow cannot be solved.
+* @return {Boolean} Sucess or failure
+*/
+function fixOverflow(story, masterSpreadName, deleteEmptyPages, warnOverflow) {
+	if (warnOverflow == undefined) warnOverflow = false;
+	var dok = story.parent;
+	if (dok instanceof XMLElement) {
+		log.warn("Die Story mit der id [" + story.id + "] ist nicht im Dokument platziert. Parent ist ein Objekt vom Typ [" + dok.constructor.name + "]");
+		return false;
+	}
+
+	if (deleteEmptyPages == undefined) deleteEmptyPages = false;
+
+	var master;
+	if (masterSpreadName != undefined) {
+		if (masterSpreadName instanceof MasterSpread) {
+			master = masterSpreadName;
+		}
+		else {
+			master = dok.masterSpreads.itemByName(masterSpreadName);
+			if (!master.isValid) {
+				log.warn("Musterseite [" + masterSpreadName + "] ist nicht im Dokument vorhanden. Der Übersatz wird mit der Musterseite, die auf der letzten Seite angewendet wurde, aufgelöst!");
+				master = undefined;
+			}
+		}
+	}
+
+	var oldValues = setDefaultValues(dok);
+
+	var lastTextContainer = story.textContainers[story.textContainers.length - 1];
+
+	while (lastTextContainer.overflows) {
+		if (hasContent(lastTextContainer, false)) {
+			var page = lastTextContainer.parentPage;
+			if (master == undefined) {
+				master = page.appliedMaster;
+			}
+			var newTextFrame = addPageTextFrame(dok, page, master, true);
+			lastTextContainer.nextTextFrame = newTextFrame;
+			lastTextContainer = newTextFrame;
+		}
+		else {
+			// Überschrift beginnt auf anderer Seite ?!?
+			var page = lastTextContainer.parentPage;
+			if (master == undefined) {
+				master = page.appliedMaster;
+			}
+			var newTextFrame = addPageTextFrame(dok, page, master, true);
+			lastTextContainer.nextTextFrame = newTextFrame;
+			lastTextContainer = newTextFrame;
+			// Wenn er jetzt immer noch keine Content hat, dann Problem
+			if (!hasContent(lastTextContainer, false) && warnOverflow) {
+				log.warn("Auf Seite [" + lastTextContainer.parentPage.name + "] kann ein Übersatz nicht aufgelöst werden. Die Seite wurde in der Seitenpalette markiert!");
+				lastTextContainer.parentPage.pageColor = UIColors.ORANGE;
+				// Tabellenzelle oder verankerter Rahmen zu groß?
+				lastTextContainer.fit(FitOptions.FRAME_TO_CONTENT);
+				if (!hasContent(lastTextContainer, false)) {
+					lastTextContainer.select();
+					return false;
+				}
+			}
+			else if (!hasContent(lastTextContainer, false)) {
+				return false;
+			}
+		}
+	}
+
+	if (deleteEmptyPages) {
+		while (!hasContent(lastTextContainer, true)) {
+			var page = lastTextContainer.parentPage;
+			if (page.pageItems.length == 1) {
+				if (dok.pages.length == 1) {
+					lastTextContainer.remove();
+					return true;
+				}
+				else {
+					page.remove();
+				}
+				if (!story.isValid) {
+					// Komplett leere Story 
+					return true;
+				}
+				lastTextContainer = story.textContainers[story.textContainers.length - 1];
+			}
+			else {
+				// Last page is not empty 
+				return true;
+			}
+		}
+	}
+
+	setValues(dok, oldValues);
+
+	return true;
+}
+/**
+ * Draws a textFrame on a page based on the margins and column settings
+ * @param {Document} dok 
+ * @param {Page} page 
+ * @param {MasterSpread*} [masterSpread] If not explixitly set, the Masterpread of page is applied
+ * @param {Boolean} [addNewPage=true] Add a new page
+ * @param {ObjectStyle} [default] The object Style, if not set the dok.pageItemDefaults.appliedTextObjectStyle is used (as always)
+ */
+function addPageTextFrame(dok, page, masterSpread, addNewPage, objectStyle) {
+	if (addNewPage == undefined) {
+		addNewPage = true;
+	}
+	if (masterSpread === undefined) {
+		masterSpread = page.appliedMaster;
+	}
+
+	if (addNewPage) {
+		var currentPage = dok.pages.add(LocationOptions.AFTER, page);
+	}
+	else {
+		var currentPage = page;
+	}
+
+	currentPage.appliedMaster = masterSpread;
+
+	var y1 = currentPage.marginPreferences.top;
+	var y2 = dok.documentPreferences.pageHeight - currentPage.marginPreferences.bottom;
+	if (currentPage.side == PageSideOptions.LEFT_HAND) {
+		var x1 = currentPage.marginPreferences.right;
+		var x2 = dok.documentPreferences.pageWidth - currentPage.marginPreferences.left;
+	}
+	else {
+		var x1 = currentPage.marginPreferences.left;
+		var x2 = dok.documentPreferences.pageWidth - currentPage.marginPreferences.right;
+	}
+	var textFrame = currentPage.textFrames.add();
+	textFrame.geometricBounds = [y1, x1, y2, x2];
+
+
+	if (objectStyle  != undefined && objectStyle.constructor.name == "ObjectStyle" && objectStyle.isValid) {
+		textFrame.appliedObjectStyle = objectStyle
+	}
+	else {
+		textFrame.textFramePreferences.textColumnCount = currentPage.marginPreferences.columnCount;
+		textFrame.textFramePreferences.textColumnGutter = currentPage.marginPreferences.columnGutter
+	}
+
+	return textFrame;
+}
+
+
+function hasContent(textFrame, checkOnlyLastRow) {
+	if (textFrame.characters.length > 0) return true;
+	var previousTextFrame = textFrame.previousTextFrame;
+	if (previousTextFrame == null) return false;
+	while (previousTextFrame.characters.length == 0) {
+		previousTextFrame = previousTextFrame.previousTextFrame;
+		if (previousTextFrame == null) return false;
+	}
+	var lastChar = previousTextFrame.characters[-1];
+	if (lastChar.tables.length == 1) {
+		var table = lastChar.tables[0];
+		if (checkOnlyLastRow) {
+			return table.rows[-1].cells[0].insertionPoints[0].parentTextFrames[0].id == textFrame.id;
+		} else {
+			return isRowInTextFrame(table.rows.itemByRange(1, -1).getElements(), textFrame.id);
+		}
+		// Slower ... 
+		// var checkRowIndex = -1;
+		// while (table.rows[checkRowIndex].cells[0].insertionPoints[0].parentTextFrames.length == 0) {
+		//     checkRowIndex--;
+		// }
+		// if (table.rows[checkRowIndex].cells[0].insertionPoints[0].parentTextFrames[0].id == textFrame.id) {
+		//     return true;
+		// }
+	}
+
+	return false;
+}
+
+function isRowInTextFrame(rowArray, tfId) {
+	if (rowArray.length == 1) {
+		return (rowArray[0].cells[0].insertionPoints[0].parentTextFrames.length > 0
+			&& rowArray[0].cells[0].insertionPoints[0].parentTextFrames[0].id == tfId);
+	}
+	var middleItem = Math.floor(rowArray.length / 2);
+	if (rowArray[middleItem].cells[0].insertionPoints[0].parentTextFrames.length > 0
+		&& rowArray[middleItem].cells[0].insertionPoints[0].parentTextFrames[0].id == tfId) {
+		return true;
+	}
+	if (rowArray[middleItem].cells[0].insertionPoints[0].parentTextFrames.length > 0) {
+		return isRowInTextFrame(rowArray.slice(middleItem), tfId);
+	}
+	else {
+		return isRowInTextFrame(rowArray.slice(0, middleItem), tfId);
+	}
+}
+
+
+function setDefaultValues(dok) {
+	var oldValues = {
+		horizontalMeasurementUnits: dok.viewPreferences.horizontalMeasurementUnits,
+		verticalMeasurementUnits: dok.viewPreferences.verticalMeasurementUnits,
+		viewPreferences: dok.viewPreferences.rulerOrigin,
+		zeroPoint: dok.zeroPoint,
+		textDefaultParStyle: dok.textDefaults.appliedParagraphStyle,
+		textDefaultCharStyle: dok.textDefaults.appliedCharacterStyle,
+		// transformReferencePoint: dok.layoutWindows[0].transformReferencePoint,
+		smartTextReflow: dok.textPreferences.smartTextReflow,
+		preflightOff: app.preflightOptions.preflightOff
+
+	}
+	dok.textDefaults.appliedCharacterStyle = dok.characterStyles[0];
+	dok.textDefaults.appliedParagraphStyle = dok.paragraphStyles[1];
+	//~ 	px.idDocument.pageItemDefaults.appliedGraphicObjectStyle
+	//~ 	px.idDocument.pageItemDefaults..appliedGridObjectStyle
+	//~ 	px.idDocument.pageItemDefaults..appliedTextObjectStyle		
+	dok.viewPreferences.horizontalMeasurementUnits = MeasurementUnits.MILLIMETERS;
+	dok.viewPreferences.verticalMeasurementUnits = MeasurementUnits.MILLIMETERS;
+	dok.viewPreferences.rulerOrigin = RulerOrigin.PAGE_ORIGIN;
+	dok.zeroPoint = [0, 0];
+	dok.textPreferences.smartTextReflow = false;
+	app.preflightOptions.preflightOff = true;
+
+	//    dok.layoutWindows[0].transformReferencePoint = AnchorPoint.TOP_LEFT_ANCHOR;
+	return oldValues;
+}
+/**
+* Set Measurement as given in values
+*/
+function setValues(dok, values) {
+	dok.viewPreferences.horizontalMeasurementUnits = values.horizontalMeasurementUnits;
+	dok.viewPreferences.verticalMeasurementUnits = values.verticalMeasurementUnits;
+	dok.viewPreferences.rulerOrigin = values.viewPreferences;
+	dok.zeroPoint = values.zeroPoint;
+	dok.textDefaults.appliedParagraphStyle = values.textDefaultParStyle;
+	dok.textDefaults.appliedCharacterStyle = values.textDefaultCharStyle;
+	dok.textPreferences.smartTextReflow = values.smartTextReflow;
+	app.preflightOptions.preflightOff = values.preflightOff;
+
+	// dok.layoutWindows[0].transformReferencePoint = values.transformReferencePoint;
 }
 
 
