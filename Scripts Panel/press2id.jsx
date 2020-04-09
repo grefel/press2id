@@ -525,8 +525,15 @@ function getConfig() {
 	ui.buttonImageManagementFolderSelectOnClick = { en: "Select the folder", de: "Wählen Sie den Ordner aus" };
 	ui.wrongReturnValue = { en: "Something went wrong, could not find Post based on the ID", de: "Etwas ist schiefgelaufen, konnte den Beitrag anhand der ID nicht finden" };
 
+	ui.staticTextAftertDate = { en: "Posts after", de: "Beiträge nach dem" };
+	ui.staticTextBeforeDate = { en: "before", de: "vor dem" };
+
 	ui.buttonStartOk = { en: "Place", de: "Platzieren" };
 	ui.buttonStartCancel = { en: "Cancel", de: "Abbrechen" };
+	ui.datePatternError = { en: "Please use this date format: YYYY-MM-DD", de: "Bitte dieses Datumsformat verwenden: JJJJ-MM-TT" };
+
+	var afterDate = "1991-08-06";
+	var beforeDate = "2100-01-01";
 
 	var listBounds = [0, 0, 400, 250];
 	var panelMargins = [10, 15, 10, 10];
@@ -537,7 +544,7 @@ function getConfig() {
 	var saveBlogURL = false;
 
 	var listItems = [];
-	listItems = getListOfBlogEntries(blogURL, 1, false);
+	listItems = getListOfBlogEntries(blogURL, 1, false, beforeDate, afterDate);
 
 	var win = new Window('dialog {text: "' + localize(ui.winTitle) + '  –  ' + px.projectName + ' ' + px.version + '", alignChildren: "fill"}');
 
@@ -561,11 +568,43 @@ function getConfig() {
 		}
 		log.info("buttonBlogInfoFetch.onClick");
 
-		listItems = getListOfBlogEntries(blogURL, 100, true);
+		listItems = getListOfBlogEntries(blogURL, 100, true, beforeDate, afterDate);
 
 		saveBlogURL = (listItems.length > 0);
 		fillListboxSelectPost();
 	}
+
+	// Set Dates
+	var groupDate = panelBlogInfo.add('group');
+	groupDate.add('statictext {text: "' + localize(ui.staticTextAftertDate) + '"}');
+	var edittextAfterDate = groupDate.add('edittext {text: "' + afterDate + '", preferredSize:[90, -1]}');
+	edittextAfterDate.onChange = function () {
+		if (afterDate == edittextAfterDate.text) {
+			return;
+		}
+		if (isValidDate(edittextAfterDate.text)) {
+			afterDate = edittextAfterDate.text;
+		}
+		else {
+			edittextAfterDate.text = afterDate;
+			alert(localize(ui.datePatternError))
+		}
+	}
+	groupDate.add('statictext {text: "' + localize(ui.staticTextBeforeDate) + '"}');
+	var edittextBeforeDate = groupDate.add('edittext {text: "' + beforeDate + '", preferredSize:[90, -1]}');
+	edittextBeforeDate.onChange = function () {
+		if (beforeDate == edittextBeforeDate.text) {
+			return;
+		}
+		if (isValidDate(edittextBeforeDate.text)) {
+			beforeDate = edittextBeforeDate.text;
+		}
+		else {
+			edittextBeforeDate.text = beforeDate;
+			alert(localize(ui.datePatternError))
+		}
+	}
+
 
 	// Panel Select Post 
 	var panelSelectPost = win.add('panel {alignChildren: "fill", text: "' + localize(ui.panelSelectPost) + '", margins:[' + panelMargins + ']}');
@@ -707,18 +746,19 @@ function getConfig() {
 
 /**
  * Fetch Blog Posts 
- * @param {*} blogURL 
- * @param {*} maxPages Results are paginated by 100 entries, if page > 1 this functions reads until maxPages is reached, or no more entries are found
+ * @param {String} blogURL 
+ * @param {Number} maxPages Results are paginated by 100 entries, if page > 1 this functions reads until maxPages is reached, or no more entries are found
  * @param {*} verbose 
  */
-function getListOfBlogEntries(blogURL, maxPages, verbose) {
+function getListOfBlogEntries(blogURL, maxPages, verbose, beforeDate, afterDate) {
 	var listItems = [];
 	var ui = {};
 	ui.noBlogPostsOnSite = { en: "No Blog entries on [%1]", de: "Keine Beiträge/Posts auf [%1]" };
 	var fixedURL = fixBlogUrlWordpressCom(blogURL);
 
 	for (var page = 1; page <= maxPages; page++) {
-		var action = "posts/?per_page=100&page=" + page + "&context=embed";
+		// https://developer.wordpress.org/rest-api/reference/posts/#list-posts
+		var action = "posts/?per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&context=embed";
 		log.info("getListOfBlogEntries: " + fixedURL + action + " mode verbose " + verbose);
 
 		var request = {
@@ -951,6 +991,31 @@ function writeTextFile(file, string, encoding) {
 		return Error("This is not a File");
 	}
 }
+
+// Adapted for ExtendScript from https://stackoverflow.com/questions/18758772/how-do-i-validate-a-date-in-this-format-yyyy-mm-dd-using-jquery
+function isValidDate(dateString) {
+	var regEx = /^(\d{4})-(\d{2})-(\d{2})$/;
+	if (!dateString.match(regEx)) return false;  // Invalid format
+	var d = new Date();
+	d.setMonth((dateString.match(regEx)[2] * 1) - 1)
+	d.setDate((dateString.match(regEx)[3] * 1))
+	d.setFullYear((dateString.match(regEx)[1] * 1));
+	var dNum = d.getTime();
+	if (!dNum && dNum !== 0) return false; // NaN value, Invalid date
+	var dString = d.getFullYear() + "-" + pad(d.getMonth() + 1, 2) + "-" + pad(d.getDate(), 2);
+	return dString === dateString;
+}
+
+/** Pad a numer witth leading zeros */
+function pad(number, length, fill) {
+	if (fill == undefined) fill = "0";
+	var str = '' + number;
+	while (str.length < length) {
+		str = fill + str;
+	}
+	return str;
+}
+
 /**  Init Log File and System */
 function initLog() {
 	var scriptFolderPath = getScriptFolderPath();
