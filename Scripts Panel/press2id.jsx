@@ -135,10 +135,12 @@ function checkDok(dok) {
 function processDok(dok) {
 	var ui = {}
 	ui.couldNotOpenTemplate = { en: "Could not open Template %1", de: "Konnte Template %1 nicht öffnen." };
-	ui.progressBar = localize({ en: "Download  –  " + px.projectName, de: "Download  –  " + px.projectName });
+	ui.progressBar = localize({ en: "Download  –  ", de: "Download  –  "});
 	ui.progressBarOpenTemplate = localize({ en: "Import Data", de: "Daten importieren" });
 	ui.progressBarDownloadImages = localize({ en: "Download Images ", de: "Lade Bilder herunter" });
-	ui.missingMasterSpread = localize({ en: "A Masterspread with the name [W-Wordpress] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [W-Wordpress] benötigt."});
+	ui.missingMasterSpread = localize({ en: "A masterspread with the name [W-Wordpress] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [W-Wordpress] benötigt." });
+	ui.missingContentTextFrame = localize({ en: "There is no text frame named [content] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [content] enthalten." });
+	ui.missingFeaturedImageFrame = localize({ en: "There is no text frame named [featured-image] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [featured-image] enthalten." });
 
 	if (px.showGUI) {
 		var selectedPostsArray = getConfig();
@@ -152,10 +154,12 @@ function processDok(dok) {
 		return;
 	}
 
+	var postObjectArray = [];
+	dok.placeGuns.abortPlaceGun();
+
 	for (var r = 0; r < selectedPostsArray.length; r++) {
+		var placeGunArray = [];
 		var selectedPost = selectedPostsArray[r]
-
-
 		var postObject = selectedPost.postObject;
 		var downloadImages = selectedPost.downloadImages;
 		var localImageFolder = selectedPost.localImageFolder;
@@ -171,8 +175,9 @@ function processDok(dok) {
 
 			var singlePost = getSinglePost(blogURL, postObject);
 			if (singlePost == null) {
-				return;
+				continue;
 			}
+			postObjectArray.push({ text: true, featuredImage: false });
 			pBar.hit(1);
 
 			var xmlTempFile = createXMLFile(singlePost, postObject, blogURL);
@@ -226,7 +231,6 @@ function processDok(dok) {
 			var contentFrame = startPage.textFrames.add();
 			contentFrame.placeXML(postXML);
 
-			var placeGunArray = [];
 
 			pBar.hit(2);
 
@@ -316,7 +320,13 @@ function processDok(dok) {
 
 						var rect;
 						if (imgXML.markupTag.name == "featuredImage") {
-							placeGunArray.push(imageFile);
+							if (selectedPostsArray.length == 1) {
+								placeGunArray.push(imageFile);
+							}
+							else {
+								postObjectArray[postObjectArray.length - 1].featuredImage = true;
+								postObjectArray[postObjectArray.length - 1].featuredImageFile = imageFile;
+							}
 						}
 						else {
 							rect = templateDok.rectangles.add();
@@ -338,9 +348,8 @@ function processDok(dok) {
 							rect.anchoredObjectSettings.insertAnchoredObject(imgXML.xmlContent.insertionPoints[0]);
 							rect.anchoredObjectSettings.properties = rect.appliedObjectStyle.anchoredObjectSettings.properties;
 
-							rect.clearObjectStyleOverrides();
+							// rect.clearObjectStyleOverrides(); // Geht nicht, weil die Größe über das Objektformat gesteuert werden soll
 							// TODO fix image height > textFrame height
-
 
 						}
 					}
@@ -447,27 +456,58 @@ function processDok(dok) {
 	}
 
 
-	if (selectedPostsArray.length > 1) {
+	if (postObjectArray.length > 1) {
 		var masterSpread = dok.masterSpreads.itemByName("W-Wordpress");
 		if (!masterSpread.isValid) {
 			log.warn(ui.missingMasterSpread);
 			return;
-		}		
-		for (var i = 0; i < dok.placeGuns.textFrames.length; i++) {
+		}
+		for (var i = dok.placeGuns.textFrames.length - 1; i >= 0; i--) {
 			// Wenn das Template nur eine Seite enthält, wird diese zum Einstieg verwendet. Ansonsten wird eine neue Seite hinten angehangen 
 			var page = dok.pages[0]
-			if (!(i == 0 && dok.pages.length == 1)) {
+			if (!(i == dok.placeGuns.textFrames.length - 1 && dok.pages.length == 1)) {
 				page = dok.pages.add();
 			}
 			page.appliedMaster = masterSpread;
 			var textFrameContent = masterSpread.textFrames.itemByName("content");
-			var tf = textFrameContent.override(page);
+			if (textFrameContent.isValid) {
+				var tf = textFrameContent.override(page);
+			}
+			else {
+				log.warn(ui.missingContentTextFrame);
+				return;
+			}
 
 			dok.placeGuns.textFrames[i].parentStory.move(LocationOptions.AT_BEGINNING, tf.insertionPoints[0]);
+
+			if (postObjectArray[i].featuredImage) {
+				var fiRect = masterSpread.pageItems.itemByName("featured-image").getElements()[0];
+				if (fiRect.isValid) {
+					var rect = fiRect.override(page);
+					postObjectArray[i].rect = rect;
+				}
+				else {
+					log.warn(ui.missingFeaturedImageFrame);
+					return;
+				}
+			}
+
 			fixOverflow(tf.parentStory);
 
 		}
+
 		dok.placeGuns.abortPlaceGun();
+		// we need clear the place gun, before placing images 
+		for (var i = postObjectArray.length - 1; i >= 0; i--) {
+			if (postObjectArray[i].featuredImage) {
+				// Fix anchored objects 
+				var rect = postObjectArray[i].rect;
+				rect.place(postObjectArray[i].featuredImageFile);
+				rect.fit(FitOptions.FILL_PROPORTIONALLY)
+			}
+		}
+
+
 	}
 
 }
@@ -612,7 +652,7 @@ function addPageTextFrame(dok, page, masterSpread, addNewPage, objectStyle) {
 	textFrame.geometricBounds = [y1, x1, y2, x2];
 
 
-	if (objectStyle  != undefined && objectStyle.constructor.name == "ObjectStyle" && objectStyle.isValid) {
+	if (objectStyle != undefined && objectStyle.constructor.name == "ObjectStyle" && objectStyle.isValid) {
 		textFrame.appliedObjectStyle = objectStyle
 	}
 	else {
