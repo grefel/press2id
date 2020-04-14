@@ -67,7 +67,8 @@ XML suchen und Text hinzufügen
 ### Mehrere Beiträge platzieren
 * Wenn du mehr als einen Beitrag platzieren willst, benötigst du eine Musterseite mit dem Namen ***W-Wordpress***.
 ![Masterspread](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/masterSpread.png)
-Auf dieser Musterseite müssen benannte Rahmen für den Inhalt und das Beitragsbild (Featured Image) erstellt werden. Namen für Rahmen können im Bedienfeld *Ebenen* zugewiesen werden. Für den Beitragsinhalt erstelle einen Textrahmen mit dem Namen ***content*** für das Beitragsbild einen Rechteckrahmen mit dem Namen ***featured-image***
+
+* Auf der Musterseite W-Wordpress müssen benannte Rahmen für den Inhalt und das Beitragsbild (Featured Image) erstellt werden. Namen für Rahmen können im Bedienfeld *Ebenen* zugewiesen werden. Für den Beitragsinhalt erstelle einen Textrahmen mit dem Namen ***content*** für das Beitragsbild einen Rechteckrahmen mit dem Namen ***featured-image***
 ![Named Frames](https://raw.githubusercontent.com/grefel/press2id/master/docu/assets/namedFrames.png)
 Im Dokument `press2id_example.indd` ist das schon erledigt!
 
