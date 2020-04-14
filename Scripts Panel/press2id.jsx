@@ -469,7 +469,12 @@ function processDok(dok) {
 				page = dok.pages.add();
 			}
 			page.appliedMaster = masterSpread;
-			var textFrameContent = masterSpread.textFrames.itemByName("content");
+			if (page.side == PageSideOptions.RIGHT_HAND) {
+				var textFrameContent = masterSpread.pages[1].textFrames.itemByName("content");
+			}
+			else {
+				var textFrameContent = masterSpread.pages[0].textFrames.itemByName("content");
+			}
 			if (textFrameContent.isValid) {
 				var tf = textFrameContent.override(page);
 			}
@@ -481,7 +486,13 @@ function processDok(dok) {
 			dok.placeGuns.textFrames[i].parentStory.move(LocationOptions.AT_BEGINNING, tf.insertionPoints[0]);
 
 			if (postObjectArray[i].featuredImage) {
-				var fiRect = masterSpread.pageItems.itemByName("featured-image").getElements()[0];
+				if (page.side == PageSideOptions.RIGHT_HAND) {
+					var fiRect = masterSpread.pages[1].pageItems.itemByName("featured-image").getElements()[0];
+				}
+				else {
+					var fiRect = masterSpread.pages[0].pageItems.itemByName("featured-image").getElements()[0];
+				}
+	
 				if (fiRect.isValid) {
 					var rect = fiRect.override(page);
 					postObjectArray[i].rect = rect;
@@ -1012,7 +1023,9 @@ function getConfig() {
  * Fetch Blog Posts 
  * @param {String} blogURL 
  * @param {Number} maxPages Results are paginated by 100 entries, if page > 1 this functions reads until maxPages is reached, or no more entries are found
- * @param {*} verbose 
+ * @param {Boolean} verbose 
+ * @param {String} beforeDate 
+ * @param {String} afterDate 
  */
 function getListOfBlogEntries(blogURL, maxPages, verbose, beforeDate, afterDate) {
 	var listItems = [];
