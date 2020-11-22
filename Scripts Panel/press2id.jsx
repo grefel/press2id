@@ -10,15 +10,18 @@
 
 var px = {
 	projectName: "press2id",
-	version: "2020-04-09-v1.3",
+	version: "2020-11-22-v1.4",
 
-	blogURL: "https://www.publishingx.de/press2id/",
+	blogURL: "https://biasiada.de/",
+	// blogURL: "https://www.publishingx.de/press2id/",
 	//	blogURL:"https://www.indesignblog.com", 
 	//~ 	blogURL:"https://www.publishingx.de", 
 	//~ 	blogURL:"https://www.publishingblog.ch", 
 	//~ 	blogURL:"https://wordpress.org/news", 
 	//~ 	blogURL:"http://www.indesignblog.de", 
 	//~ 	blogURL:"https://www.rolanddreger.net/de",
+
+	articleType: "biere", // post or page
 
 	// Verwaltung
 	showGUI: true,
@@ -31,9 +34,9 @@ if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor-") {
 	px.debug = true;
 }
 
-if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor-") {
+if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor") {
 	app.insertLabel("wp2id:blogURL", px.blogURL);
-	px.debugPost = [{ postObject: { id: 9, blogTitle: "Debug Run 9" }, downloadImages: true, localImageFolder: Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL: px.blogURL }];
+	// px.debugPost = [{ postObject: { id: 9, blogTitle: "Debug Run 9" }, downloadImages: true, localImageFolder: Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL: px.blogURL }];
 }
 
 main();
@@ -135,7 +138,7 @@ function checkDok(dok) {
 function processDok(dok) {
 	var ui = {}
 	ui.couldNotOpenTemplate = { en: "Could not open Template %1", de: "Konnte Template %1 nicht öffnen." };
-	ui.progressBar = localize({ en: "Download  –  ", de: "Download  –  "});
+	ui.progressBar = localize({ en: "Download  –  ", de: "Download  –  " });
 	ui.progressBarOpenTemplate = localize({ en: "Import Data", de: "Daten importieren" });
 	ui.progressBarDownloadImages = localize({ en: "Download Images ", de: "Lade Bilder herunter" });
 	ui.missingMasterSpread = localize({ en: "A masterspread with the name [W-Wordpress] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [W-Wordpress] benötigt." });
@@ -492,7 +495,7 @@ function processDok(dok) {
 				else {
 					var fiRect = masterSpread.pages[0].pageItems.itemByName("featured-image").getElements()[0];
 				}
-	
+
 				if (fiRect.isValid) {
 					var rect = fiRect.override(page);
 					postObjectArray[i].rect = rect;
@@ -799,7 +802,7 @@ function getConfig() {
 	ui.datePatternError = { en: "Please use this date format: YYYY-MM-DD", de: "Bitte dieses Datumsformat verwenden: JJJJ-MM-TT" };
 
 	var afterDate = "1991-08-06";
-	var beforeDate = "2100-01-01";
+	var beforeDate = "2030-01-01";
 
 	var listBounds = [0, 0, 400, 250];
 	var panelMargins = [10, 15, 10, 10];
@@ -1035,7 +1038,7 @@ function getListOfBlogEntries(blogURL, maxPages, verbose, beforeDate, afterDate)
 
 	for (var page = 1; page <= maxPages; page++) {
 		// https://developer.wordpress.org/rest-api/reference/posts/#list-posts
-		var action = "posts/?per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&context=embed";
+		var action = px.articleType + "/?per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&context=embed";
 		log.info("getListOfBlogEntries: " + fixedURL + action + " mode verbose " + verbose);
 
 		var request = {
@@ -1098,7 +1101,7 @@ function getSinglePost(blogURL, postObject) {
 
 	var request = {
 		url: blogURL,
-		command: "posts/" + postObject.id,
+		command: px.articleType + "/" + postObject.id,
 	}
 	var response = restix.fetch(request);
 	try {
