@@ -21,12 +21,17 @@ var px = {
 	//~ 	blogURL:"http://www.indesignblog.de", 
 	//~ 	blogURL:"https://www.rolanddreger.net/de",
 
-	articleType: "biere", // post or page
-	renderMode: "flow|template",
+	articleType: "biere", // posts|pages
+	renderMode: "flow", // flow|template
 
 	// Verwaltung
 	showGUI: true,
 	debug: false
+}
+
+var jsonFieldType = {
+	TEXT: "TEXT",
+	GRAPHIC: "GRAPHIC"
 }
 
 // Debug Stuff
@@ -179,7 +184,7 @@ function processDok(dok) {
 
 			if (px.renderMode == "flow") {
 
-				var singlePost = getSinglePost(blogURL, postObject);
+				var singlePost = getSingleEntity(blogURL, postObject);
 				if (singlePost == null) {
 					continue;
 				}
@@ -425,8 +430,86 @@ function processDok(dok) {
 				tempICMLFile.remove();
 			}
 			else if (px.renderMode == "template") {
-				// 
-				log.warn("not implemented yet");
+				var singleACFBlock = getSingleEntity(blogURL, postObject);
+				if (singleACFBlock == null) {
+					continue;
+				}
+				singleACFBlock = singleACFBlock.acf;
+				pBar.hit(1);
+
+				var firstPage = dok.pages[0];
+				var jsonDatenfelder = getDatenfelder(firstPage);
+
+				for (var d = 0; d < jsonDatenfelder.length; d++) {
+					var datenFeld = jsonDatenfelder[d];
+					log.debug(datenFeld.fieldName);
+					if (datenFeld.type == jsonFieldType.TEXT) {
+						if (singleACFBlock[datenFeld.fieldName] != undefined) {
+							var setThisString = singleACFBlock[datenFeld.fieldName];
+							// var startIndex = datenFeld.object.insertionPoints[0].index;
+							// var dataFieldLength = setThisString.length - 1;
+							datenFeld.object.contents = setThisString;		
+						}
+						else {
+							log.warn("Datenfeld [" + datenFeld.fieldName + "] ist nicht in JSON-Datensatz enthalten!");
+						}
+					}
+					if (datenFeld.type == jsonFieldType.GRAPHIC) {
+						if (singleACFBlock[datenFeld.fieldName] != undefined) {
+							var graphicObject = singleACFBlock[datenFeld.fieldName];
+							if (downloadImages) {
+								// Bilder herunterladen 
+								var linkPath = Folder(dok.fullName.parent + "/Links");
+								linkPath.create();
+								if (!linkPath.exists) {
+									log.warn("Could not find or create Folder [Links] used Desktop to download links instead!");
+									linkPath = Folder.desktop;
+								}
+								var fileURL = graphicObject.url;
+								log.info("Download image from URL " + fileURL);
+								var imageFile = File(linkPath + "/" + fileName);
+	
+								var request = {
+									url: fileURL.toString()
+								}
+	
+								var response = restix.fetchFile(request, imageFile);
+								try {
+									if (response.error) {
+										throw Error("Error while download image [" + fileName + "]\nfrom URL [" + fileURL + "]\nto local file [" + imageFile + "]\n\n" + response.errorMsg);
+									}
+								}
+								catch (e) {
+									log.warn(e);
+								}
+							}
+							else {
+								var imageFile = File(localImageFolder + "/" + fileName);
+								log.info("Link to local folder " + imageFile);
+							}
+		
+
+							if (imageFile.exists) {
+								try {
+									datenFeld.object.place(imageFile);
+								}
+								catch (e) {
+									log.warn(e);
+								}
+							}
+							else {
+								log.warn("Die Datei [" + imageFile.name + "] existiert nicht");
+							}
+							datenFeld.object.clearObjectStyleOverrides();
+						}
+						else {
+							log.warn("Datenfeld [" + datenFeld.fieldName + "] ist nicht in JSON-Datensatz enthalten!");
+						}
+					}
+				}
+
+				pBar.hit(1);
+
 			}
  		}
 		catch (e) {
@@ -444,21 +527,21 @@ function processDok(dok) {
 					}
 				}
 				catch (e) {
-					log.info("Errro while cleanup")
+					log.info("Error while cleanup")
 					log.info(e);
 				}
 				try {
 					xmlTempFile.remove();
 				}
 				catch (e) {
-					log.info("Errro while cleanup")
+					log.info("Error while cleanup")
 					log.info(e);
 				}
 				try {
 					pBar.close();
 				}
 				catch (e) {
-					log.info("Errro while cleanup")
+					log.info("Error while cleanup")
 					log.info(e);
 				}
 			}
@@ -466,7 +549,7 @@ function processDok(dok) {
 
 	}
 
-
+	// Multipage Mode!
 	if (postObjectArray.length > 1) {
 		var masterSpread = dok.masterSpreads.itemByName("W-Wordpress");
 		if (!masterSpread.isValid) {
@@ -532,6 +615,118 @@ function processDok(dok) {
 
 	}
 
+}
+
+
+/**
+ * Liest aus einer InDesign-Gruppe die Datenfelder für die JSON-Befüllung aus
+ * @param {Page} jsonDatenfeldPage 
+ */
+function getDatenfelder(jsonDatenfeldPage) {
+	var jsonDatenfelder = [];
+	for (var i = 0; i < jsonDatenfeldPage.pageItems.length; i++) {
+		var pi = jsonDatenfeldPage.pageItems[i].getElements()[0];
+		if (pi.constructor.name == "TextFrame") {
+			var searchResults = findOrChangeGrep(pi.parentStory, "<<[a-zA-Z_]+>>", null, false);
+			for (var f = 0; f < searchResults.length; f++) {
+				var text = searchResults[f];
+				var textFieldName = text.contents.replace(/[><]/g, "");
+				log.debug("Setze Textdatenfeld: " + textFieldName);
+				jsonDatenfelder.push({
+					fieldName: textFieldName,
+					object: text.getElements()[0],
+					type: jsonFieldType.TEXT
+				});
+			}
+		}
+		else if (pi.name != "") {
+			log.info("Setze Grafikdatenfeld " + pi.name);
+			jsonDatenfelder.push({
+				fieldName: pi.name,
+				object: pi,
+				type: jsonFieldType.GRAPHIC
+			});
+		}
+	}
+	return jsonDatenfelder;
+}
+
+/**
+ * Find or change with GREP
+ * @param {Object} where An InDesign Object to search within (Document, Story, Text, Table, TextFrame) 
+ * @param {Object|String} find String or findGrepPreferences.properties to search for
+ * @param {Object|String|null} change String or changeGrepPreferences.properties to search for. If null, will only search in object *where* Note: Resulting Array is reversed
+ * @param {Boolean} includeMaster Defaults to false
+ */
+function findOrChangeGrep(where, find, change, includeMaster) {
+	if (change == undefined) {
+		change = null;
+	}
+	if (includeMaster == undefined) {
+		includeMaster = false;
+	}
+
+	// Save Options
+	var saveFindGrepOptions = {};
+	saveFindGrepOptions.includeFootnotes = app.findChangeGrepOptions.includeFootnotes;
+	saveFindGrepOptions.includeHiddenLayers = app.findChangeGrepOptions.includeHiddenLayers;
+	saveFindGrepOptions.includeLockedLayersForFind = app.findChangeGrepOptions.includeLockedLayersForFind;
+	saveFindGrepOptions.includeLockedStoriesForFind = app.findChangeGrepOptions.includeLockedStoriesForFind;
+	saveFindGrepOptions.includeMasterPages = app.findChangeGrepOptions.includeMasterPages;
+	if (app.findChangeGrepOptions.hasOwnProperty("searchBackwards")) saveFindGrepOptions.searchBackwards = app.findChangeGrepOptions.searchBackwards;
+
+	// Set Options
+	app.findChangeGrepOptions.includeFootnotes = true;
+	app.findChangeGrepOptions.includeHiddenLayers = true;
+	app.findChangeGrepOptions.includeLockedLayersForFind = false;
+	app.findChangeGrepOptions.includeLockedStoriesForFind = false;
+	app.findChangeGrepOptions.includeMasterPages = includeMaster;
+	if (app.findChangeGrepOptions.hasOwnProperty("searchBackwards")) app.findChangeGrepOptions.searchBackwards = false;
+
+	// Reset Dialog
+	app.findGrepPreferences = NothingEnum.nothing;
+	app.changeGrepPreferences = NothingEnum.nothing;
+
+	try {
+		// Find Change operation
+		if (find.constructor.name == "String") {
+			app.findGrepPreferences.findWhat = find;
+		}
+		else {
+			app.findGrepPreferences.properties = find;
+		}
+		if (change != null && change.constructor.name == "String") {
+			app.changeGrepPreferences.changeTo = change;
+		}
+		else if (change != null) {
+			app.changeGrepPreferences.properties = change;
+		}
+		var results = null;
+		if (change == null) {
+			results = where.findGrep(true);
+		}
+		else {
+			results = where.changeGrep();
+		}
+	}
+	catch(e) {
+		throw e;
+	}
+	finally {
+		// Reset Dialog
+		app.findGrepPreferences = NothingEnum.nothing;
+		app.changeGrepPreferences = NothingEnum.nothing;
+
+		// Reset Options
+		app.findChangeGrepOptions.includeFootnotes = saveFindGrepOptions.includeFootnotes;
+		app.findChangeGrepOptions.includeHiddenLayers = saveFindGrepOptions.includeHiddenLayers;
+		app.findChangeGrepOptions.includeLockedLayersForFind = saveFindGrepOptions.includeLockedLayersForFind;
+		app.findChangeGrepOptions.includeLockedStoriesForFind = saveFindGrepOptions.includeLockedStoriesForFind;
+		app.findChangeGrepOptions.includeMasterPages = saveFindGrepOptions.includeMasterPages;
+		if (app.findChangeGrepOptions.hasOwnProperty("searchBackwards")) app.findChangeGrepOptions.searchBackwards = saveFindGrepOptions.searchBackwards;
+	}
+
+	return results;
 }
 
 
@@ -965,7 +1160,7 @@ function getConfig() {
 	var groupProcessModeRadioSelect = panelProcessMode.add("group {spacing:5, alignChildren:['left', 'top'], orientation:'column'}");
 	var radioProcessFlow = groupProcessModeRadioSelect.add("radiobutton {text:'" + localize(ui.radioProcessFlow) + "', value:true}");
 	var radioProcessTemplate = groupProcessModeRadioSelect.add("radiobutton {text:'" + localize(ui.radioProcessTemplate) + "'}");
-
+	radioProcessTemplate.value = true;
 
 	// Group for Ok/Cancel
 	var groupStart = win.add("group {preferredSize:[400,undefined], alignChildren:['right', 'center'], margins: [0,0,0,0]}");
@@ -1137,7 +1332,7 @@ function getListOfBlogEntries(blogURL, maxPages, verbose, beforeDate, afterDate)
 	return listItems;
 }
 
-function getSinglePost(blogURL, postObject) {
+function getSingleEntity(blogURL, postObject) {
 
 	var request = {
 		url: blogURL,
@@ -1241,12 +1436,11 @@ function getTemplateFile() {
 	return null;
 }
 
-
+/* Fix Wordpress.com URLs */
 function fixBlogUrlWordpressCom(blogURL) {
 	if (blogURL.match(/\.wordpress.com.$/)) return "https://public-api.wordpress.com/wp/v2/sites/" + blogURL.replace(/^https?:\/\//, '').replace(/\/$/, "") + "/";
 	else return blogURL.replace(/\/$/, "") + "/wp-json/wp/v2/";
 }
-
 
 /* HTML Tidy aufrufen */
 function runTidy(xmlTempFile) {
@@ -1332,7 +1526,6 @@ function runTidy(xmlTempFile) {
 	}
 }
 
-
 /* Wirft eine Fehlermeldung nach der angegeben Zeit */
 function timeoutFileExistence(processResultFile, seconds) {
 	var timeOut = 0;
@@ -1347,6 +1540,7 @@ function timeoutFileExistence(processResultFile, seconds) {
 		throw Error("Timeout. Result file " + processResultFile.name + " does not appear after " + seconds + " seonds run time.\nMight be a slow server connection?");
 	}
 }
+
 /* Erstellen von Textdateien mit korrektem Linefeed für Bash oder Bat Skripte relevant */
 function writeTextFileLocal(file, string, encoding, linefeed) {
 	if (file.constructor.name == "String") {
@@ -1370,6 +1564,7 @@ function writeTextFileLocal(file, string, encoding, linefeed) {
 		return Error("This is not a File");
 	}
 }
+
 function writeTextFile(file, string, encoding) {
 	if (encoding == undefined) {
 		encoding = "UTF-8";
