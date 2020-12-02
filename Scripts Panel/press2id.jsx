@@ -448,7 +448,7 @@ function processDok(dok) {
 							var setThisString = singleACFBlock[datenFeld.fieldName];
 							// var startIndex = datenFeld.object.insertionPoints[0].index;
 							// var dataFieldLength = setThisString.length - 1;
-							datenFeld.object.contents = setThisString;		
+							datenFeld.object.contents = setThisString.toString();
 						}
 						else {
 							log.warn("Datenfeld [" + datenFeld.fieldName + "] ist nicht in JSON-Datensatz enthalten!");
@@ -522,7 +522,7 @@ function processDok(dok) {
 			}
 			else {
 				try {
-					if (r == selectedPostsArray.length - 1) {
+					if (r == selectedPostsArray.length - 1 && px.renderMode == "flow") {
 						templateDok.close(SaveOptions.NO);
 					}
 				}
