@@ -12,16 +12,16 @@ var px = {
 	projectName: "press2id",
 	version: "2020-11-22-v1.4",
 
-	// blogURL: "https://biasiada.de/",
+	blogURL: "https://biasiada.de/",
 	// blogURL: "https://www.publishingx.de/press2id/",
 	//	blogURL:"https://www.indesignblog.com", 
 	//~ 	blogURL:"https://www.publishingx.de", 
 	//~ 	blogURL:"https://www.publishingblog.ch", 
 	//~ 	blogURL:"https://wordpress.org/news", 
-		blogURL:"http://www.indesignblog.de", 
+	// blogURL:"http://www.indesignblog.de", 
 	//~ 	blogURL:"https://www.rolanddreger.net/de",
 
-	articleType: "posts", // biere|pages
+	articleType: "biere", // biere|posts|pages
 	renderMode: "flow", // flow|template
 
 	// Verwaltung
@@ -150,8 +150,8 @@ function processDok(dok) {
 	ui.missingMasterSpread = localize({ en: "A masterspread with the name [W-Wordpress] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [W-Wordpress] benötigt." });
 	ui.missingContentTextFrame = localize({ en: "There is no text frame named [content] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [content] enthalten." });
 	ui.missingFeaturedImageFrame = localize({ en: "There is no text frame named [featured-image] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [featured-image] enthalten." });
-	ui.missingDataFields =  localize({ en: "No data field (<<data field name>> or named graphics frame) could be found in the current document!", de: "Im aktuellen Dokument konnt kein Datenfeld (<<Datenfeldname>> oder benannter Grafikrahmen) gefunden werden!" });
-	ui.undefinedACFBlock =  localize({ en: "No acf Block in the Post Object found.", de: "Kein acf-Block im Post-Objekt gefunden." });
+	ui.missingDataFields = localize({ en: "No data field (<<data field name>> or named graphics frame) could be found in the current document!", de: "Im aktuellen Dokument konnt kein Datenfeld (<<Datenfeldname>> oder benannter Grafikrahmen) gefunden werden!" });
+	ui.undefinedACFBlock = localize({ en: "No acf Block in the Post Object found.", de: "Kein acf-Block im Post-Objekt gefunden." });
 
 	if (px.showGUI) {
 		var selectedPostsArray = getConfig();
@@ -287,7 +287,7 @@ function processDok(dok) {
 
 						var fileURL = imgXML.xmlAttributes.itemByName("src").value;
 						var fileName = getFileNameFromURL(fileURL)
-						
+
 						if (downloadImages) {
 							log.info("Download image from URL " + fileURL);
 							var imageFile = File(linkPath + "/" + fileName);
@@ -436,6 +436,7 @@ function processDok(dok) {
 					log.warn(ui.undefinedACFBlock + " " + postObject.id + " " + postObject.blogTitle);
 					continue;
 				}
+				log.info("process" + " " + postObject.id + " " + postObject.blogTitle);
 
 				pBar.hit(1);
 
@@ -471,13 +472,13 @@ function processDok(dok) {
 								}
 								var fileURL = graphicObject.url;
 								log.info("Download image from URL " + fileURL);
-								var fileName = getFileNameFromURL(fileURL)	
+								var fileName = getFileNameFromURL(fileURL)
 								var imageFile = File(linkPath + "/" + fileName);
-	
+
 								var request = {
 									url: fileURL.toString()
 								}
-	
+
 								var response = restix.fetchFile(request, imageFile);
 								try {
 									if (response.error) {
@@ -492,11 +493,12 @@ function processDok(dok) {
 								var imageFile = File(localImageFolder + "/" + fileName);
 								log.info("Link to local folder " + imageFile);
 							}
-		
+
 
 							if (imageFile.exists) {
 								try {
 									datenFeld.object.place(imageFile);
+									datenFeld.object.name = "";
 								}
 								catch (e) {
 									log.warn(e);
@@ -516,13 +518,13 @@ function processDok(dok) {
 				pBar.hit(1);
 
 			}
- 		}
+		}
 		catch (e) {
 			throw e;
 		}
 		finally {
 			// Clean up 	
-			if (px.debug) {
+			if (px.debug && px.renderMode == "flow") {
 				xmlTempFile.parent.execute();
 			}
 			else {
@@ -535,12 +537,14 @@ function processDok(dok) {
 					log.info("Error while cleanup")
 					log.info(e);
 				}
-				try {
-					xmlTempFile.remove();
-				}
-				catch (e) {
-					log.info("Error while cleanup")
-					log.info(e);
+				if (px.renderMode == "flow") {
+					try {
+						xmlTempFile.remove();
+					}
+					catch (e) {
+						log.info("Error while cleanup")
+						log.info(e);
+					}
 				}
 				try {
 					pBar.close();
@@ -714,7 +718,7 @@ function findOrChangeGrep(where, find, change, includeMaster) {
 			results = where.changeGrep();
 		}
 	}
-	catch(e) {
+	catch (e) {
 		throw e;
 	}
 	finally {
