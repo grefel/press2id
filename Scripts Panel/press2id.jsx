@@ -12,16 +12,16 @@ var px = {
 	projectName: "press2id",
 	version: "2020-11-22-v1.4",
 
-	blogURL: "https://biasiada.de/",
+	// blogURL: "https://biasiada.de/",
 	// blogURL: "https://www.publishingx.de/press2id/",
 	//	blogURL:"https://www.indesignblog.com", 
 	//~ 	blogURL:"https://www.publishingx.de", 
 	//~ 	blogURL:"https://www.publishingblog.ch", 
 	//~ 	blogURL:"https://wordpress.org/news", 
-	//~ 	blogURL:"http://www.indesignblog.de", 
+		blogURL:"http://www.indesignblog.de", 
 	//~ 	blogURL:"https://www.rolanddreger.net/de",
 
-	articleType: "biere", // posts|pages
+	articleType: "posts", // biere|pages
 	renderMode: "flow", // flow|template
 
 	// Verwaltung
@@ -150,6 +150,8 @@ function processDok(dok) {
 	ui.missingMasterSpread = localize({ en: "A masterspread with the name [W-Wordpress] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [W-Wordpress] benötigt." });
 	ui.missingContentTextFrame = localize({ en: "There is no text frame named [content] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [content] enthalten." });
 	ui.missingFeaturedImageFrame = localize({ en: "There is no text frame named [featured-image] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [featured-image] enthalten." });
+	ui.missingDataFields =  localize({ en: "No data field (<<data field name>> or named graphics frame) could be found in the current document!", de: "Im aktuellen Dokument konnt kein Datenfeld (<<Datenfeldname>> oder benannter Grafikrahmen) gefunden werden!" });
+	ui.undefinedACFBlock =  localize({ en: "No acf Block in the Post Object found.", de: "Kein acf-Block im Post-Objekt gefunden." });
 
 	if (px.showGUI) {
 		var selectedPostsArray = getConfig();
@@ -430,11 +432,18 @@ function processDok(dok) {
 					continue;
 				}
 				singleACFBlock = singleACFBlock.acf;
+				if (singleACFBlock == undefined) {
+					log.warn(ui.undefinedACFBlock + " " + postObject.id + " " + postObject.blogTitle);
+					continue;
+				}
+
 				pBar.hit(1);
 
 				var firstPage = dok.pages[0];
 				var jsonDatenfelder = getDatenfelder(firstPage);
-
+				if (jsonDatenfelder.length == 0) {
+					log.warn(ui.missingDataFields)
+				}
 				for (var d = 0; d < jsonDatenfelder.length; d++) {
 					var datenFeld = jsonDatenfelder[d];
 					log.debug(datenFeld.fieldName);
