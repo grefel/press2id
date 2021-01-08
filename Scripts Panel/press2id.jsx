@@ -1,4 +1,4 @@
-//DESCRIPTION:press2id – Place Post from Wordpress Blogs 
+//DESCRIPTION:press2id – Access Wordpress Sites
 //Author: Gregor Fellenz - http://www.publishingx.de
 
 //@include "lib/encoder.js"
@@ -10,19 +10,22 @@
 
 var px = {
 	projectName: "press2id",
-	version: "2020-11-22-v1.4",
+	version: "2021-01-08-v2.0",
 
 	blogURL: "https://biasiada.de/",
 	// blogURL: "https://www.publishingx.de/press2id/",
-	//	blogURL:"https://www.indesignblog.com", 
+	// //	blogURL:"https://www.indesignblog.com", 
 	//~ 	blogURL:"https://www.publishingx.de", 
-	//~ 	blogURL:"https://www.publishingblog.ch", 
+	// blogURL:"https://www.publishingblog.ch", 
 	//~ 	blogURL:"https://wordpress.org/news", 
 	// blogURL:"http://www.indesignblog.de", 
 	//~ 	blogURL:"https://www.rolanddreger.net/de",
 
 	articleType: "biere", // biere|posts|pages
 	renderMode: "flow", // flow|template
+
+	afterDate:"2003-05-27",
+	beforeDate:"2030-01-01",
 
 	// Verwaltung
 	showGUI: true,
@@ -440,8 +443,9 @@ function processDok(dok) {
 
 				pBar.hit(1);
 
-				var firstPage = dok.pages[0];
-				var jsonDatenfelder = getDatenfelder(firstPage);
+				dok.pages[0].duplicate(LocationOptions.AT_END);
+				var lastPage = dok.pages[-1];
+				var jsonDatenfelder = getDatenfelder(lastPage);
 				if (jsonDatenfelder.length == 0) {
 					log.warn(ui.missingDataFields)
 				}
@@ -522,41 +526,45 @@ function processDok(dok) {
 		catch (e) {
 			throw e;
 		}
-		finally {
-			// Clean up 	
-			if (px.debug && px.renderMode == "flow") {
-				xmlTempFile.parent.execute();
+	}
+
+	// Clean up 	
+	if (px.renderMode == "template") {
+		dok.pages[0].remove();
+	}
+	else if (px.renderMode == "flow") {
+		if (px.debug) {
+			xmlTempFile.parent.execute();
+		}
+		else {
+			try {
+				if (r == selectedPostsArray.length - 1 && px.renderMode == "flow") {
+					templateDok.close(SaveOptions.NO);
+				}
 			}
-			else {
+			catch (e) {
+				log.info("Error while cleanup")
+				log.info(e);
+			}
+			if (px.renderMode == "flow") {
 				try {
-					if (r == selectedPostsArray.length - 1 && px.renderMode == "flow") {
-						templateDok.close(SaveOptions.NO);
-					}
+					xmlTempFile.remove();
 				}
 				catch (e) {
 					log.info("Error while cleanup")
 					log.info(e);
 				}
-				if (px.renderMode == "flow") {
-					try {
-						xmlTempFile.remove();
-					}
-					catch (e) {
-						log.info("Error while cleanup")
-						log.info(e);
-					}
-				}
-				try {
-					pBar.close();
-				}
-				catch (e) {
-					log.info("Error while cleanup")
-					log.info(e);
-				}
+			}
+			try {
+				pBar.close();
+			}
+			catch (e) {
+				log.info("Error while cleanup")
+				log.info(e);
 			}
 		}
-
 	}
+
 
 	// Multipage Mode!
 	if (postObjectArray.length > 1) {
@@ -1019,9 +1027,6 @@ function getConfig() {
 	ui.buttonStartCancel = { en: "Cancel", de: "Abbrechen" };
 	ui.datePatternError = { en: "Please use this date format: YYYY-MM-DD", de: "Bitte dieses Datumsformat verwenden: JJJJ-MM-TT" };
 
-	var afterDate = "1991-08-06";
-	var beforeDate = "2030-01-01";
-
 	var listBounds = [0, 0, 400, 250];
 	var panelMargins = [10, 15, 10, 10];
 
@@ -1031,7 +1036,7 @@ function getConfig() {
 	var saveBlogURL = false;
 
 	var listItems = [];
-	listItems = getListOfBlogEntries(blogURL, 1, false, beforeDate, afterDate);
+	listItems = getListOfBlogEntries(blogURL, 1, false, px.beforeDate, px.afterDate);
 
 	var win = new Window('dialog {text: "' + localize(ui.winTitle) + '  –  ' + px.projectName + ' ' + px.version + '", alignChildren: "fill"}');
 
@@ -1055,7 +1060,7 @@ function getConfig() {
 		}
 		log.info("buttonBlogInfoFetch.onClick");
 
-		listItems = getListOfBlogEntries(blogURL, 100, true, beforeDate, afterDate);
+		listItems = getListOfBlogEntries(blogURL, 100, true, px.beforeDate, px.afterDate);
 
 		saveBlogURL = (listItems.length > 0);
 		fillListboxSelectPost();
@@ -1064,30 +1069,30 @@ function getConfig() {
 	// Set Dates
 	var groupDate = panelBlogInfo.add('group');
 	groupDate.add('statictext {text: "' + localize(ui.staticTextAftertDate) + '"}');
-	var edittextAfterDate = groupDate.add('edittext {text: "' + afterDate + '", justify:"center", preferredSize:[90, -1]}');
+	var edittextAfterDate = groupDate.add('edittext {text: "' + px.afterDate + '", justify:"center", preferredSize:[90, -1]}');
 	edittextAfterDate.onChange = function () {
-		if (afterDate == edittextAfterDate.text) {
+		if (px.afterDate == edittextAfterDate.text) {
 			return;
 		}
 		if (isValidDate(edittextAfterDate.text)) {
-			afterDate = edittextAfterDate.text;
+			px.afterDate = edittextAfterDate.text;
 		}
 		else {
-			edittextAfterDate.text = afterDate;
+			edittextAfterDate.text = px.afterDate;
 			alert(localize(ui.datePatternError))
 		}
 	}
 	groupDate.add('statictext {text: "' + localize(ui.staticTextBeforeDate) + '"}');
-	var edittextBeforeDate = groupDate.add('edittext {text: "' + beforeDate + '", justify:"center", preferredSize:[90, -1]}');
+	var edittextBeforeDate = groupDate.add('edittext {text: "' + px.beforeDate + '", justify:"center", preferredSize:[90, -1]}');
 	edittextBeforeDate.onChange = function () {
-		if (beforeDate == edittextBeforeDate.text) {
+		if (px.beforeDate == edittextBeforeDate.text) {
 			return;
 		}
 		if (isValidDate(edittextBeforeDate.text)) {
-			beforeDate = edittextBeforeDate.text;
+			px.beforeDate = edittextBeforeDate.text;
 		}
 		else {
-			edittextBeforeDate.text = beforeDate;
+			edittextBeforeDate.text = px.beforeDate;
 			alert(localize(ui.datePatternError))
 		}
 	}
