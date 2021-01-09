@@ -21,7 +21,7 @@ var px = {
 	// blogURL:"http://www.indesignblog.de", 
 	//~ 	blogURL:"https://www.rolanddreger.net/de",
 
-	articleType: "biere", // biere|posts|pages
+	articleType: "posts", // biere|posts|pages
 	renderMode: "flow", // flow|template
 
 	afterDate:"2003-05-27",
@@ -44,7 +44,6 @@ if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor-") {
 }
 
 if (app.extractLabel("px:debugID") == "Jp07qcLlW3aDHuCoNpBK_Gregor") {
-	app.insertLabel("wp2id:blogURL", px.blogURL);
 	// px.debugPost = [{ postObject: { id: 9, blogTitle: "Debug Run 9" }, downloadImages: true, localImageFolder: Folder("/Users/hp/oc/publishingX/15-Auftraege/2018-02-26_Wordpress2ID/Links"), blogURL: px.blogURL }];
 }
 
@@ -108,6 +107,7 @@ function main() {
 	//~ 	}
 	log.info("Skriptlauf Ende");
 	log.elapsedTime();
+	app.activate();
 }
 
 
@@ -1031,9 +1031,16 @@ function getConfig() {
 	var panelMargins = [10, 15, 10, 10];
 
 	// Try to fetch default blog or last used blog
-	var savedBlogAdress = app.extractLabel("wp2id:blogURL");
-	var blogURL = (savedBlogAdress == "") ? px.blogURL : savedBlogAdress;
+	var savedBlogAdressArray = app.extractLabel("wp2id:blogURLArray");
 	var saveBlogURL = false;
+	if (savedBlogAdressArray == "") savedBlogAdressArray = JSON.stringify([]);
+	var urlList = JSON.parse(savedBlogAdressArray);
+
+	if (urlList.length == 0) {
+		urlList.push(px.blogURL); 
+	} 
+
+	 var blogURL = urlList[0];
 
 	var listItems = [];
 	listItems = getListOfBlogEntries(blogURL, 1, false, px.beforeDate, px.afterDate);
@@ -1042,27 +1049,52 @@ function getConfig() {
 
 	// Panel Blog URL 
 	var panelBlogInfo = win.add('panel {text:"' + localize(ui.panelBlogInfo) + '", margins:[' + panelMargins + '], alignChildren:["left", "top"]}');
-	var groupBlogInfo = panelBlogInfo.add('group');
-	var edittextBlogInfoURL = groupBlogInfo.add('edittext {text: "' + blogURL + '", preferredSize:[310, -1]}');
+	var groupBlogInfoFirst = panelBlogInfo.add('group');
+	groupBlogInfoFirst.orientation = "row";
+	var groupBlogInfo = groupBlogInfoFirst.add('group');
+	groupBlogInfo.orientation = "stack";
+	groupBlogInfo.alignChildren = "left";
+	var urlListDropdown = groupBlogInfo.add("dropdownlist", undefined, urlList);
+	urlListDropdown.preferredSize.width = 320;
+	urlListDropdown.preferredSize.height = 24;
+	var edittextBlogInfoURL = groupBlogInfo.add('edittext {text: "' + blogURL + '"}');
+	edittextBlogInfoURL.preferredSize.width = 302; 
+	edittextBlogInfoURL.preferredSize.height = 24;
+	urlListDropdown.onChange = function () {
+		var selectionText = urlListDropdown.selection.text;
+		if (blogURL == selectionText) {
+			return;
+		}
+		edittextBlogInfoURL.text = selectionText;
+		buttonBlogInfoFetch.onClick();
+	}
 	edittextBlogInfoURL.onChange = function () {
 		if (blogURL == edittextBlogInfoURL.text) {
 			return;
 		}
 		buttonBlogInfoFetch.onClick();
 	}
-	var buttonBlogInfoFetch = groupBlogInfo.add('button {text:"' + localize(ui.buttonBlogInfoFetch) + '", preferredSize:[80,-1]}');
+	var buttonBlogInfoFetch = groupBlogInfoFirst.add('button {text:"' + localize(ui.buttonBlogInfoFetch) + '", preferredSize:[80,-1]}');
 	buttonBlogInfoFetch.onClick = function () {
 		blogURL = edittextBlogInfoURL.text;
+		if (blogURL == "") return;
 		edittextSelectPost.text = "";
 		if (!blogURL.match(/^https?:\/\//)) {
 			log.infoAlert(localize(ui.buttonBlogInfoFetchonClickURLWrong));
 			return;
 		}
-		log.info("buttonBlogInfoFetch.onClick");
+		log.info("buttonBlogInfoFetch.onClick: " + blogURL);
 
 		listItems = getListOfBlogEntries(blogURL, 100, true, px.beforeDate, px.afterDate);
+		
+		if (listItems.length > 0) {
+			saveBlogURL = true;
+			urlList.unshift(blogURL);
+			urlList = unique(urlList);
+			urlList = urlList.slice(0, 6);
+		}
 
-		saveBlogURL = (listItems.length > 0);
+
 		fillListboxSelectPost();
 	}
 
@@ -1231,8 +1263,10 @@ function getConfig() {
 	// Show Windows and process results
 	if (win.show() != 2) {
 		if (saveBlogURL) {
-			app.insertLabel("wp2id:blogURL", blogURL);
+			log.info("Save into Application: " + JSON.stringify(urlList));
+			app.insertLabel("wp2id:blogURLArray", JSON.stringify(urlList));
 		}
+
 		if (canRun()) {
 			var selectedPostsArray = [];
 			for (var p = 0; p < listItems.length; p++) {
@@ -1624,6 +1658,21 @@ function getFileNameFromURL(fileURL) {
 	fileName = fileName.replace(regexSymbolWithCombiningMarks, '$1');
 	return fileName;
 }
+
+/**
+ * Unique an array
+ * @param {*} arr 
+ */
+function unique(arr) {
+	var hash = {}, result = [];
+	for (var i = 0, l = arr.length; i < l; ++i) {
+		if (!hash.hasOwnProperty(arr[i])) { //it works with objects! in FF, at least
+			hash[arr[i]] = true;
+			result.push(arr[i]);
+		}
+	}
+	return result;
+} /* END function unique */
 
 /** Pad a numer witth leading zeros */
 function pad(number, length, fill) {
