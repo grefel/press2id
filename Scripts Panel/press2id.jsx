@@ -147,6 +147,7 @@ function processDok(dok) {
 	ui.missingFeaturedImageFrame = localize({ en: "There is no text frame named [featured-image] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [featured-image] enthalten." });
 	ui.missingDataFields = localize({ en: "No data field (<<data field name>> or named graphics frame) could be found in the current document!", de: "Im aktuellen Dokument konnt kein Datenfeld (<<Datenfeldname>> oder benannter Grafikrahmen) gefunden werden!" });
 	ui.undefinedACFBlock = localize({ en: "JSON Object has no acf property. You need the Plugins https://wordpress.org/plugins/advanced-custom-fields/ and https://de.wordpress.org/plugins/acf-to-rest-api/", de: "Die Eigenschaft acf konnte nicht im JSON Objekt gefunden werden. Du brauchst das Plugin https://wordpress.org/plugins/advanced-custom-fields/ und https://de.wordpress.org/plugins/acf-to-rest-api/" });
+	ui.invalidGraphicDatafiled = { en: "Datafield [%1] has no URL. Cannot place image", de: "Datenfeld [%1] hat keine Eigenschaft url. Das Bild kann nicht platziert werden!" };
 
 	if (px.showGUI) {
 		var selectedPostsArray = getConfig();
@@ -449,6 +450,9 @@ function processDok(dok) {
 					if (datenFeld.type == jsonFieldType.TEXT) {
 						if (singleACFBlock[datenFeld.fieldName] != undefined) {
 							var setThisString = singleACFBlock[datenFeld.fieldName];
+							if (setThisString.constructor.name == "Object" && setThisString.title != undefined) {
+								setThisString = setThisString.title;
+							}
 							// var startIndex = datenFeld.object.insertionPoints[0].index;
 							// var dataFieldLength = setThisString.length - 1;
 							datenFeld.object.contents = setThisString.toString();
@@ -460,6 +464,12 @@ function processDok(dok) {
 					if (datenFeld.type == jsonFieldType.GRAPHIC) {
 						if (singleACFBlock[datenFeld.fieldName] != undefined) {
 							var graphicObject = singleACFBlock[datenFeld.fieldName];
+
+							if (!graphicObject.hasOwnProperty("url")) {
+								log.warn(localize(ui.invalidGraphicDatafiled , datenFeld.fieldName));
+								continue;
+							}
+
 							if (downloadImages) {
 								// Bilder herunterladen 
 								var linkPath = Folder(dok.fullName.parent + "/Links");
@@ -1341,7 +1351,7 @@ function getConfig() {
 function getListOfBlogEntries(blogURL, maxPages, verbose, articleType, beforeDate, afterDate) {
 	var listItems = [];
 	var ui = {};
-	ui.noBlogPostsOnSite = { en: "No Blog entries on [%1]", de: "Keine Beiträge/Posts auf [%1]" };
+	ui.noBlogPostsOnSite = { en: "No content entries on [%1] for endpoint [%2]", de: "Keine Inhalte auf [%1] für endpoint [%2]" };
 	var fixedURL = fixBlogUrlWordpressCom(blogURL);
 
 	for (var page = 1; page <= maxPages; page++) {
@@ -1396,7 +1406,7 @@ function getListOfBlogEntries(blogURL, maxPages, verbose, articleType, beforeDat
 		}
 		log.info("listItems.length " + listItems.length + " response.httpStatus " + response.httpStatus);
 		if (verbose && postEmbed.length == 0 && listItems.length == 0 && response.httpStatus == 200) {
-			log.infoAlert(localize(ui.noBlogPostsOnSite, blogURL));
+			log.infoAlert(localize(ui.noBlogPostsOnSite, blogURL, articleType));
 			return;
 		}
 	}
