@@ -1006,6 +1006,8 @@ function getConfig() {
 	ui.panelBlogInfo = { en: "Web address of the blog", de: "Webadresse des Blogs" };
 	ui.buttonBlogInfoFetch = { en: "Fetch", de: "Abrufen" };
 	ui.staticTextArticleTypeDescription = { en: "Process", de: "Verarbeite" };
+	ui.staticTextArticleTypeDescription2 = { en: "Posts, Pages or Custom Post Types", de: "Beiträge, Seiten oder Custom Post Types" };
+	
 
 	ui.buttonBlogInfoFetchonClickURLWrong = { en: "URL must start with http:// or https://", de: "URL muss mit http:// oder https:// beginnen" };
 
@@ -1163,6 +1165,8 @@ function getConfig() {
 	groupArticleType.add('statictext {text: "' + localize(ui.staticTextArticleTypeDescription) + '"}');
 
 	var articleTypeDropdown = groupArticleType.add("dropdownlist", undefined, articleTypeArray);
+	groupArticleType.add('statictext {text: "' + localize(ui.staticTextArticleTypeDescription2) + '"}');
+
 	articleTypeDropdown.selection = 0;
 	articleTypeDropdown.preferredSize.width = 90;
 	articleTypeDropdown.preferredSize.height = 24;
