@@ -1108,7 +1108,7 @@ function getConfig() {
 			return;
 		}
 		log.info("buttonBlogInfoFetch.onClick: " + blogURL);
-		listItems = getListOfBlogEntries(blogURL, 100, true, articleType, px.beforeDate, px.afterDate);
+		listItems = getListOfBlogEntries(blogURL, 5, true, articleType, px.beforeDate, px.afterDate);
 
 		if (listItems.length > 0) {
 			saveBlogURL = true;
