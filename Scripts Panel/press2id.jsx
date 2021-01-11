@@ -1550,11 +1550,11 @@ function createXMLFile(singlePost, postObject, blogURL) {
 	if (singlePost.content != undefined && singlePost.content.rendered != undefined ) {
 		content += '<div id="content"><h1 class="title">' + postObject.blogTitle + '</h1>\r' + singlePost.content.rendered + '</div>'
 	}
-	if ( !(	
-			(singlePost.featured_media != 0 && singlePost.featured_media != undefined ) && 
-			(singlePost.content != undefined && singlePost.content.rendered != undefined)
-		  ) ) {
-		log.warn("No content in " + postObject.blogTitle );		
+	//Warnung wenn kein Content
+	if ( !(singlePost.featured_media != 0 && singlePost.featured_media != undefined ) && 
+		 !(singlePost.content != undefined && singlePost.content.rendered != undefined)
+	   ) {
+		log.warn("No content in [" + postObject.blogTitle + "]");		
 	}
 	content += '</body></html>';
 
