@@ -10,22 +10,14 @@
 
 var px = {
 	projectName: "press2id",
-	version: "2021-01-08-v2.0",
+	version: "2021-01-10-v2.0",
 
 	blogURL: "https://biasiada.de/",
-	// blogURL: "https://www.publishingx.de/press2id/",
-	// //	blogURL:"https://www.indesignblog.com", 
-	//~ 	blogURL:"https://www.publishingx.de", 
-	// blogURL:"https://www.publishingblog.ch", 
-	//~ 	blogURL:"https://wordpress.org/news", 
-	// blogURL:"http://www.indesignblog.de", 
-	//~ 	blogURL:"https://www.rolanddreger.net/de",
 
-	articleType: "posts", // biere|posts|pages
 	renderMode: "flow", // flow|template
 
-	afterDate:"2003-05-27",
-	beforeDate:"2030-01-01",
+	afterDate: "2003-05-27",
+	beforeDate: "2030-01-01",
 
 	// Verwaltung
 	showGUI: true,
@@ -154,7 +146,7 @@ function processDok(dok) {
 	ui.missingContentTextFrame = localize({ en: "There is no text frame named [content] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [content] enthalten." });
 	ui.missingFeaturedImageFrame = localize({ en: "There is no text frame named [featured-image] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [featured-image] enthalten." });
 	ui.missingDataFields = localize({ en: "No data field (<<data field name>> or named graphics frame) could be found in the current document!", de: "Im aktuellen Dokument konnt kein Datenfeld (<<Datenfeldname>> oder benannter Grafikrahmen) gefunden werden!" });
-	ui.undefinedACFBlock = localize({ en: "No acf Block in the Post Object found.", de: "Kein acf-Block im Post-Objekt gefunden." });
+	ui.undefinedACFBlock = localize({ en: "JSON Object has no acf property. You need the Plugins https://wordpress.org/plugins/advanced-custom-fields/ and https://de.wordpress.org/plugins/acf-to-rest-api/", de: "Die Eigenschaft acf konnte nicht im JSON Objekt gefunden werden. Du brauchst das Plugin https://wordpress.org/plugins/advanced-custom-fields/ und https://de.wordpress.org/plugins/acf-to-rest-api/" });
 
 	if (px.showGUI) {
 		var selectedPostsArray = getConfig();
@@ -178,6 +170,7 @@ function processDok(dok) {
 		var downloadImages = selectedPost.downloadImages;
 		var localImageFolder = selectedPost.localImageFolder;
 		var blogURL = selectedPost.blogURL;
+		var articleType = selectedPost.articleType
 
 		blogURL = fixBlogUrlWordpressCom(blogURL);
 
@@ -189,7 +182,7 @@ function processDok(dok) {
 
 			if (px.renderMode == "flow") {
 
-				var singlePost = getSingleEntity(blogURL, postObject);
+				var singlePost = getSingleEntity(blogURL, articleType, postObject);
 				if (singlePost == null) {
 					continue;
 				}
@@ -430,7 +423,7 @@ function processDok(dok) {
 				tempICMLFile.remove();
 			}
 			else if (px.renderMode == "template") {
-				var singleACFBlock = getSingleEntity(blogURL, postObject);
+				var singleACFBlock = getSingleEntity(blogURL, articleType, postObject);
 				if (singleACFBlock == null) {
 					continue;
 				}
@@ -444,6 +437,7 @@ function processDok(dok) {
 				pBar.hit(1);
 
 				dok.pages[0].duplicate(LocationOptions.AT_END);
+				px.addedPage = true;
 				var lastPage = dok.pages[-1];
 				var jsonDatenfelder = getDatenfelder(lastPage);
 				if (jsonDatenfelder.length == 0) {
@@ -529,7 +523,7 @@ function processDok(dok) {
 	}
 
 	// Clean up 	
-	if (px.renderMode == "template") {
+	if (px.renderMode == "template" && px.addedPage) {
 		dok.pages[0].remove();
 	}
 	else if (px.renderMode == "flow") {
@@ -641,6 +635,7 @@ function processDok(dok) {
  */
 function getDatenfelder(jsonDatenfeldPage) {
 	var jsonDatenfelder = [];
+	log.info("Search Datafiles on page " + jsonDatenfeldPage.name);
 	for (var i = 0; i < jsonDatenfeldPage.pageItems.length; i++) {
 		var pi = jsonDatenfeldPage.pageItems[i].getElements()[0];
 		if (pi.constructor.name == "TextFrame") {
@@ -1037,13 +1032,14 @@ function getConfig() {
 	var urlList = JSON.parse(savedBlogAdressArray);
 
 	if (urlList.length == 0) {
-		urlList.push(px.blogURL); 
-	} 
+		urlList.push(px.blogURL);
+	}
 
-	 var blogURL = urlList[0];
-
+	var blogURL = urlList[0];
+	var articleTypeArray = getArticleTypes(blogURL);
+	var articleType = articleTypeArray[0];
 	var listItems = [];
-	listItems = getListOfBlogEntries(blogURL, 1, false, px.beforeDate, px.afterDate);
+	listItems = getListOfBlogEntries(blogURL, 1, false, articleType, px.beforeDate, px.afterDate);
 
 	var win = new Window('dialog {text: "' + localize(ui.winTitle) + '  –  ' + px.projectName + ' ' + px.version + '", alignChildren: "fill"}');
 
@@ -1058,7 +1054,7 @@ function getConfig() {
 	urlListDropdown.preferredSize.width = 320;
 	urlListDropdown.preferredSize.height = 24;
 	var edittextBlogInfoURL = groupBlogInfo.add('edittext {text: "' + blogURL + '"}');
-	edittextBlogInfoURL.preferredSize.width = 302; 
+	edittextBlogInfoURL.preferredSize.width = 302;
 	edittextBlogInfoURL.preferredSize.height = 24;
 	urlListDropdown.onChange = function () {
 		var selectionText = urlListDropdown.selection.text;
@@ -1078,22 +1074,46 @@ function getConfig() {
 	buttonBlogInfoFetch.onClick = function () {
 		blogURL = edittextBlogInfoURL.text;
 		if (blogURL == "") return;
+		
+		articleTypeArray = getArticleTypes(edittextBlogInfoURL.text);
+		var setNewEndpoint = true;
+		articleTypeDropdown.removeAll();
+		for (var f = 0; f < articleTypeArray.length; f++) {
+			articleTypeDropdown.add("item", articleTypeArray[f]);
+			if (articleType == articleTypeArray[f]) {
+				articleTypeDropdown.selection = f;
+				setNewEndpoint = false;
+			}
+		}
+		if (setNewEndpoint) {
+			articleTypeDropdown.selection = 0;
+		}		
+
+
 		edittextSelectPost.text = "";
 		if (!blogURL.match(/^https?:\/\//)) {
 			log.infoAlert(localize(ui.buttonBlogInfoFetchonClickURLWrong));
 			return;
 		}
 		log.info("buttonBlogInfoFetch.onClick: " + blogURL);
+		listItems = getListOfBlogEntries(blogURL, 100, true, articleType, px.beforeDate, px.afterDate);
 
-		listItems = getListOfBlogEntries(blogURL, 100, true, px.beforeDate, px.afterDate);
-		
 		if (listItems.length > 0) {
 			saveBlogURL = true;
 			urlList.unshift(blogURL);
 			urlList = unique(urlList);
 			urlList = urlList.slice(0, 6);
+			var found = false;
+			for (var g = 0; g < urlListDropdown.items.length; g++) {
+				if (urlListDropdown.items[g].text == blogURL) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				urlListDropdown.add('item', blogURL);
+			}
 		}
-
 
 		fillListboxSelectPost();
 	}
@@ -1131,14 +1151,17 @@ function getConfig() {
 
 	var groupArticleType = panelBlogInfo.add('group');
 	groupArticleType.add('statictext {text: "' + localize(ui.staticTextArticleTypeDescription) + '"}');
-	var edittextArticleType = groupArticleType.add('edittext {text: "' + px.articleType + '", justify:"center", preferredSize:[90, -1]}');
-	groupArticleType.add('statictext {text: "' + 'posts|pages|...' + '"}');
-	edittextArticleType.onChange = function () {
-		if (px.articleType == edittextArticleType.text) {
-			return;
-		}
-		else {
-			px.articleType = edittextArticleType.text;
+
+	var articleTypeDropdown = groupArticleType.add("dropdownlist", undefined, articleTypeArray);
+	articleTypeDropdown.selection = 0;
+	articleTypeDropdown.preferredSize.width = 90;
+	articleTypeDropdown.preferredSize.height = 24;
+
+	articleTypeDropdown.onChange = function () {
+		if (articleType != articleTypeDropdown.selection.text) {
+			log.info("Change endpoint to " + articleTypeDropdown.selection.text);
+			articleType = articleTypeDropdown.selection.text;
+			buttonBlogInfoFetch.onClick();
 		}
 	}
 
@@ -1277,7 +1300,8 @@ function getConfig() {
 							postObject: listItems[p],
 							downloadImages: radioImageManagementDownload.value,
 							localImageFolder: edittextImageManagementFolder.imageFolder,
-							blogURL: blogURL
+							blogURL: blogURL,
+							articleType: articleType
 						});
 					}
 				}
@@ -1310,10 +1334,11 @@ function getConfig() {
  * @param {String} blogURL 
  * @param {Number} maxPages Results are paginated by 100 entries, if page > 1 this functions reads until maxPages is reached, or no more entries are found
  * @param {Boolean} verbose 
+ * @param {String} articleType posts, pages, ...
  * @param {String} beforeDate 
  * @param {String} afterDate 
  */
-function getListOfBlogEntries(blogURL, maxPages, verbose, beforeDate, afterDate) {
+function getListOfBlogEntries(blogURL, maxPages, verbose, articleType, beforeDate, afterDate) {
 	var listItems = [];
 	var ui = {};
 	ui.noBlogPostsOnSite = { en: "No Blog entries on [%1]", de: "Keine Beiträge/Posts auf [%1]" };
@@ -1321,8 +1346,8 @@ function getListOfBlogEntries(blogURL, maxPages, verbose, beforeDate, afterDate)
 
 	for (var page = 1; page <= maxPages; page++) {
 		// https://developer.wordpress.org/rest-api/reference/posts/#list-posts
-		var action = px.articleType + "/?per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&context=embed";
-		log.info("getListOfBlogEntries: " + fixedURL + action + " mode verbose " + verbose);
+		var action = articleType + "/?per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&context=embed";
+		log.info("fn ListOfBlogEntries: " + fixedURL + action + " mode verbose " + verbose);
 
 		var request = {
 			url: fixedURL,
@@ -1380,11 +1405,74 @@ function getListOfBlogEntries(blogURL, maxPages, verbose, beforeDate, afterDate)
 	return listItems;
 }
 
-function getSingleEntity(blogURL, postObject) {
+function getArticleTypes(blogURL) {
+	var articleTypeArray = ["posts", "pages"];
+
+	var ui = {};
+	ui.noRESTapiFound = { en: "No REST API found", de: "Keine REST Schnittstelle gefunden" };
+	var fixedURL = fixBlogUrlWordpressCom(blogURL);
+
+	var request = {
+		url: fixedURL,
+		command: "",
+	}
+	var response = restix.fetch(request);
+	try {
+		if (response.error) {
+			throw Error(response.errorMsg);
+		}
+		var postEmbed = JSON.parse(response.body);
+		var routes = postEmbed.routes;
+		var endpointCache = {
+			"posts":true,
+			"pages":true,
+			"media":true,
+			"blocks":true,
+			"types":true,
+			"statuses":true,
+			"taxonomies":true,
+			"tags":true,
+			"categories":true,
+			"users":true,
+			"comments":true,
+			"block-renderer":true,
+			"block-directory":true,
+			"block-types":true,
+			"themes":true,
+			"settings":true,
+			"plugins":true,
+			"search":true,
+		}
+		
+		for (var endpoint in routes) {
+			var endpointName = endpoint.replace(/^\/wp\/v2\/?/, "").replace(/([^\/]+).*/, "$1");
+			if (endpointName != "" && endpointCache[endpointName] == undefined) {
+				endpointCache[endpointName] = true;
+				articleTypeArray.push(endpointName);
+			}
+		}
+	}
+	catch (e) {
+		var msg = "Could not connect to\n" + blogURL + "\n\n" + e;
+		if (verbose) {
+			log.infoAlert(msg);
+		}
+		else {
+			log.info(msg);
+		}
+		log.info(e);
+		return articleTypeArray;
+	}
+
+	log.info("endpointArray: " + articleTypeArray);
+	return articleTypeArray;
+}
+
+function getSingleEntity(blogURL, articleType, postObject) {
 
 	var request = {
 		url: blogURL,
-		command: px.articleType + "/" + postObject.id,
+		command: articleType + "/" + postObject.id,
 	}
 	var response = restix.fetch(request);
 	try {
@@ -1449,7 +1537,15 @@ function createXMLFile(singlePost, postObject, blogURL) {
 		}
 
 	}
-	content += '<div id="content"><h1 class="title">' + postObject.blogTitle + '</h1>\r' + singlePost.content.rendered + '</div>'
+	if (singlePost.content != undefined && singlePost.content.rendered != undefined ) {
+		content += '<div id="content"><h1 class="title">' + postObject.blogTitle + '</h1>\r' + singlePost.content.rendered + '</div>'
+	}
+	if ( !(	
+			(singlePost.featured_media != 0 && singlePost.featured_media != undefined ) && 
+			(singlePost.content != undefined && singlePost.content.rendered != undefined)
+		  ) ) {
+		log.warn("No content in " + postObject.blogTitle );		
+	}
 	content += '</body></html>';
 
 
