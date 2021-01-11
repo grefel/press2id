@@ -542,7 +542,7 @@ function processDok(dok) {
 		}
 		else {
 			try {
-				if (r == selectedPostsArray.length - 1 && px.renderMode == "flow") {
+				if (r == selectedPostsArray.length && px.renderMode == "flow") {
 					templateDok.close(SaveOptions.NO);
 				}
 			}
