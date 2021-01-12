@@ -231,6 +231,15 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			else {
 				curlString += ' -w \'\n------http_code%{http_code}\'';
 			}
+			
+			// Fix UTF-8 URLs
+			var fileURL = request.fullURL.toString();
+			var urlParts = fileURL.split("/");
+			for (var p = 1; p < urlParts.length; p++) {
+				urlParts[p] = encodeURIComponent(urlParts[p]);
+			}
+			request.fullURL = urlParts.join("/");
+
 			curlString += ' \'' + request.fullURL + '\'';
 			//~ 			$.writeln(curlString);
 			try {

@@ -298,7 +298,7 @@ function processDok(dok) {
 							}
 
 							var request = {
-								url: url + "/" + fileNameEncoded
+								url: fileURL.toString()
 							}
 
 							var response = restix.fetchFile(request, imageFile);
