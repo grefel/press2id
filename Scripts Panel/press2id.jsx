@@ -293,7 +293,9 @@ function processDok(dok) {
 							fileURL = fileURL.toString();
 							var url = fileURL.replace(/(.+)\/(.+)/, "$1");
 							var fileNameEncoded = fileURL.replace(/(.+)\/(.+)/, "$2");
-							fileNameEncoded = encodeURIComponent(fileNameEncoded);
+							if ($.os.indexOf("Windows") == -1) {
+								fileNameEncoded = encodeURIComponent(fileNameEncoded);
+							}
 
 							var request = {
 								url: url + "/" + fileNameEncoded
