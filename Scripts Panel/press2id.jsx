@@ -288,15 +288,7 @@ function processDok(dok) {
 						if (downloadImages) {
 							log.info("Download image from URL " + fileURL);
 							var imageFile = File(linkPath + "/" + fileName);
-
-							// Fix URL File Names on mac
-							fileURL = fileURL.toString();
-							var url = fileURL.replace(/(.+)\/(.+)/, "$1");
-							var fileNameEncoded = fileURL.replace(/(.+)\/(.+)/, "$2");
-							if ($.os.indexOf("Windows") == -1) {
-								fileNameEncoded = encodeURIComponent(fileNameEncoded);
-							}
-
+							
 							var request = {
 								url: fileURL.toString()
 							}
