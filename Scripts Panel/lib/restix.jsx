@@ -60,7 +60,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 
 		if (request.method == undefined || request.method == "") request.method = "GET";
-		if (!(request.method == "GET" || request.method == "POST" || request.method == "PUT" || request.method == "PATCH" || request.method == "DELETE")) throw Error("Method " + request.method + " is not supported");  // Missing HEAD 
+		if (!(request.method == "GET" || request.method == "POST" || request.method == "PUT" || request.method == "PATCH" || request.method == "DELETE" || request.method == "HEAD")) throw Error("Method " + request.method + " is not supported");  // Missing HEAD 
 
 		if (request.method == "POST" && (request.binaryFilePath == undefined || request.binaryFilePath == "")) request.binaryFilePath = false;
 
@@ -140,7 +140,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			else {
 				scriptCommands.push('xHttp.Send');
 			}
-			
+
 			scriptCommands.push('If err.Number = 0 Then');
 
 			if (outFile) {
@@ -177,11 +177,10 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 					BinaryStream.SaveToFile FileName, adSaveCreateOverWrite
 				End Function
 					*/
-				scriptCommands.push('	res = "outFile" & vbCr & "------http_code" &  xHttp.status');
+				scriptCommands.push('	res = "outFile" &  vbCr & "-----http-----" & xHttp.getAllResponseHeaders &  vbCr & "-----http-----" &  xHttp.status');
 			}
 			else {
-				// ' give respones
-				scriptCommands.push('	res = xHttp.responseText  &  vbCr & "------http_code" &  xHttp.status');
+				scriptCommands.push('	res = xHttp.responseText  &  vbCr & "-----http-----" & xHttp.getAllResponseHeaders &  vbCr & "-----http-----" &  xHttp.status');
 			}
 
 			scriptCommands.push('Else');
@@ -225,17 +224,17 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			}
 
 			if (outFile) {
-				curlString += ' -w \'outFile\n------http_code%{http_code}\'';
+				curlString += ' -w \'outFile\n-----http-----%{http_code}\'';
 				curlString += ' -o \'' + outFile.fsName + '\''
 			}
 			else {
-				curlString += ' -w \'\n------http_code%{http_code}\'';
+				curlString += ' -w \'\n-----http-----%{http_code}\'';
 			}
 			// not encoded, we need to encode;
 			if (decodeURI(request.fullURL) == request.fullURL) {
 				request.fullURL = encodeURI(request.fullURL);
 			}
-			curlString += ' \'' + request.fullURL  + '\'';
+			curlString += ' \'' + request.fullURL + '\'';
 			log.info(curlString);
 			try {
 				result = app.doScript('do shell script "' + curlString + '"', ScriptLanguage.APPLESCRIPT_LANGUAGE);
@@ -254,10 +253,18 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			response.errorMsg = result;
 		}
 		else {
-			var resArray = result.split("\r------http_code");
-			if (resArray.length == 2) {
-				response.httpStatus = resArray[1] * 1;
+			var resArray = result.split("\r-----http-----");
+			if (resArray.length == 3) {
 				response.body = resArray[0];
+				response.head = {};
+				response.httpStatus = resArray[2] * 1;
+				var headSplit = resArray[1].split("\n");
+				for (var h = 0; h < headSplit.length; h++) {
+					var headProperty = headSplit[h];
+					if (headProperty.replace(/\s/g, '') == "") continue;
+					var colonIndex = headProperty.indexOf(":");
+					response.head[headProperty.substring(0, colonIndex)] = headProperty.substring(colonIndex+1).replace(/^ +/, "");
+				}
 			}
 			else {
 				throw Error("Wrong result value: [" + result + "]");
@@ -269,8 +276,8 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 
 	/****************
-    * API 
-    */
+	* API 
+	*/
 	/** Process an HTTP Request 
 	* @param {request} Request object with connection Information
 	* @return {response} Response object {error:error, errorMsg:errorMsg, body:body, httpStatus:httpStatus}
