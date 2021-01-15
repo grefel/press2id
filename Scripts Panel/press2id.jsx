@@ -1485,9 +1485,15 @@ function discoverRestUrl(blogURL) {
 		command: "",
 		method: "HEAD"
 	}
+
 	var response = restix.fetch(request);
 	var restRegex = /<(.+?)>; rel="https:\/\/api.w.org\/"/;
-	var restRegexResult = response.head["Link"].match(restRegex);
+	if (response.head["link"] != undefined) {
+		var restRegexResult = response.head["link"].match(restRegex);
+	}
+	else {
+		throw Error(localize(ui.noRESTapiFound, blogURL));
+	}
 	if (restRegexResult != null) {
 		var restUrl = restRegexResult[1];
 	}
