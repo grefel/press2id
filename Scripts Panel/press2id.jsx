@@ -1074,20 +1074,34 @@ function getConfig() {
 			return;
 		}
 		edittextBlogInfoURL.text = selectionText;
-		buttonBlogInfoFetch.onClick();
+		edittextBlogInfoURL.onChange();
 	}
 	edittextBlogInfoURL.onChange = function () {
+		if (edittextBlogInfoURL.text == "") {
+			return;
+		}
 		if (blogURL == edittextBlogInfoURL.text) {
 			return;
 		}
-		buttonBlogInfoFetch.onClick();
+		try {
+			px.restURL = discoverRestUrl(edittextBlogInfoURL.text);
+			buttonBlogInfoFetch.onClick();
+			buttonStartOk.enabled = canRun();
+		}
+		catch(e) {
+			alert(e.toString());
+			px.restURL = null;
+			buttonStartOk.enabled = canRun();
+
+			return;
+		}
 	}
 	var buttonBlogInfoFetch = groupBlogInfoFirst.add('button {text:"' + localize(ui.buttonBlogInfoFetch) + '", preferredSize:[80,-1]}');
 	buttonBlogInfoFetch.onClick = function () {
 		blogURL = edittextBlogInfoURL.text;
 		if (blogURL == "") return;
-
 		articleTypeArray = getArticleTypes(edittextBlogInfoURL.text);
+
 		var setNewEndpoint = true;
 		articleTypeDropdown.removeAll();
 		for (var f = 0; f < articleTypeArray.length; f++) {
@@ -1290,6 +1304,7 @@ function getConfig() {
 
 	// Check if we have all necessary  information
 	function canRun() {
+		if(px.restURL == null) return false;
 		groupImageManagementFolderSelect.enabled = radioImageManagementLocalFolder.value;
 		if (listboxSelectPost.selection == null) return false;
 		if (radioImageManagementLocalFolder.value && edittextImageManagementFolder.imageFolder == undefined) return false;
@@ -1478,16 +1493,21 @@ function getArticleTypes(blogURL) {
 
 function discoverRestUrl(blogURL) {
 	var ui = {};
-	ui.noRESTapiFound = { en: "No REST API found for [%1]", de: "Keine REST Schnittstelle unter [%1] gefunden" };
+	ui.pageNotFound = { en: "URL [%1] not found [%2]", de: "URL [%1] nicht gefunden [%2]" };
+	ui.noRESTapiFound = { en: "No REST API found\n[%1]", de: "Keine REST Schnittstelle unter\n[%1]" };
 
 	var request = {
-		url: blogURL + "/discoverREST",
+		url: blogURL + "/discoverrest",
 		command: "",
 		method: "HEAD"
 	}
 
 	var response = restix.fetch(request);
 	var restRegex = /<(.+?)>; rel="https:\/\/api.w.org\/"/;
+	if (response.error == true) {
+		throw Error(localize(ui.pageNotFound, blogURL, response.errorMsg));
+	}
+
 	if (response.head["link"] != undefined) {
 		var restRegexResult = response.head["link"].match(restRegex);
 	}
