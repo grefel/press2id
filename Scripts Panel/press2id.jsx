@@ -1242,9 +1242,9 @@ function getConfig() {
 	var panelProcessMode = win.add("panel {text:'" + localize(ui.panelProcessMode) + "', margins:[" + panelMargins + "], alignChildren:['left', 'top']}");
 	var groupProcessModeRadioSelect = panelProcessMode.add("group {spacing:5, alignChildren:['left', 'top'], orientation:'column'}");
 	var radioProcessFlow = groupProcessModeRadioSelect.add("radiobutton {text:'" + localize(ui.radioProcessFlow) + "', value:true}");
-	// radioProcessFlow.value = true;
+	radioProcessFlow.value = true;
 	var radioProcessTemplate = groupProcessModeRadioSelect.add("radiobutton {text:'" + localize(ui.radioProcessTemplate) + "'}");
-	radioProcessTemplate.value = true;
+	// radioProcessTemplate.value = true;
 
 	// Group for Ok/Cancel
 	var groupStart = win.add("group {preferredSize:[400,undefined], alignChildren:['right', 'center'], margins: [0,0,0,0]}");
