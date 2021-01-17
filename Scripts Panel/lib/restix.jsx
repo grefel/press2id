@@ -339,7 +339,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 // // Example Request
 //  var request = {
-//  	url:"https://www.publishingx.de/dfdf",
+//  	url:"https://einmanncombo.de/wp-json/",
 //  	method:"HEAD", // defaults to GET
 // }
 

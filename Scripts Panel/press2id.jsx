@@ -1376,7 +1376,7 @@ function getListOfBlogEntries(blogURL, maxPages, verbose, articleType, beforeDat
 
 	for (var page = 1; page <= maxPages; page++) {
 		// https://developer.wordpress.org/rest-api/reference/posts/#list-posts
-		var action = articleType + "/?per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&context=embed";
+		var action = articleType + "/?_fields[]=title&_fields[]=id&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&context=embed";
 		log.info("fn ListOfBlogEntries: " + fixedURL + action + " mode verbose " + verbose);
 
 		var request = {
@@ -1820,7 +1820,7 @@ function unique(arr) {
 		}
 	}
 	return result;
-} /* END function unique */
+} 
 
 /** Pad a numer witth leading zeros */
 function pad(number, length, fill) {

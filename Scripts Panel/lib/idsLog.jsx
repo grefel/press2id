@@ -201,7 +201,8 @@ $.global.hasOwnProperty('idsLog') || (function (HOST, SELF) {
 					dialogWin.close();
 				}
 			}
-			dialogWin.gControl.add("button", undefined, "Ok", { name: "ok", active: true });
+			var button = dialogWin.gControl.add("button", undefined, "Ok", { name: "ok" });
+			button.active = true;
 			dialogWin.show();
 		}
 	};
@@ -239,7 +240,8 @@ $.global.hasOwnProperty('idsLog') || (function (HOST, SELF) {
 				}
 			}
 			dialogWin.gControl.add("button", undefined, localize({ en: "Cancel", de: "Abbrechen" }), { name: "cancel" });
-			dialogWin.gControl.add("button", undefined, "Ok", { name: "ok", active:true });
+			var button = dialogWin.gControl.add("button", undefined, "Ok", { name: "ok" });
+			button.active = true;
 			return dialogWin.show();
 		}
 	};
