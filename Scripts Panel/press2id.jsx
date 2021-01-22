@@ -1035,7 +1035,7 @@ function getListOfBlogEntries(blogURL, maxPages, verbose, beforeDate, afterDate)
 
 	for (var page = 1; page <= maxPages; page++) {
 		// https://developer.wordpress.org/rest-api/reference/posts/#list-posts
-		var action = "posts/?per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&context=embed";
+		var action = "posts/?_fields[]=title&_fields[]=id&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&context=embed";
 		log.info("getListOfBlogEntries: " + fixedURL + action + " mode verbose " + verbose);
 
 		var request = {
