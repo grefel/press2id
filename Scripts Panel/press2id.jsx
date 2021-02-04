@@ -258,17 +258,17 @@ function processDok(dok) {
                         var oStyleName = imgXML.xmlAttributes.itemByName("ostyle").value;
                         var oStyle = styleTemplateDok.objectStyles.itemByName(oStyleName);
                         if (!oStyle.isValid) {
-                            log.warn("Create Objectstyle [" + oStyleName + "]")
+                            log.info("Create Objectstyle [" + oStyleName + "]")
                             oStyle = styleTemplateDok.objectStyles.add({ name: oStyleName });
                         }
                     }
-                    else if (imgXML.markupTag.name != "featuredImage") {
+                    else {
                         // Use markup tag for object style			
                         log.info("Element " + imgXML.markupTag.name + " has now Attribute ostyle, we use the tag name!");
                         var oStyleName = imgXML.markupTag.name;
                         var oStyle = styleTemplateDok.objectStyles.itemByName(oStyleName);
                         if (!oStyle.isValid) {
-                            log.warn("Create Objectstyle [" + oStyleName + "]")
+                            log.info("Create Objectstyle [" + oStyleName + "]")
                             oStyle = styleTemplateDok.objectStyles.add({ name: oStyleName });
                         }
                     }
