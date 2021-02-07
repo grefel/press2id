@@ -698,9 +698,7 @@ function getConfig(newConfigObject) {
     ui.staticTextBeforeDate = { en: "before", de: "vor dem" };
     ui.staticTextEndpointDescription = { en: "Process", de: "Verarbeite" };
     ui.staticTextEndpointDescriptionInfo = { en: "Posts, Pages or Custom Post Types", de: "Beiträge, Seiten oder Custom Post Types" };
-
     ui.staticTextCategoryFile = { en: "Filter by category", de: "Kategorie auswählen" };
-
     ui.panelSelectPost = { en: "Choose one or more entries", de: "Wähle einen oder mehrere Beiträge" };
     ui.panelSelectPostFilter = localize({ en: "[Search in title]", de: "[Im Titel suchen]" });
     ui.imagePanelHead = { en: "Image processing", de: "Bilder verarbeiten" };
@@ -713,7 +711,7 @@ function getConfig(newConfigObject) {
     ui.buttonImageManagementFolderSelectOnClick = { en: "Select the folder", de: "Wählen Sie den Ordner aus" };
 
 
-    var listBounds = [0, 0, 520, 260];
+    var listBounds = [0, 0, 520, 256];
     var listItems = [];
     var etPostFilter;
     var endPointDropdown;
@@ -1190,7 +1188,7 @@ function getConfig(newConfigObject) {
         var panel1 = filterEntries.add("panel", undefined, undefined, { name: "panel1" });
         panel1.text = "Auswahl verfeinern";
         panel1.preferredSize.width = 540;
-        panel1.preferredSize.height = 166;
+        panel1.preferredSize.height = 170;
         panel1.orientation = "column";
         panel1.alignChildren = ["left", "top"];
         panel1.spacing = 10;
@@ -1252,7 +1250,6 @@ function getConfig(newConfigObject) {
             fillListboxSelectPost(listItems);
         }
 
-
         var groupCategory = group1.add('group');
         groupCategory.add('statictext {text: "' + localize(ui.staticTextCategoryFile) + '"}');
         categoryDropDown = groupCategory.add("dropdownlist", undefined, []);
@@ -1281,7 +1278,7 @@ function getConfig(newConfigObject) {
 
         var panel2 = filterEntries.add("panel", undefined, localize(ui.panelSelectPost), { name: "panel2" });
         panel2.preferredSize.width = 540;
-        panel2.preferredSize.height = 300;
+        panel2.preferredSize.height = 290;
         panel2.orientation = "column";
         panel2.alignChildren = ["left", "top"];
         panel2.spacing = 10;
