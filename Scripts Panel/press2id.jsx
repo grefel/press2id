@@ -717,6 +717,7 @@ function getConfig(newConfigObject) {
     var endPointDropdown;
     var categoryDropDown;
     var listboxSelectPost;
+    var stNumberOfEntries
     var groupSelectPost;
     var buttonNextMode;
     var loadMaxPages = 1;
@@ -1264,8 +1265,7 @@ function getConfig(newConfigObject) {
 
         var groupRefilter = group1.add('group');
         groupRefilter.orientation = "row";
-        var st = groupRefilter.add("statictext");
-        st.text = "Es wurden nur die 100 neuesten Einträge geladen";
+        stNumberOfEntries = groupRefilter.add("statictext");
         var buttonFilter = groupRefilter.add("button", undefined, undefined, { name: "" });
         buttonFilter.text = "Alle Einträge laden";
 
@@ -1273,7 +1273,6 @@ function getConfig(newConfigObject) {
             loadMaxPages = 50;
             listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
             fillListboxSelectPost(listItems);
-            st.text = "Es wurden " + listItems.length + " Einträge geladen";
         }
 
         var panel2 = filterEntries.add("panel", undefined, localize(ui.panelSelectPost), { name: "panel2" });
@@ -1556,6 +1555,13 @@ function getConfig(newConfigObject) {
             listboxSelectPost.selection = 0;
         }
         buttonStartOkFilterPanel.enabled = true;
+        if (loadMaxPages > 1) {
+            stNumberOfEntries.text = "Es wurden " + localListItems.length + " Einträge geladen";
+        }
+        else {
+            stNumberOfEntries.text = "Es wurden nur die 100 neuesten Einträge geladen";
+        }
+
     }
 
 
