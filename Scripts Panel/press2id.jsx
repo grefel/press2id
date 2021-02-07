@@ -17,7 +17,7 @@ var px = {
 }
 
 var configObject = {
-    version: 1.4,
+    version: "2",
     urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/"],
     siteURL: undefined,
     restURL: undefined,
@@ -26,6 +26,7 @@ var configObject = {
     modeDatabase: false,
     filterAfterDate: "2003-05-27",
     filterBeforeDate: "2030-01-01",
+    categoryID:undefined,
     loadImagesToPlaceGun: true, // if false, all images are anchored into the text flow    
     styleTemplateFile: undefined,
     downloadImages: true,
@@ -697,6 +698,9 @@ function getConfig(newConfigObject) {
     ui.staticTextBeforeDate = { en: "before", de: "vor dem" };
     ui.staticTextEndpointDescription = { en: "Process", de: "Verarbeite" };
     ui.staticTextEndpointDescriptionInfo = { en: "Posts, Pages or Custom Post Types", de: "Beiträge, Seiten oder Custom Post Types" };
+
+    ui.staticTextCategoryFile = { en: "Filter by category", de: "Kategorie auswählen" };
+
     ui.panelSelectPost = { en: "Choose one or more entries", de: "Wähle einen oder mehrere Beiträge" };
     ui.panelSelectPostFilter = localize({ en: "[Search in title]", de: "[Im Titel suchen]" });
     ui.imagePanelHead = { en: "Image processing", de: "Bilder verarbeiten" };
@@ -712,6 +716,8 @@ function getConfig(newConfigObject) {
     var listBounds = [0, 0, 520, 260];
     var listItems = [];
     var etPostFilter;
+    var endPointDropdown;
+    var categoryDropDown;
     var listboxSelectPost;
     var groupSelectPost;
     var buttonNextMode;
@@ -1140,20 +1146,36 @@ function getConfig(newConfigObject) {
             filterEntries.visible = true;
             newConfigObject.endPointArray = getEndpoints(newConfigObject.restURL);
             endPointDropdown.removeAll();
-            var setNewEndpoint = true;
+            var setNewCategory = true;
             for (var f = 0; f < newConfigObject.endPointArray.length; f++) {
                 endPointDropdown.add("item", newConfigObject.endPointArray[f]);
                 if (newConfigObject.endPoint == newConfigObject.endPointArray[f]) {
                     endPointDropdown.selection = f;
-                    setNewEndpoint = false;
+                    setNewCategory = false;
                 }
             }
-            if (setNewEndpoint) {
+            if (setNewCategory) {
                 endPointDropdown.selection = 0;
                 newConfigObject.endPoint = endPointDropdown.selection.text;
             }
+            newConfigObject.categoryArray = getCategories(newConfigObject.restURL);
+            categoryDropDown.removeAll();
+            var setNewCategory = true;
+            for (var f = 0; f < newConfigObject.categoryArray.length; f++) {
+                var li = categoryDropDown.add("item", newConfigObject.categoryArray[f].name);
+                li.categoryID = newConfigObject.categoryArray[f].id
+                if (newConfigObject.categoryID == newConfigObject.categoryArray[f].id) {
+                    categoryDropDown.selection = f;
+                    setNewCategory = false;
+                }
+            }
+            if (setNewCategory) {
+                categoryDropDown.selection = 0;
+                newConfigObject.categoryID = categoryDropDown.selection.categoryID;
+            }
+
             // Fill 
-            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate);
+            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
             fillListboxSelectPost(listItems);
         }
     }
@@ -1192,7 +1214,7 @@ function getConfig(newConfigObject) {
             }
             if (isValidDate(edittextAfterDate.text)) {
                 newConfigObject.filterAfterDate = edittextAfterDate.text;
-                listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate);
+                listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
                 fillListboxSelectPost(listItems);
             }
             else {
@@ -1208,7 +1230,7 @@ function getConfig(newConfigObject) {
             }
             if (isValidDate(edittextBeforeDate.text)) {
                 newConfigObject.filterBeforeDate = edittextBeforeDate.text;
-                listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate);
+                listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
                 fillListboxSelectPost(listItems);
             }
             else {
@@ -1226,9 +1248,23 @@ function getConfig(newConfigObject) {
 
         endPointDropdown.onChange = function () {
             newConfigObject.endPoint = endPointDropdown.selection.text;
-            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate);
+            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
             fillListboxSelectPost(listItems);
         }
+
+
+        var groupCategory = group1.add('group');
+        groupCategory.add('statictext {text: "' + localize(ui.staticTextCategoryFile) + '"}');
+        categoryDropDown = groupCategory.add("dropdownlist", undefined, []);
+        categoryDropDown.preferredSize.width = 200;
+        categoryDropDown.preferredSize.height = 24;
+
+        categoryDropDown.onChange = function () {
+            newConfigObject.categoryID = categoryDropDown.selection.categoryID;
+            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
+            fillListboxSelectPost(listItems);
+        }
+
         var groupRefilter = group1.add('group');
         groupRefilter.orientation = "row";
         var st = groupRefilter.add("statictext");
@@ -1238,7 +1274,7 @@ function getConfig(newConfigObject) {
 
         buttonFilter.onClick = function () {
             loadMaxPages = 50;
-            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate);
+            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
             fillListboxSelectPost(listItems);
             st.text = "Es wurden " + listItems.length + " Einträge geladen";
         }
@@ -1600,9 +1636,35 @@ function getConfig(newConfigObject) {
             log.info(e);
             return endPointArray;
         }
-
-        log.info("endpointArray: " + endPointArray);
         return endPointArray;
+    }
+
+    function getCategories(restURL) {
+        var alleObject = {name:localize({en:"-- ALL --", de: "-- ALLE --"}), id:"-1"};
+
+        // We put the user Agent here because of useless security options of some webservers restriction the REST API to browesers only
+        var request = {
+            url: restURL + "categories/",
+            command: "?_fields[]=id&_fields[]=name&per_page=100",
+            headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
+        }
+
+        var response = restix.fetch(request);
+        try {
+            if (response.error) {
+                throw Error(response.errorMsg);
+            }
+            var categories = JSON.parse(response.body);
+            categories.unshift(alleObject); 
+        }
+        catch (e) {
+            var msg = "Could not connect to\n" + restURL + "\n\n" + e;
+            log.info(msg);
+            log.info(e);
+            return [alleObject];
+        }
+
+        return categories;
     }
 
     // Adapted for ExtendScript from https://stackoverflow.com/questions/18758772/how-do-i-validate-a-date-in-this-format-yyyy-mm-dd-using-jquery
@@ -1627,14 +1689,18 @@ function getConfig(newConfigObject) {
      * @param {String} endPoint posts, pages, ...
      * @param {String} beforeDate 
      * @param {String} afterDate 
+     * @param {String} categoryID
      */
-    function getListOfBlogEntries(restURL, maxPages, verbose, endPoint, beforeDate, afterDate) {
+    function getListOfBlogEntries(restURL, maxPages, verbose, endPoint, beforeDate, afterDate, categoryID) {
         var localListItems = [];
         var ui = {};
         ui.noBlogPostsOnSite = { en: "No content entries on [%1] for endpoint [%2]", de: "Keine Inhalte auf [%1] für endpoint [%2]" };
 
         for (var page = 1; page <= maxPages; page++) {
             var action = "?_fields[]=title&_fields[]=id&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00";
+            if (categoryID && categoryID*1 > -1) {
+                action += "&categories=" + categoryID;
+            }
             log.info("fn ListOfBlogEntries: " + restURL + endPoint + "/" + action + " mode verbose " + verbose);
 
             // We put the user Agent here because of useless security options of some webservers restriction the REST API to browesers only
