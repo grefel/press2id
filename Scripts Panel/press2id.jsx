@@ -1266,6 +1266,7 @@ function getConfig(newConfigObject) {
         var groupRefilter = group1.add('group');
         groupRefilter.orientation = "row";
         stNumberOfEntries = groupRefilter.add("statictext");
+        stNumberOfEntries.preferredSize.width = 300;
         var buttonFilter = groupRefilter.add("button", undefined, undefined, { name: "" });
         buttonFilter.text = "Alle Einträge laden";
 
