@@ -283,8 +283,10 @@ function processDok(dok) {
                     }
 
                     var fileURL = imgXML.xmlAttributes.itemByName("src").value;
+                    if (!fileURL.match(/^http/)) {
+                        fileURL = configObject.siteURL + fileURL;
+                    }
                     var fileName = getFileNameFromURL(fileURL)
-
                     if (configObject.downloadImages) {
                         log.info("Download image from URL " + fileURL);
                         var imageFile = File(linkPath + "/" + fileName);
