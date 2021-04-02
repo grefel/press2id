@@ -26,7 +26,7 @@ var configObject = {
     modeDatabase: false,
     filterAfterDate: "2003-05-27",
     filterBeforeDate: "2030-01-01",
-    categoryID:undefined,
+    categoryID: undefined,
     loadImagesToPlaceGun: true, // if false, all images are anchored into the text flow    
     styleTemplateFile: undefined,
     downloadImages: true,
@@ -114,7 +114,7 @@ function main() {
         app.scriptPreferences.enableRedraw = false;
         app.scriptPreferences.version = parseInt(app.version);
 
-        var dok = app.documents[0];
+        var dok = app.documents[0].getElements()[0];
         log.info("Verarbeite Datei: " + dok.name);
         dok = findDocumentPath(dok);
 
@@ -388,36 +388,37 @@ function processDok(dok) {
             untag(root);
 
             // Export to TEMP ICML
-            if (app.userName == "") {
-                log.info("Setze einen generischen userName = press2id");
-                app.userName = "press2id";
-            }
-
-            var tempICMLFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp.icml");
-            story.exportFile(ExportFormat.INCOPY_MARKUP, tempICMLFile);
-            placeGunArray.unshift(tempICMLFile);
-
-            // Need to set the user, for import 
-            if (app.userName == "Unbekannter Benutzername") {
-                app.userName = "press2ID";
-            }
-
+            var oldUserName = app.userName;
+            log.debug("Setze einen generischen userName = press2id, war vorher " + oldUserName);
+            app.userName = "press2id";
             try {
-                dok.placeGuns.loadPlaceGun(placeGunArray);
-            }
-            catch (e) {
-                // // Windows Async File Export Problems (Error: Die Datei existiert nicht bzw. wird von einer anderen Anwendung verwendet, oder Sie haben nicht die entsprechenden Zugriffsrechte.)
-                if (e.number == 29446) {
-                    for (var i = 0; i < placeGunArray.length; i++) {
-                        if (!placeGunArray[i].exists) throw e;
+                var tempICMLFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp.icml");
+                story.exportFile(ExportFormat.INCOPY_MARKUP, tempICMLFile);
+                placeGunArray.unshift(tempICMLFile);
+
+                try {
+                    dok.placeGuns.loadPlaceGun(placeGunArray);
+                }
+                catch (e) {
+                    // // Windows Async File Export Problems (Error: Die Datei existiert nicht bzw. wird von einer anderen Anwendung verwendet, oder Sie haben nicht die entsprechenden Zugriffsrechte.)
+                    if (e.number == 29446) {
+                        for (var i = 0; i < placeGunArray.length; i++) {
+                            if (!placeGunArray[i].exists) throw e;
+                        }
+                    }
+                    else {
+                        throw e;
                     }
                 }
-                else {
-                    throw e;
-                }
+                tempICMLFile.remove();
+                dok.links.itemByName(tempICMLFile.name).unlink();
             }
-            dok.links[placeGunArray.length * -1].unlink();
-            tempICMLFile.remove();
+            catch (e) {
+                log.warn(e);
+            }
+            finally {
+                app.userName = oldUserName;
+            }
         }
         catch (e) {
             log.warn(e);
@@ -1582,7 +1583,7 @@ function getConfig(newConfigObject) {
             method: "HEAD",
             headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
         }
-       var response = restix.fetch(request);
+        var response = restix.fetch(request);
         // log.info(JSON.stringify(response));
         var restRegex = /<(.+?)>; rel="https:\/\/api.w.org\/"/;
         if (!response.error) {
@@ -1676,7 +1677,7 @@ function getConfig(newConfigObject) {
     }
 
     function getCategories(restURL) {
-        var alleObject = {name:localize({en:"-- ALL --", de: "-- ALLE --"}), id:"-1"};
+        var alleObject = { name: localize({ en: "-- ALL --", de: "-- ALLE --" }), id: "-1" };
 
         // We put the user Agent here because of useless security options of some webservers restriction the REST API to browesers only
         var urlCommandChar = (restURL.match(/\?rest_route/)) ? "&" : "?";
@@ -1692,7 +1693,7 @@ function getConfig(newConfigObject) {
                 throw Error(response.errorMsg);
             }
             var categories = JSON.parse(response.body);
-            categories.unshift(alleObject); 
+            categories.unshift(alleObject);
         }
         catch (e) {
             var msg = "Could not connect to\n" + restURL + "\n\n" + e;
@@ -1736,7 +1737,7 @@ function getConfig(newConfigObject) {
 
         for (var page = 1; page <= maxPages; page++) {
             var action = urlCommandChar + "_fields[]=title&_fields[]=id&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00";
-            if (categoryID && categoryID*1 > -1) {
+            if (categoryID && categoryID * 1 > -1) {
                 action += "&categories=" + categoryID;
             }
             log.info("fn ListOfBlogEntries: " + restURL + endPoint + "/" + action + " mode verbose " + verbose);
