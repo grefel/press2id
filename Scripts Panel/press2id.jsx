@@ -764,6 +764,7 @@ function getConfig(newConfigObject) {
     createFilterPanel();
     createOptionsPlaceGun();
     createOptionsImages();
+    createOptionsDatabase()
 
     var dialogResult = dialog.show();
 
@@ -1565,6 +1566,67 @@ function getConfig(newConfigObject) {
 
         buttonStartOkFilterPanel.onClick = function () {
             dialog.close(1);
+        }
+    }
+
+    function createOptionsDatabase() {
+        // GETURL
+        // ======
+        optionsDatabase.orientation = "column";
+        optionsDatabase.alignChildren = ["left", "center"];
+        optionsDatabase.spacing = 10;
+        optionsDatabase.margins = 0;
+
+        // PANEL1
+        // ======
+        var panel1 = optionsDatabase.add("panel", undefined, undefined, { name: "panel1" });
+        panel1.text = "Einstellungen variable Datenfelder";
+        panel1.preferredSize.width = 540;
+        panel1.preferredSize.height = 510;
+        panel1.orientation = "column";
+        panel1.alignChildren = ["left", "top"];
+        panel1.spacing = 10;
+        panel1.margins = 10;
+
+        // GROUP1
+        // ======
+        var group1 = panel1.add("group", undefined, { name: "group1" });
+        group1.orientation = "column";
+        group1.alignChildren = ["left", "center"];
+        group1.spacing = 10;
+        group1.margins = [0, 20, 0, 0];
+        group1.add("statictext", undefined, "Optionen kommen hier bestimmt auch noch");
+
+
+        // WIZARDCONTROL
+        // =============
+        var wizardControl = optionsDatabase.add("group", undefined, { name: "wizardControl" });
+        wizardControl.orientation = "row";
+        wizardControl.alignChildren = ["right", "center"];
+        wizardControl.spacing = 10;
+        wizardControl.margins = [0, 10, 0, 0];
+        wizardControl.alignment = ["fill", "center"];
+
+        var buttonCancel = wizardControl.add("button", undefined, undefined, { name: "cancel" });
+        buttonCancel.text = "Abbrechen";
+
+        buttonCancel.onClick = function () {
+            dialog.close(2);
+        }
+
+        buttonStartOkFilterPanel = wizardControl.add("button", undefined, undefined, { name: "ok" });
+        buttonStartOkFilterPanel.text = "Start";
+
+        buttonStartOkFilterPanel.onClick = function () {
+            dialog.close(1);
+        }
+
+        var buttonNext = wizardControl.add("button", undefined, undefined, { name: "buttonNext" });
+        buttonNext.text = "Weiter";
+        // buttonNext.active = true;
+        buttonNext.onClick = function () {
+            optionsDatabase.visible = false;
+            imageOptions.visible = true;
         }
     }
 
