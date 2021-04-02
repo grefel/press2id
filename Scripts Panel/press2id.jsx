@@ -17,7 +17,7 @@ var px = {
 }
 
 var configObject = {
-    version: "2.1",
+    version: "2.11",
     urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/"],
     siteURL: undefined,
     restURL: undefined,
@@ -26,8 +26,9 @@ var configObject = {
     modeDatabase: false,
     filterAfterDate: "2003-05-27",
     filterBeforeDate: "2030-01-01",
+    orderBy: "desc", // asc oder desc
     categoryID: undefined,
-    downloadFeaturedImage: true, 
+    downloadFeaturedImage: true,
     loadImagesToPlaceGun: true, // if false, all images are anchored into the text flow    
     styleTemplateFile: undefined,
     downloadImages: true,
@@ -343,7 +344,7 @@ function processDok(dok) {
 
                             if (rect.getElements()[0] instanceof TextFrame) {
                                 log.warn("Found text instead of image data for [" + fileURL + "]");
-                                rect.parentStory.contents = "File not found [" + imageFile + "] The URL [" + fileURL + "] is probably broken?";
+                                rect.getElements()[0].parentStory.contents = "File not found [" + imageFile + "] The URL [" + fileURL + "] is probably broken?";
                             }
 
                             rect.fit(FitOptions.PROPORTIONALLY);
@@ -699,8 +700,11 @@ function isOnline() {
 function getConfig(newConfigObject) {
     var ui = {}
     ui.buttonBlogInfoFetchonClickURLWrong = { en: "URL must start with http:// or https://", de: "URL muss mit http:// oder https:// beginnen" };
-    ui.staticTextAftertDate = { en: "Posts after", de: "Beiträge nach dem" };
+    ui.staticTextAftertDate = { en: "After", de: "Nach dem" };
     ui.staticTextBeforeDate = { en: "before", de: "vor dem" };
+    ui.staticTextSort = { en: "Sort ", de: "Sortiere" };
+    ui.staticTextSortOld = { en: "Old ", de: "Alt" };
+    ui.staticTextSortNew = { en: "New ", de: "Neu" };
     ui.staticTextEndpointDescription = { en: "Process", de: "Verarbeite" };
     ui.staticTextEndpointDescriptionInfo = { en: "Posts, Pages or Custom Post Types", de: "Beiträge, Seiten oder Custom Post Types" };
     ui.staticTextCategoryFile = { en: "Filter by category", de: "Kategorie auswählen" };
@@ -765,14 +769,18 @@ function getConfig(newConfigObject) {
 
     if (dialogResult != 2) {
         var selectedPostsArray = [];
-        for (var p = 0; p < listItems.length; p++) {
-            for (var s = 0; s < listboxSelectPost.selection.length; s++) {
+        if (listboxSelectPost.selection != null) {
+            for (var p = 0; p < listItems.length; p++) {
+                for (var s = 0; s < listboxSelectPost.selection.length; s++) {
 
-                if (listboxSelectPost.selection[s].toString().indexOf(listItems[p].blogTitle + " [" + listItems[p].id + "]") == 0) {
-                    selectedPostsArray.push(listItems[p]);
+                    if (listboxSelectPost.selection[s].toString().indexOf(listItems[p].blogTitle + " [" + listItems[p].id + "]") == 0) {
+                        selectedPostsArray.push(listItems[p]);
+                    }
                 }
             }
-
+        }
+        else {
+            log.info("Nichts ausgewählt!");
         }
 
         if (selectedPostsArray.length > 0) {
@@ -1112,18 +1120,21 @@ function getConfig(newConfigObject) {
             rbPlaceGun.value = newConfigObject.modePlaceGun = true;
             rbTemplate.value = newConfigObject.modeTemplate = false;
             rbDatabasePublishing.value = newConfigObject.modeDatabase = false;
+            buttonNextMode.enabled = true;
         }
         rbTemplate.onClick = function () {
             rbPlaceGun.value = newConfigObject.modePlaceGun = false;
             rbTemplate.value = newConfigObject.modeTemplate = true;
             rbDatabasePublishing.value = newConfigObject.modeDatabase = false;
+            alert("Sorry, not implemented");
+            buttonNextMode.enabled = false;
         }
         rbDatabasePublishing.onClick = function () {
             rbPlaceGun.value = newConfigObject.modePlaceGun = false;
             rbTemplate.value = newConfigObject.modeTemplate = false;
             rbDatabasePublishing.value = newConfigObject.modeDatabase = true;
+            buttonNextMode.enabled = true;
         }
-
 
 
         // WIZARDCONTROL
@@ -1179,7 +1190,7 @@ function getConfig(newConfigObject) {
             }
 
             // Fill 
-            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
+            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
             fillListboxSelectPost(listItems);
         }
     }
@@ -1218,7 +1229,7 @@ function getConfig(newConfigObject) {
             }
             if (isValidDate(edittextAfterDate.text)) {
                 newConfigObject.filterAfterDate = edittextAfterDate.text;
-                listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
+                listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
                 fillListboxSelectPost(listItems);
             }
             else {
@@ -1234,7 +1245,7 @@ function getConfig(newConfigObject) {
             }
             if (isValidDate(edittextBeforeDate.text)) {
                 newConfigObject.filterBeforeDate = edittextBeforeDate.text;
-                listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
+                listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
                 fillListboxSelectPost(listItems);
             }
             else {
@@ -1242,6 +1253,16 @@ function getConfig(newConfigObject) {
                 alert(localize(ui.datePatternError))
             }
         }
+
+        groupDate.add("statictext", undefined, localize(ui.staticTextSort));
+        var orderByDD = groupDate.add("dropdownlist", undefined, [" " + localize(ui.staticTextSortNew) + " > " + localize(ui.staticTextSortOld), " " + localize(ui.staticTextSortOld) + " > " + localize(ui.staticTextSortNew)]);
+        orderByDD.selection = (newConfigObject.orderBy == "desc") ? 0 : 1;
+        orderByDD.onChange = function () {
+            newConfigObject.orderBy = (orderByDD.selection == 0) ? "desc" : "asc";
+            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
+            fillListboxSelectPost(listItems);
+        }
+
 
         var groupEndpoint = group1.add('group');
         groupEndpoint.add('statictext {text: "' + localize(ui.staticTextEndpointDescription) + '"}');
@@ -1252,7 +1273,7 @@ function getConfig(newConfigObject) {
 
         endPointDropdown.onChange = function () {
             newConfigObject.endPoint = endPointDropdown.selection.text;
-            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
+            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
             fillListboxSelectPost(listItems);
         }
 
@@ -1264,7 +1285,7 @@ function getConfig(newConfigObject) {
 
         categoryDropDown.onChange = function () {
             newConfigObject.categoryID = categoryDropDown.selection.categoryID;
-            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
+            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
             fillListboxSelectPost(listItems);
         }
 
@@ -1277,7 +1298,7 @@ function getConfig(newConfigObject) {
 
         buttonFilter.onClick = function () {
             loadMaxPages = 50;
-            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID);
+            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
             fillListboxSelectPost(listItems);
         }
 
@@ -1745,15 +1766,16 @@ function getConfig(newConfigObject) {
      * @param {String} beforeDate 
      * @param {String} afterDate 
      * @param {String} categoryID
+     * @param {String} orderBy (asc|desc)
      */
-    function getListOfBlogEntries(restURL, maxPages, verbose, endPoint, beforeDate, afterDate, categoryID) {
+    function getListOfBlogEntries(restURL, maxPages, verbose, endPoint, beforeDate, afterDate, categoryID, orderBy) {
         var localListItems = [];
         var ui = {};
         ui.noBlogPostsOnSite = { en: "No content entries on [%1] for endpoint [%2]", de: "Keine Inhalte auf [%1] für endpoint [%2]" };
         var urlCommandChar = (restURL.match(/\?rest_route/)) ? "&" : "?";
 
         for (var page = 1; page <= maxPages; page++) {
-            var action = urlCommandChar + "_fields[]=title&_fields[]=id&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00";
+            var action = urlCommandChar + "_fields[]=title&_fields[]=id&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&filter[orderby]=date&order=" + orderBy;
             if (categoryID && categoryID * 1 > -1) {
                 action += "&categories=" + categoryID;
             }
