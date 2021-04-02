@@ -17,7 +17,7 @@ var px = {
 }
 
 var configObject = {
-    version: "2",
+    version: "2.1",
     urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/"],
     siteURL: undefined,
     restURL: undefined,
@@ -27,6 +27,7 @@ var configObject = {
     filterAfterDate: "2003-05-27",
     filterBeforeDate: "2030-01-01",
     categoryID: undefined,
+    downloadFeaturedImage: true, 
     loadImagesToPlaceGun: true, // if false, all images are anchored into the text flow    
     styleTemplateFile: undefined,
     downloadImages: true,
@@ -342,6 +343,7 @@ function processDok(dok) {
 
                             if (rect.getElements()[0] instanceof TextFrame) {
                                 log.warn("Found text instead of image data for [" + fileURL + "]");
+                                rect.parentStory.contents = "File not found [" + imageFile + "] The URL [" + fileURL + "] is probably broken?";
                             }
 
                             rect.fit(FitOptions.PROPORTIONALLY);
@@ -473,7 +475,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
 
 
     // Featured Image einbinden
-    if (singlePost.featured_media != 0 && singlePost.featured_media != undefined) {
+    if (configObject.downloadFeaturedImage && singlePost.featured_media != 0 && singlePost.featured_media != undefined) {
         log.info("Post has featured media with media ID " + singlePost.featured_media);
         var request = {
             url: blogURL,
@@ -1374,7 +1376,7 @@ function getConfig(newConfigObject) {
         group1.alignChildren = ["left", "center"];
         group1.spacing = 10;
         group1.margins = [0, 20, 0, 0];
-
+        group1.add("statictext", undefined, "Platziere Bilder im Textfluss oder einzeln");
         var placeGunImageProcessingSingleFiles = group1.add("radiobutton");
         placeGunImageProcessingSingleFiles.text = "Jedes Bild einzeln in den Platzierungs-Einfügemarke »Place Gun« laden";
         placeGunImageProcessingSingleFiles.value = newConfigObject.loadImagesToPlaceGun;
@@ -1387,6 +1389,21 @@ function getConfig(newConfigObject) {
         placeGunImageProcessingSingleFiles.onClick = placeGunImageProcessingAnchor.onClick = function () {
             newConfigObject.loadImagesToPlaceGun = placeGunImageProcessingSingleFiles.value;
         }
+
+        var group2 = panel1.add("group", undefined, { name: "group2" });
+        group2.orientation = "column";
+        group2.alignChildren = ["left", "center"];
+        group2.spacing = 10;
+        group2.margins = [0, 10, 0, 0];
+        group2.add("statictext", undefined, "Beitragsbild/Featured Image verarbeiten");
+
+        var placeGunImageProcessingFeaturedImage = group2.add("checkbox");
+        placeGunImageProcessingFeaturedImage.text = "Beitragsbild einsetzen";
+        placeGunImageProcessingFeaturedImage.value = newConfigObject.downloadFeaturedImage;
+        placeGunImageProcessingFeaturedImage.onClick = function () {
+            newConfigObject.downloadFeaturedImage = placeGunImageProcessingFeaturedImage.value;
+        }
+
 
         // WIZARDCONTROL
         // =============
