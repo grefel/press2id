@@ -9,11 +9,11 @@
 
 var px = {
     projectName: "press2id",
-    version: "2021-02-04-v2.0",
+    version: "2021-04-02-v2.1",
 
     // Verwaltung
     showGUI: true,
-    debug: false
+    debug: true
 }
 
 var configObject = {
@@ -1574,6 +1574,35 @@ function getConfig(newConfigObject) {
         ui.pageNotFound = { en: "URL [%1] not found [%2]", de: "URL [%1] nicht gefunden [%2]" };
         ui.noRESTapiFound = { en: "No REST API found\n[%1]", de: "Keine WordPress Seite oder REST Schnittstelle deaktiviert unter\n[%1]" };
 
+        // Guess the REST-Route for sites in subfolders or simple permalinks
+        log.debug("check for rest URL: " + blogURL + "/index.php?rest_route=/");
+        // We put the user Agent here because of useless security options of some webservers restriction the REST API to browesers only
+        var request = {
+            url: blogURL + "/index.php?rest_route=/",
+            method: "HEAD",
+            headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
+        }
+       var response = restix.fetch(request);
+        // log.info(JSON.stringify(response));
+        var restRegex = /<(.+?)>; rel="https:\/\/api.w.org\/"/;
+        if (!response.error) {
+            if (response.head["link"] != undefined) {
+                var restRegexResult = response.head["link"].match(restRegex);
+            }
+            else {
+                throw Error(localize(ui.noRESTapiFound, blogURL));
+            }
+            if (restRegexResult) {
+                var restURL = restRegexResult[1];
+                return restURL + "wp/v2/";
+            }
+            else {
+                throw Error(localize(ui.noRESTapiFound, blogURL));
+            }
+        }
+
+
+        log.debug("check for rest URL: " + blogURL + "/wp-json");
         // We put the user Agent here because of useless security options of some webservers restriction the REST API to browesers only
         var request = {
             url: blogURL + "/wp-json",
@@ -1594,7 +1623,7 @@ function getConfig(newConfigObject) {
         else {
             throw Error(localize(ui.noRESTapiFound, blogURL));
         }
-        if (restRegexResult != null) {
+        if (restRegexResult) {
             var restURL = restRegexResult[1];
         }
         else {
@@ -1607,9 +1636,10 @@ function getConfig(newConfigObject) {
         var endPointArray = ["posts", "pages"];
 
         // We put the user Agent here because of useless security options of some webservers restriction the REST API to browesers only
+        var urlCommandChar = (restURL.match(/\?rest_route/)) ? "&" : "?";
         var request = {
             url: restURL + "types/",
-            command: "?context=embed",
+            command: urlCommandChar + "context=embed",
             headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
         }
 
@@ -1649,9 +1679,10 @@ function getConfig(newConfigObject) {
         var alleObject = {name:localize({en:"-- ALL --", de: "-- ALLE --"}), id:"-1"};
 
         // We put the user Agent here because of useless security options of some webservers restriction the REST API to browesers only
+        var urlCommandChar = (restURL.match(/\?rest_route/)) ? "&" : "?";
         var request = {
             url: restURL + "categories/",
-            command: "?_fields[]=id&_fields[]=name&per_page=100",
+            command: urlCommandChar + "_fields[]=id&_fields[]=name&per_page=100",
             headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
         }
 
@@ -1701,9 +1732,10 @@ function getConfig(newConfigObject) {
         var localListItems = [];
         var ui = {};
         ui.noBlogPostsOnSite = { en: "No content entries on [%1] for endpoint [%2]", de: "Keine Inhalte auf [%1] für endpoint [%2]" };
+        var urlCommandChar = (restURL.match(/\?rest_route/)) ? "&" : "?";
 
         for (var page = 1; page <= maxPages; page++) {
-            var action = "?_fields[]=title&_fields[]=id&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00";
+            var action = urlCommandChar + "_fields[]=title&_fields[]=id&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00";
             if (categoryID && categoryID*1 > -1) {
                 action += "&categories=" + categoryID;
             }
