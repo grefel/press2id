@@ -8,7 +8,7 @@
 
 var px = {
     projectName: "press2id",
-    version: "2021-04-02-v2.1",
+    version: "2021-04-04-v2.2",
 
     // Verwaltung
     showGUI: true,
@@ -159,9 +159,9 @@ function main() {
 function processDok(dok) {
     var ui = {}
     ui.couldNotOpenTemplate = { en: "Could not open Template %1", de: "Konnte Template %1 nicht öffnen." };
-    ui.progressBar = localize({ en: "Download  –  ", de: "Download  –  " });
-    ui.progressBarOpenTemplate = localize({ en: "Import Data", de: "Daten importieren" });
-    ui.progressBarDownloadImages = localize({ en: "Download Images ", de: "Lade Bilder herunter" });
+    ui.progressBarInit = { en: "Process %1 entries. %2", de: "Verarbeite %1 Einträge. %2" };
+    ui.progressBarProcess = localize({ en: "Load data from ", de: "Lade Daten von " });
+    ui.progressBarPlace = localize({ en: "Place ", de: "Platziere " });
     ui.missingMasterSpread = localize({ en: "A masterspread with the name [W-Wordpress] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [W-Wordpress] benötigt." });
     ui.missingContentTextFrame = localize({ en: "There is no text frame named [content] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [content] enthalten." });
     ui.missingFeaturedImageFrame = localize({ en: "There is no text frame named [featured-image] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [featured-image] enthalten." });
@@ -169,19 +169,23 @@ function processDok(dok) {
     ui.undefinedACFBlock = localize({ en: "JSON Object has no acf property. You need the Plugins https://wordpress.org/plugins/advanced-custom-fields/ and https://de.wordpress.org/plugins/acf-to-rest-api/", de: "Die Eigenschaft acf konnte nicht im JSON Objekt gefunden werden. Du brauchst das Plugin https://wordpress.org/plugins/advanced-custom-fields/ und https://de.wordpress.org/plugins/acf-to-rest-api/" });
     ui.invalidGraphicDatafiled = { en: "Datafield [%1] has no URL. Cannot place image", de: "Datenfeld [%1] hat keine Eigenschaft url. Das Bild kann nicht platziert werden!" };
 
-
     log.debug(JSON.stringify(configObject));
 
+    // Init 
     if (configObject.modePlaceGun) {
         dok.placeGuns.abortPlaceGun();
+        var modeName = localize({en:"Fill Place Gun", de: "Platzierungs-Einfügemarke befüllen"});
     }
-
-    if (configObject.modeTemplate) {
+    else if (configObject.modeTemplate) {
         var templateModeMasterSpread = dok.masterSpreads.itemByName("W-Wordpress");
         if (!templateModeMasterSpread.isValid) {
             log.warn(ui.missingMasterSpread);
             return;
         }
+        var modeName = localize({en:"Fill Masterspread", de: "Musterseiten befüllen"});
+    }
+    else if (configObject.modeDatabase) {
+        var modeName = localize({en:"Fill Data Fields", de: "Datenfelder befüllen"});
     }
 
     if (configObject.modePlaceGun || configObject.modeTemplate) {
@@ -198,7 +202,7 @@ function processDok(dok) {
     var restURL = configObject.restURL;
     var endPoint = configObject.endPoint;
     createProgressbar();
-    progressbar.init(localize(ui.progressBarOpenTemplate) , configObject.selectedPostsArray.length * 2); // title, max
+    progressbar.init(localize(ui.progressBarInit, configObject.selectedPostsArray.length, modeName), configObject.selectedPostsArray.length * 2); // title, max
 
     for (var r = 0; r < configObject.selectedPostsArray.length; r++) {
         var postObject = configObject.selectedPostsArray[r];
@@ -212,7 +216,7 @@ function processDok(dok) {
                 continue;
             }
 
-            progressbar.step("Lade Daten für " + postObject.entryTitle); // label, [step]
+            progressbar.step(ui.progressBarProcess + postObject.entryTitle); // label, [step]
 
             // Prepare Data
             if (configObject.modePlaceGun) {
@@ -352,7 +356,7 @@ function processDok(dok) {
                 }
             }
 
-            progressbar.step("Platziere Daten für " + postObject.entryTitle); // label, [step]
+            progressbar.step(ui.progressBarPlace + postObject.entryTitle); // label, [step]
 
             // Place data in destination
             if (configObject.modePlaceGun) {
@@ -840,8 +844,8 @@ function getConfig(newConfigObject) {
     ui.edittextImageManagementFolderStandardText = { en: "[Select folder ...]", de: "[Ordner wählen ...]" };
     ui.buttonImageManagementFolderSelect = { en: "Choose", de: "Wählen" };
     ui.buttonImageManagementFolderSelectOnClick = { en: "Select the folder", de: "Wählen Sie den Ordner aus" };
-    ui.panelACFFileds  = { en: "Fill prepared data fields", de: "Vorbereitete Datenfelder befüllen" };
-    
+    ui.panelACFFileds = { en: "Fill prepared data fields", de: "Vorbereitete Datenfelder befüllen" };
+
 
 
     var listBounds = [0, 0, 520, 256];
@@ -1220,7 +1224,7 @@ function getConfig(newConfigObject) {
         acfInfoGroup.spacing = 10;
         acfInfoGroup.margins = 0;
 
-        var staticDatabase = acfInfoGroup.add("statictext", undefined,  localize(ui.panelACFFileds));
+        var staticDatabase = acfInfoGroup.add("statictext", undefined, localize(ui.panelACFFileds));
 
         if (app.generalPreferences.uiBrightnessPreference > 0.5) {
             var image3_imgString = "%C2%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%C3%97%00%00%00%26%08%06%00%00%00W%C2%B3%0E%09%00%00%00%09pHYs%00%00%0B%13%00%00%0B%13%01%00%C2%9A%C2%9C%18%00%00%05%C3%B1iTXtXML%3Acom.adobe.xmp%00%00%00%00%00%3C%3Fxpacket%20begin%3D%22%C3%AF%C2%BB%C2%BF%22%20id%3D%22W5M0MpCehiHzreSzNTczkc9d%22%3F%3E%20%3Cx%3Axmpmeta%20xmlns%3Ax%3D%22adobe%3Ans%3Ameta%2F%22%20x%3Axmptk%3D%22Adobe%20XMP%20Core%206.0-c005%2079.164590%2C%202020%2F12%2F09-11%3A57%3A44%20%20%20%20%20%20%20%20%22%3E%20%3Crdf%3ARDF%20xmlns%3Ardf%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%22%3E%20%3Crdf%3ADescription%20rdf%3Aabout%3D%22%22%20xmlns%3Axmp%3D%22http%3A%2F%2Fns.adobe.com%2Fxap%2F1.0%2F%22%20xmlns%3Adc%3D%22http%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%22%20xmlns%3Aphotoshop%3D%22http%3A%2F%2Fns.adobe.com%2Fphotoshop%2F1.0%2F%22%20xmlns%3AxmpMM%3D%22http%3A%2F%2Fns.adobe.com%2Fxap%2F1.0%2Fmm%2F%22%20xmlns%3AstEvt%3D%22http%3A%2F%2Fns.adobe.com%2Fxap%2F1.0%2FsType%2FResourceEvent%23%22%20xmp%3ACreatorTool%3D%22Adobe%20Photoshop%2022.1%20(Windows)%22%20xmp%3ACreateDate%3D%222021-01-13T12%3A26%3A23%2B01%3A00%22%20xmp%3AModifyDate%3D%222021-01-17T07%3A54%3A13%2B01%3A00%22%20xmp%3AMetadataDate%3D%222021-01-17T07%3A54%3A13%2B01%3A00%22%20dc%3Aformat%3D%22image%2Fpng%22%20photoshop%3AColorMode%3D%223%22%20photoshop%3AICCProfile%3D%22sRGB%20IEC61966-2.1%22%20xmpMM%3AInstanceID%3D%22xmp.iid%3A7a0990c0-acc5-4c4b-8503-88868d39c8f8%22%20xmpMM%3ADocumentID%3D%22adobe%3Adocid%3Aphotoshop%3A0d805bbf-7b82-2f4b-93d8-b96e0743f626%22%20xmpMM%3AOriginalDocumentID%3D%22xmp.did%3A914643d6-fd23-2e48-b63c-c57c121bd21d%22%3E%20%3CxmpMM%3AHistory%3E%20%3Crdf%3ASeq%3E%20%3Crdf%3Ali%20stEvt%3Aaction%3D%22created%22%20stEvt%3AinstanceID%3D%22xmp.iid%3A914643d6-fd23-2e48-b63c-c57c121bd21d%22%20stEvt%3Awhen%3D%222021-01-13T12%3A26%3A23%2B01%3A00%22%20stEvt%3AsoftwareAgent%3D%22Adobe%20Photoshop%2022.1%20(Windows)%22%2F%3E%20%3Crdf%3Ali%20stEvt%3Aaction%3D%22saved%22%20stEvt%3AinstanceID%3D%22xmp.iid%3A7a0990c0-acc5-4c4b-8503-88868d39c8f8%22%20stEvt%3Awhen%3D%222021-01-17T07%3A54%3A13%2B01%3A00%22%20stEvt%3AsoftwareAgent%3D%22Adobe%20Photoshop%2022.1%20(Windows)%22%20stEvt%3Achanged%3D%22%2F%22%2F%3E%20%3C%2Frdf%3ASeq%3E%20%3C%2FxmpMM%3AHistory%3E%20%3C%2Frdf%3ADescription%3E%20%3C%2Frdf%3ARDF%3E%20%3C%2Fx%3Axmpmeta%3E%20%3C%3Fxpacket%20end%3D%22r%22%3F%3E%C3%B6%0F%C3%9F%C2%AB%00%00%06%25IDATx%C2%9C%C3%AD%C2%9D%C3%A1%C2%91%C2%A36%14%C2%80%C2%BF%C3%8D%C3%A4%C3%BFr%15%2C%C2%A9%C3%80t%C2%B0%C2%BA%0A%C2%8E%0E%C2%8E%C2%AD%20%C2%9B%0A%C3%A2Tp%5C%05!%1D%C2%B0%15%C3%84WA%C3%98%0A%C3%82V%10%C2%B6%02%C3%B2Cb%10B%C3%82%60c%C3%80k%7D3%1A%19%C3%B1x%C2%92%C2%85%C2%9E%C2%9E%C2%90d%7CW%C3%975%00wwwx%3E%2C%02x%06%C2%82%13%C2%AF%C3%8FTH%C2%80%08H%C2%81r%C3%A8%C2%82%C2%A6%5D%C3%9D2%3F%C2%9Fqm%08%C3%84*%C2%84%C3%80%C2%83E%C3%A6%1D(%C2%80%03%C2%90%C2%AB%C3%8F%C2%9Ee%09%C2%90u%7F%7F%C2%86%C2%8E%C2%83%C2%8AC%C3%A0W%C2%A4%C2%91%09%C3%BC%C3%BD%1C%C2%A6%C2%AE%C3%AB%C2%A9%C2%BDL%C2%82%C2%AC%C3%94%C3%BA%C2%84Pr%5E%0F%C3%AA%C2%99%C2%8E%C3%A0%C2%B4%7B%C2%A5%C2%87%C2%BD%C3%92%C2%B5%C3%97%C3%92*%C2%A4%17%C2%B3%C3%92%C2%B4%C2%AB%5B%0E%3FM%C2%B8I%11%C2%B2%07%C3%BB%13%C3%98%C2%A9%C2%B47%C3%A0%3B%C3%B0%19%C3%B8%05%C2%B8%C3%93%C3%82'%C2%95%C3%BE%1B%C3%B0%C2%A2%C3%A4%1F%C2%80oH%C3%A3%C2%8C'%C3%A4%C3%AD%C3%99%1E%C3%B7%C3%88%C3%B6%10%C2%AD%5B%C2%8C%0D3%C3%92s%3D%C3%93%C3%AD%C3%892%C2%A6Wj%C2%88%C3%AC%C3%B9*CO0Q%C2%8Fg%1A%C2%82%C3%8Bx%C2%AEA%0F%C2%B6%C2%B6%C3%97%C3%98B%18c%5C%C2%99V%C2%91%C2%85%C2%AD%22'%12%20%C2%9F%01t%C2%9D%C3%81%C2%99%3A%3Dn%04%C2%975.%C2%AB%C2%81%C2%AD%C3%9D%C2%B0%C2%B7%10%C2%8E%0D%0B3%C3%A0%C2%AB%C3%BA%C3%BC%C2%97%C2%AA%C3%80b%C3%9A%C2%BD%C3%ADQ!%C2%87%C2%84O%C3%AAx%C2%87%1C%5E%04g%C3%AA%C3%B5%C2%AC%C2%87%1F%22Z%182%C2%AE%C2%94%C3%96%C2%B0%C2%9E%C2%90%13%19s!Thh%0C%C3%8Cs%C2%BDx%033p%19W%C2%8C%C2%9Cr%05%C3%B8%03%C3%A9%C3%81%C3%A6%24%C2%A35%C3%9C%C2%86%1D%C3%92%C2%A0%3D%C3%97%C3%8B%3D%C3%B3%C2%B7%C2%95%C2%AB%C3%85f%5C%01m%05%C2%BD%C3%90%C2%8E%C2%B7%C3%A7%22%C3%86%C2%BE%26%06%C3%92%C2%A0%C3%85%C3%8C%C3%B9y%C2%96e%C2%87%C3%B7%5E%C2%80%C3%9D%C2%B8R%C3%9A%05%C3%87%2F%C3%98%1F%5E%03u%3E%C2%B7%C2%9C%C2%B7%05%C2%A1%C3%A9%0F%C2%8F%C2%94)%1D%5Dz%C3%8FR%04*%C3%9E%C3%93%5Dnq%C2%85b%C3%A9%02n%12c%C2%B60%C3%84m%20%15%C2%B2%C3%A1%3Fk%C2%97%C3%87%C3%88%0A%2F%1D%C3%97%C3%A4%C3%B4%3D%C3%9FP%1EMH%C3%8E%C3%BD%5E%2B%C2%90%20%C2%9F9R%C2%B659%238%7F%C2%B6%C2%B0d%C3%A2%C2%88b%C3%AD%C2%99%C2%BA-%04%C3%93%C2%B8%C3%92%23%C2%95%1C8%C3%AA2r%C3%88'%0E%C3%B9%C3%83%C3%80M%C2%AC%C2%B9%C2%BE%C3%89%C2%8D%C2%90%C3%AE%C3%BA%5D%C3%81v%0CLp%C2%BEqM%0Db%C3%AD%C2%86%C2%BD%C2%85%60%0E%0Bc%15%7Fw%C3%9C%C2%A8%C3%98%C2%91%5E%20wk%C2%8C%C2%95O%1C%C3%A9%C2%99%C2%8A%1F%C3%99N%C3%A3%1CCHw%C3%AF%C2%9E_%5E%C3%B0t%C2%8C%2B%C2%A4%C2%9DhH%C2%81W%C2%8B%7C%3C%C2%A0%2B%C2%B7%C2%A4%7D%C3%81%C3%9E%C3%80J%C3%A4%2C%C2%A4%C3%89%C2%9E%C3%96H%C2%87%C3%B2%C2%BA%06%C2%BC%C2%81%C3%9D8%C2%BAq%09%15%C2%BF%22%1B%7Fj%C2%91w%19%0B%0Eyp%1BIf%1C%C2%BF%C2%AB%C3%B8%C2%A0%C3%A2%C3%88q%C3%9D5%C3%A1%0D%C3%AC%C2%861%3D%17%C2%B43%3D%C2%B9%C3%A3%C2%9A%C3%84%C2%91%5E2%C3%8D%C3%9B%C2%95%C3%80%0F%C3%AD%C2%B80%C3%A2%C3%88q%C3%9D%C2%A9%04%C2%9C%C2%BE%C2%9B%C3%BFX%C3%B8%7B%20_o%607%C2%8A%C3%8D%C2%B8J%15W%C2%B4%C2%BB%C3%99u%C2%92%01%7D%C2%99%25m%C3%88%C3%9B%1D%C2%B4%C3%8F%C2%B9%C2%8A%C2%8B%01%C3%BD%C3%A7%10%C3%91%C3%AE%C3%A6_%1Ao%607%C2%88%C3%8D%C2%B8t2K%C3%9A%C3%8E!%0B%C3%AEY%C2%BExDYr%C3%A3%C3%B8q%C3%845%C3%97%C3%84%0E%C2%BF%C2%86wS%1C%C3%9B%C2%B8%C2%9B%C3%93%3E%0B%C3%A9%C3%84%0E%C3%B9%C3%88%C2%91%C3%AE%C2%92%0FU%C3%BC%C2%83%23%3F%1B%C3%BF%20%C2%84k%17%C3%80%C2%B3%1C%C3%BA%C3%8F%C3%BC%2B%C2%87LF%C2%BB%C3%8F%C2%B0!%C3%81%C3%9E%0B%C3%87%0E%1D%C3%8D%C3%90%C3%90%C3%8C%23%C3%92%C3%B20%C2%B1%3D%C2%BF%5D%3B%C3%BB%C2%B5%0B%C2%A0x%C3%85%7D%C2%BF%C2%A7%12q%C3%9E%2B%04%3E.%C3%9A%22%C3%B2%1E%C3%B9p%C2%9E%1A%22%11%C3%B6%C2%87%C3%B8%C3%90%C2%90%0Bh%17P%2B%C2%8B%7Cb%C3%88%C2%87%C3%9A%C2%B9%40K%C2%8F%C2%B9%C3%8CBr%C3%A8(%C3%97R!%C2%99%C3%B9%C3%BB%C2%8CE%18%C3%A5%C3%88f%C3%96%1F%C3%91%C2%AFW%C2%BF%C2%88%5C%C3%97V%C3%8F%15%19%C2%95W%20%C3%97%C2%9E%1E%C2%8C%C3%B4%C2%98%C2%AE!%C3%86*%C3%8E%C2%94%C2%8E%C2%AF%16%C3%B9L%3B%16*~%C2%A1%C3%9B%C2%8B6%C3%B9%C2%97%C3%8CK%C2%A9t%C2%873%C3%ABE%C3%A9%C3%BD6p%C3%BE%C2%89m%C3%AC%16%7Fe~%23%2F%C2%90%C3%AD%C3%A0%C3%B7%C2%99%C3%B5%5E%3F%C2%9A%C3%A7%12%C2%B4%3D%C2%8F%C3%893%C3%BD%C2%9E%C2%B80drZ%C2%8F%16Y%C3%A4M%0F%C3%95%C3%88'%C2%86%C2%9EB%C2%A5%3FO%C3%BA%22%C3%AB%22%C3%98%C2%9E%C3%87j%10%C2%B4e9%5C(%C2%8F%3D%C3%9Es%C3%B5%C2%82n%5C%C3%90%C2%BA%C3%B7%C3%98%C2%A8%C2%BC%10%7B%C3%83%09%C3%95%C3%B9%40%1D%C3%A7%C3%9A5%C2%A5E%3E%C3%91%C3%8E%C3%9B%0CN%C3%8F'%C2%9Aps%C3%97F%C2%B0M%C3%83%C2%82n%C3%99J.%C2%B3%1C%C2%90%C3%A2%C2%8D%C2%AB%17%C3%8C%C3%99%C3%82%5C%C3%85%C3%8FFzIw%C3%81%C2%B7!6%C3%A2%5C%3B%C2%97%C2%8D%C2%907%C2%87%C2%84%C2%89%C2%8A%C3%9F%C2%B8%C2%AE%C2%9F-T%C2%96%C2%B4%C2%AD%0C%05u%1E%C2%98%7F%C2%BD-%C2%A1%3F%C3%A1%C3%A5%C2%81%C2%9E%C3%A7%12h%C2%BD%C2%8F!%C2%9A%C3%90%C3%AF%C2%99%0Bu.g%C3%98%0B%C2%99C%C3%83%C2%8C%C2%BE%C2%87%0Ch%3D%C3%A7%C3%BE%C2%A4%2F%C2%B3.9%C2%B2%C3%AC%15%C3%9B%C3%B0X%0D%C2%82%C3%A5'o%C2%BC%C3%A7%C2%AA%C3%BB%C3%83Bh%7F%0Er0nR%C2%80%7D%C2%B6-%C2%A2%3F%24l(%2C%C3%B2%C2%89%C3%92S%19%C2%B2%7B%C3%9A%C3%86%19Xtm%C2%9D%C2%80m%C2%AEc%09%C2%BCq%C2%AD%12l%C2%AF%C2%B3%C3%9E%23%C3%B7%C3%8A%3D%22%C2%87%C2%87%C2%A9J%C2%AF%C2%90%06%C3%B4%C3%95%C2%90%C3%8F%C2%8DX'E%C2%BED%C3%94L%C2%BBG%C2%BEM%C2%AA!%C2%A2%C2%9DmJ%C2%99o%0DfI*%C2%AE%C2%A7%C3%9C~%C2%9Dk%09%2C%C2%9E%0B%C2%BA%0F%C2%A8%C2%91%C2%96%1E%C3%A3%C3%AE%C2%AD%02%C2%8B%C3%BA%60%40%3E%C3%96dJ%C2%BA%C3%83L%C3%8F%7C%08%C2%BA%C3%B5%C2%9E%C3%8D%C2%AC%3F%C3%82%C2%AFsY%C2%83%C3%8B%C2%B8%02%C3%9A!%5DE%C3%97%C3%80J%C3%BA%C2%862t%C3%83r%C2%8B%7C%C3%A5%C3%88'%1C%7BG%3D%C2%A3%11%C3%B4%C2%9F%C2%91%C3%A7f%C2%8F7%C2%AE%5Ep%C3%AD-%C2%AC%C3%94My%C2%A7%C3%BF%3E%C2%BA%C3%9C%22oKk%C3%88%1C%C3%B2%C2%A1%C3%92%C2%BBS%C3%B9%08nc%7F%C3%A1%C2%9ATk%17%C3%A0%C2%96%18%C3%9A%C2%B8%5B!%1B%C3%BC%1B%C3%92%C3%80%C3%BEA%C3%B6P%C2%99!%C3%B7%C3%8E%C2%B0q%C3%A5%C3%987%C3%BF%16t%0D%C2%AB%18%2C%C2%A9g%0EB.3Yt%09%C2%9D%C3%97%C2%8FcX%C2%A8%13%C3%90%C2%9D%C3%B5%2B%C3%A8%C3%BF%C2%99%C3%8212%C3%BACC%C3%9B%C2%90%C3%933%3F%C2%82%C3%BE%C3%B2I0%C2%A3%C3%BE%C2%84%C3%BE%7D%C3%B5%C3%83%C3%82%C2%81a%C2%A1N%C2%854%C2%80%C3%A6%C2%9D%17%3B%C2%BA%C2%B3C%C3%85%C2%91%C3%ABC%C3%AC%C3%83%C2%91%17u%C3%AE%C3%98%C3%B5%C2%9Ey%C3%99%01%C3%BF1%C3%9F%C2%B4%C2%BB9%1B%C3%ACQ%C3%9C5%5Ek%C3%A4%C3%9F%C2%B6%C2%86%C3%88%C2%A1%C2%A19%1D%C3%9F%C3%BC%C2%83%24t%C3%BF%09%25%C2%A2%3FM%C3%BBC%C3%A98%C2%8C%2F%C2%A6%C3%A7%0C%04%C3%83%C2%AF!%C2%B8%04%C2%9F%C3%AB%C2%BA%3E%2C%C2%9C%C3%A7%C3%A6%C2%98j%5C%0D!r%0DL0%C3%AE%C2%A7%C3%B3o%C2%B4%2F%C3%8C%2C%C2%A6d%C3%A49%C2%9B%10%C3%B8w%C3%A1%3C%3F%C3%95u%5D-%C2%9C%C3%A7%C3%A68%C3%95%C2%B8t%02%C3%9A%C2%9Fr%C2%84Zz%C2%854%C2%A4%12%3F%0B%C2%B86)%C3%8B%C3%AC%C3%BF%7BWy%C3%AD%C2%8F%3C%C3%87%C3%9F%04%C3%BF%03%04!%1B0%12%C3%BB9l%00%00%00%00IEND%C2%AEB%60%C2%82";
@@ -2386,35 +2390,35 @@ function untag(xmlElement) {
 /**
  * Fortschrittsanzeige 
  */
- function createProgressbar() {
+function createProgressbar() {
 
-	progressbar = new Window("palette", undefined, undefined, { borderless: true });
-	progressbar.spacing = 10;
-	progressbar.margins = [10, 10, 10, 10];
-	progressbar.alignChildren = ["fill", "center"];
-	var titelText = progressbar.add("statictext");
-	titelText.characters = 30;
-	titelText.justify = "center";
+    progressbar = new Window("palette", undefined, undefined, { borderless: true });
+    progressbar.spacing = 10;
+    progressbar.margins = [10, 10, 10, 10];
+    progressbar.alignChildren = ["fill", "center"];
+    var titelText = progressbar.add("statictext");
+    titelText.characters = 30;
+    titelText.justify = "center";
 
-	var labelText = progressbar.add("statictext");
-	labelText.justify = "center";
+    var labelText = progressbar.add("statictext");
+    labelText.justify = "center";
 
-	var progressbarBar = progressbar.add("progressbar", undefined, 0, 0);
-	progressbarBar.minimumSize.width = 380;
-	progressbarBar.maximumSize.height = 6;
+    var progressbarBar = progressbar.add("progressbar", undefined, 0, 0);
+    progressbarBar.minimumSize.width = 380;
+    progressbarBar.maximumSize.height = 6;
 
 
-	progressbar.init = function (title, max) {
-		titelText.text = (title && title.toString()) || "";
-		progressbarBar.maxvalue = (max && !isNaN(max) && Number(max)) || 0;
-		this.show();
-	};
+    progressbar.init = function (title, max) {
+        titelText.text = (title && title.toString()) || "";
+        progressbarBar.maxvalue = (max && !isNaN(max) && Number(max)) || 0;
+        this.show();
+    };
 
-	progressbar.step = function (label, step) {
-		labelText.text = (label && label.toString()) || "";
-		progressbarBar.value = (step && !isNaN(step) && Number(step)) || progressbarBar.value + 1;
-		this.update();
-	};
+    progressbar.step = function (label, step) {
+        labelText.text = (label && label.toString()) || "";
+        progressbarBar.value = (step && !isNaN(step) && Number(step)) || progressbarBar.value + 1;
+        this.update();
+    };
 }
 
 
