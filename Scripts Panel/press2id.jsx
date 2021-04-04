@@ -1724,7 +1724,6 @@ function getConfig(newConfigObject) {
             dialog.close(1);
         }
     }
-
     function createOptionsDatabase() {
         // GETURL
         // ======
@@ -1785,7 +1784,6 @@ function getConfig(newConfigObject) {
             imageOptions.visible = true;
         }
     }
-
     function createOptionsTemplate() {
         // GETURL
         // ======
@@ -1810,7 +1808,7 @@ function getConfig(newConfigObject) {
         group2.orientation = "column";
         group2.alignChildren = ["left", "center"];
         group2.spacing = 10;
-        group2.margins = [0, 10, 0, 0];
+        group2.margins = [0, 20, 0, 0];
         group2.add("statictext", undefined, "Beitragsbild/Featured Image verarbeiten");
 
         var placeGunImageProcessingFeaturedImage = group2.add("checkbox");
