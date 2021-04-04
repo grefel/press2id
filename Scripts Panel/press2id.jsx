@@ -174,7 +174,7 @@ function processDok(dok) {
     // Init 
     if (configObject.modePlaceGun) {
         dok.placeGuns.abortPlaceGun();
-        var modeName = localize({en:"Fill Place Gun", de: "Platzierungs-Einfügemarke befüllen"});
+        var modeName = localize({ en: "Fill Place Gun", de: "Platzierungs-Einfügemarke befüllen" });
     }
     else if (configObject.modeTemplate) {
         var templateModeMasterSpread = dok.masterSpreads.itemByName("W-Wordpress");
@@ -182,10 +182,10 @@ function processDok(dok) {
             log.warn(ui.missingMasterSpread);
             return;
         }
-        var modeName = localize({en:"Fill Masterspread", de: "Musterseiten befüllen"});
+        var modeName = localize({ en: "Fill Masterspread", de: "Musterseiten befüllen" });
     }
     else if (configObject.modeDatabase) {
-        var modeName = localize({en:"Fill Data Fields", de: "Datenfelder befüllen"});
+        var modeName = localize({ en: "Fill Data Fields", de: "Datenfelder befüllen" });
     }
 
     if (configObject.modePlaceGun || configObject.modeTemplate) {
@@ -204,6 +204,7 @@ function processDok(dok) {
     createProgressbar();
     progressbar.init(localize(ui.progressBarInit, configObject.selectedPostsArray.length, modeName), configObject.selectedPostsArray.length * 2); // title, max
 
+    // Process selected entries
     for (var r = 0; r < configObject.selectedPostsArray.length; r++) {
         var postObject = configObject.selectedPostsArray[r];
         log.info("Verarbeite Entry mit ID " + postObject.id + " titel " + postObject.entryTitle + " run " + r);
@@ -420,23 +421,32 @@ function processDok(dok) {
 
                 currentEntryStory.move(LocationOptions.AT_BEGINNING, tf.insertionPoints[0]);
 
-                // if (postObject.downloadFeaturedImage) {
-                //     if (page.side == PageSideOptions.RIGHT_HAND) {
-                //         var fiRect = templateModeMasterSpread.pages[1].pageItems.itemByName("featured-image").getElements()[0];
-                //     }
-                //     else {
-                //         var fiRect = templateModeMasterSpread.pages[0].pageItems.itemByName("featured-image").getElements()[0];
-                //     }
+                if (postObject.featuredImageURL) {
+                    if (page.side == PageSideOptions.RIGHT_HAND) {
+                        var fiRect = templateModeMasterSpread.pages[1].pageItems.itemByName("featured-image").getElements()[0];
+                    }
+                    else {
+                        var fiRect = templateModeMasterSpread.pages[0].pageItems.itemByName("featured-image").getElements()[0];
+                    }
 
-                //     if (fiRect.isValid) {
-                //         var rect = fiRect.override(page);
-                //         postObjectArray[i].rect = rect;
-                //     }
-                //     else {
-                //         log.warn(ui.missingFeaturedImageFrame);
-                //         return;
-                //     }
-                // }
+                    if (fiRect.isValid) {
+                        var rect = fiRect.override(page);
+                    }
+                    else {
+                        log.warn(ui.missingFeaturedImageFrame);
+                        return;
+                    }
+                    var imageFile = getImageFile(configObject, postObject.featuredImageURL);
+
+                    if (imageFile != null && imageFile.exists && imageFile.length > 0) {
+                        try {
+                            fiRect.place(imageFile);
+                        }
+                        catch (e) {
+                            log.warn(e);
+                        }
+                    }
+                }
 
             }
             else if (configObject.modeDatabase) {
@@ -622,9 +632,15 @@ function createXMLFile(singlePost, postObject, blogURL) {
 
         if (featuredImage.hasOwnProperty("code")) {
             log.info("Bild [featuredImage] konnte nicht geladen werden:\nCode: " + featuredImage.code + " Message: " + featuredImage.message);
+            postObject.featuredImageURL = null;
         }
         else {
-            content += '<div id="featuredImage">' + featuredImage.source_url + '</div>'
+            if (configObject.modePlaceGun) {
+                content += '<div id="featuredImage">' + featuredImage.source_url + '</div>'
+            }
+            else { //if (configObject.modeTemplate) {
+                postObject.featuredImageURL = featuredImage.source_url;
+            }
         }
 
     }
