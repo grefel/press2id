@@ -1,7 +1,7 @@
 ﻿/****************
 * Logging Class 
-* @Version: 1.16
-* @Date: 2019-11-14
+* @Version: 1.20
+* @Date: 2021-01-17
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: Library design pattern from Marc Aturet https://forums.adobe.com/thread/1111415
 
@@ -54,8 +54,13 @@ $.global.hasOwnProperty('idsLog') || (function (HOST, SELF) {
 			// Text
 			if (object.hasOwnProperty("baseline")) {
 				if (object.parentTextFrames.length == 0) {
-					object = object.parent.parentStory.textContainers[object.parentStory.textContainers.length - 1];
-					pagePositionMessage += localize({ en: "Overset text. Position of the last text frame: ", de: "Im Übersatz. Position des letzten Textrahmens: " });
+					if (object.parent.constructor.name == "XmlStory") {
+						return localize({ en: "XML Content", de: "In der XML Struktur" });
+					}
+					else {
+						object = object.parentStory.textContainers[object.parentStory.textContainers.length - 1];
+						pagePositionMessage += localize({ en: "Overset text. Position of the last text frame: ", de: "Im Übersatz. Position des letzten Textrahmens: " });
+					}
 				}
 				else {
 					object = object.parentTextFrames[0];
@@ -118,6 +123,7 @@ $.global.hasOwnProperty('idsLog') || (function (HOST, SELF) {
 			return pagePositionMessage + localize({ en: "Could not detect page", de: "Konnte Seite nicht ermitteln" });
 		}
 	}
+
 
 	INNER.writeLog = function (msg, severity, file) {
 		var date = new Date();
@@ -195,7 +201,8 @@ $.global.hasOwnProperty('idsLog') || (function (HOST, SELF) {
 					dialogWin.close();
 				}
 			}
-			dialogWin.gControl.add("button", undefined, "Ok", { name: "ok" });
+			var button = dialogWin.gControl.add("button", undefined, "Ok", { name: "ok" });
+			button.active = true;
 			dialogWin.show();
 		}
 	};
@@ -233,7 +240,8 @@ $.global.hasOwnProperty('idsLog') || (function (HOST, SELF) {
 				}
 			}
 			dialogWin.gControl.add("button", undefined, localize({ en: "Cancel", de: "Abbrechen" }), { name: "cancel" });
-			dialogWin.gControl.add("button", undefined, "Ok", { name: "ok" });
+			var button = dialogWin.gControl.add("button", undefined, "Ok", { name: "ok" });
+			button.active = true;
 			return dialogWin.show();
 		}
 	};
@@ -283,15 +291,15 @@ $.global.hasOwnProperty('idsLog') || (function (HOST, SELF) {
 		return h + ':' + m + ':' + s + "." + ms;
 	};
 	/****************
-    * API 
-    */
+	* API 
+	*/
 
-    /**
-    * Returns a log Object
-    * @logFile {File|String} Path to logfile as File Object or String.
-    * @logLevel {String} Log Threshold  "OFF", "ERROR", "WARN", "INFO", "DEBUG"
-    * @disableAlerts {Boolean} Show alerts
-    */
+	/**
+	* Returns a log Object
+	* @logFile {File|String} Path to logfile as File Object or String.
+	* @logLevel {String} Log Threshold  "OFF", "ERROR", "WARN", "INFO", "DEBUG"
+	* @disableAlerts {Boolean} Show alerts
+	*/
 	SELF.getLogger = function (logFile, logLevel, disableAlerts) {
 		if (logFile == undefined) {
 			throw Error("Cannot instantiate Log without Logfile. Please provide a File");
@@ -302,6 +310,17 @@ $.global.hasOwnProperty('idsLog') || (function (HOST, SELF) {
 		}
 		if (!(logFile instanceof File)) {
 			throw Error("Cannot instantiate Log. Please provide a File");
+		}
+		// Logrotate > 1 MB
+		if (logFile.length > 1000000) {
+			try {
+				var rotateFile = File(logFile.toString().replace(/\.txt$/, "") + "_logrotate.txt");
+				logFile.copy(rotateFile);
+				logFile.remove();
+			}
+			catch (e) {
+				throw Error("Could not move the log File! Error: " + e);
+			}
 		}
 		if (logLevel == undefined) {
 			logLevel = "INFO";

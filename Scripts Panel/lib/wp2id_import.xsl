@@ -225,11 +225,13 @@
     </xsl:template>
 
     <!--Images -->
-    <xsl:template match="p[img][count(img) = count(*)] | p[a/img][count(a) = count(*)]">
+    <xsl:template match="p[img][count(img) = count(*)] | p[a/img][count(a) = count(*)] | div[img][count(img) = count(*)]">
+    <xsl:for-each select="descendant::img">
         <p_img aid:pstyle="p_img">
-            <xsl:apply-templates select="descendant::img"/>
+            <xsl:apply-templates select="."/>
         </p_img>
         <xsl:text>&#x0A;</xsl:text>
+    </xsl:for-each>
     </xsl:template>
 
     <xsl:template match="img">
