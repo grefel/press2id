@@ -3,7 +3,6 @@
 //@include "lib/encoder.js"
 //@include "lib/json2.js"
 //@include "lib/idsLog.jsx"
-//@include "lib/ProgressBar.jsx"
 //@include "lib/restix.jsx"
 
 
