@@ -197,17 +197,15 @@ function processDok(dok) {
     }
 
     var restURL = configObject.restURL;
-    var endPoint = configObject.endPoint
+    var endPoint = configObject.endPoint;
+    createProgressbar();
+    progressbar.init(localize(ui.progressBarOpenTemplate) , configObject.selectedPostsArray.length * 2); // title, max
 
     for (var r = 0; r < configObject.selectedPostsArray.length; r++) {
-        var placeGunArray = [];
-        var postObject = configObject.selectedPostsArray[r]
-
+        var postObject = configObject.selectedPostsArray[r];
         log.info("Verarbeite Entry mit ID " + postObject.id + " titel " + postObject.entryTitle + " run " + r);
 
         try {
-            var pBar = new $.ProgressBar(ui.progressBar + " " + postObject.entryTitle, 350, 100);
-            pBar.show(ui.progressBarOpenTemplate + " %1 / " + 4, 4, 0);
 
             var oneBlogEntry = getSingleEntity(restURL, endPoint, postObject);
             if (oneBlogEntry == null) {
@@ -215,16 +213,18 @@ function processDok(dok) {
                 continue;
             }
 
-            pBar.hit(1);
+            progressbar.step("Lade Daten für " + postObject.entryTitle); // label, [step]
+
+            // Prepare Data
+            if (configObject.modePlaceGun) {
+                var placeGunArray = [];
+            }
 
             if (configObject.modePlaceGun || configObject.modeTemplate) {
                 var xmlTempFile = createXMLFile(oneBlogEntry, postObject, restURL);
 
-                pBar.hit(2);
-
                 // Remove Existing XML
                 styleTemplateDok.xmlElements[0].contents = "";
-                pBar.hit(3);
 
                 // Set Import Preferences 
                 with (styleTemplateDok.xmlImportPreferences) {
@@ -242,8 +242,6 @@ function processDok(dok) {
                     repeatTextElements = false;
                 }
 
-                pBar.hit(4);
-
                 styleTemplateDok.importXML(xmlTempFile);
 
                 var root = styleTemplateDok.xmlElements[0];
@@ -258,95 +256,88 @@ function processDok(dok) {
                 contentFrame.placeXML(postXML);
 
 
-                pBar.hit(2);
-
                 // Bilder platzieren 
                 var imgArray = postXML.evaluateXPathExpression("//*[@src]");
-                if (imgArray.length > 0) {
-                    pBar.reset(ui.progressBarDownloadImages + " %1 / " + imgArray.length, imgArray.length, 0);
+                for (var i = 0; i < imgArray.length; i++) {
+                    var imgXML = imgArray[i];
+                    if (imgXML.xmlAttributes.itemByName("ostyle").isValid) {
+                        var oStyleName = imgXML.xmlAttributes.itemByName("ostyle").value;
+                        var oStyle = styleTemplateDok.objectStyles.itemByName(oStyleName);
+                        if (!oStyle.isValid) {
+                            log.info("Create Objectstyle [" + oStyleName + "]")
+                            oStyle = styleTemplateDok.objectStyles.add({ name: oStyleName });
+                        }
+                    }
+                    else {
+                        // Use markup tag for object style			
+                        log.info("Element " + imgXML.markupTag.name + " has now Attribute ostyle, we use the tag name!");
+                        var oStyleName = imgXML.markupTag.name;
+                        var oStyle = styleTemplateDok.objectStyles.itemByName(oStyleName);
+                        if (!oStyle.isValid) {
+                            log.info("Create Objectstyle [" + oStyleName + "]")
+                            oStyle = styleTemplateDok.objectStyles.add({ name: oStyleName });
+                        }
+                    }
 
-                    for (var i = 0; i < imgArray.length; i++) {
-                        pBar.hit(i + 1);
-                        var imgXML = imgArray[i];
-                        if (imgXML.xmlAttributes.itemByName("ostyle").isValid) {
-                            var oStyleName = imgXML.xmlAttributes.itemByName("ostyle").value;
-                            var oStyle = styleTemplateDok.objectStyles.itemByName(oStyleName);
-                            if (!oStyle.isValid) {
-                                log.info("Create Objectstyle [" + oStyleName + "]")
-                                oStyle = styleTemplateDok.objectStyles.add({ name: oStyleName });
-                            }
+                    var fileURL = imgXML.xmlAttributes.itemByName("src").value;
+                    var imageFile = getImageFile(configObject, fileURL)
+
+                    if (imageFile != null && imageFile.exists && imageFile.length > 0) {
+
+                        if (configObject.modePlaceGun && configObject.loadImagesToPlaceGun) {
+                            placeGunArray.push(imageFile);
                         }
                         else {
-                            // Use markup tag for object style			
-                            log.info("Element " + imgXML.markupTag.name + " has now Attribute ostyle, we use the tag name!");
-                            var oStyleName = imgXML.markupTag.name;
-                            var oStyle = styleTemplateDok.objectStyles.itemByName(oStyleName);
-                            if (!oStyle.isValid) {
-                                log.info("Create Objectstyle [" + oStyleName + "]")
-                                oStyle = styleTemplateDok.objectStyles.add({ name: oStyleName });
+                            var rect = styleTemplateDok.rectangles.add();
+                            rect.geometricBounds = [0, 0, 50, 100]; // Default if not set in Object style
+                            rect.appliedObjectStyle = oStyle;
+                            try {
+                                rect.place(imageFile);
                             }
-                        }
-
-                        var fileURL = imgXML.xmlAttributes.itemByName("src").value;
-                        var imageFile = getImageFile(configObject, fileURL)
-
-                        if (imageFile != null && imageFile.exists && imageFile.length > 0) {
-
-                            if (configObject.modePlaceGun && configObject.loadImagesToPlaceGun) {
-                                placeGunArray.push(imageFile);
+                            catch (e) {
+                                log.warn("Cannot place " + imageFile.name + "\nError: " + e);
                             }
-                            else {
-                                var rect = styleTemplateDok.rectangles.add();
-                                rect.geometricBounds = [0, 0, 50, 100]; // Default if not set in Object style
-                                rect.appliedObjectStyle = oStyle;
-                                try {
-                                    rect.place(imageFile);
-                                }
-                                catch (e) {
-                                    log.warn("Cannot place " + imageFile.name + "\nError: " + e);
-                                }
 
-                                if (rect.getElements()[0] instanceof TextFrame) {
-                                    log.warn("Found text instead of image data for [" + fileURL + "]");
-                                    rect.getElements()[0].parentStory.contents = "File not found [" + imageFile + "] The URL [" + fileURL + "] is probably broken?";
-                                }
-
-                                rect.fit(FitOptions.PROPORTIONALLY);
-                                rect.fit(FitOptions.FRAME_TO_CONTENT);
-                                rect.anchoredObjectSettings.insertAnchoredObject(imgXML.xmlContent.insertionPoints[0]);
-                                rect.anchoredObjectSettings.properties = rect.appliedObjectStyle.anchoredObjectSettings.properties;
-
-                                // rect.clearObjectStyleOverrides(); // Geht nicht, weil die Größe über das Objektformat gesteuert werden soll
-                                // TODO fix image height > textFrame height
-
+                            if (rect.getElements()[0] instanceof TextFrame) {
+                                log.warn("Found text instead of image data for [" + fileURL + "]");
+                                rect.getElements()[0].parentStory.contents = "File not found [" + imageFile + "] The URL [" + fileURL + "] is probably broken?";
                             }
+
+                            rect.fit(FitOptions.PROPORTIONALLY);
+                            rect.fit(FitOptions.FRAME_TO_CONTENT);
+                            rect.anchoredObjectSettings.insertAnchoredObject(imgXML.xmlContent.insertionPoints[0]);
+                            rect.anchoredObjectSettings.properties = rect.appliedObjectStyle.anchoredObjectSettings.properties;
+
+                            // rect.clearObjectStyleOverrides(); // Geht nicht, weil die Größe über das Objektformat gesteuert werden soll
+                            // TODO fix image height > textFrame height
+
                         }
-                        else {
-                            log.warn("Could not donwload/find image URL [" + fileURL + "]");
-                        }
+                    }
+                    else {
+                        log.warn("Could not donwload/find image URL [" + fileURL + "]");
                     }
                 }
 
-                var story = contentFrame.parentStory;
+                var currentEntryStory = contentFrame.parentStory;
 
                 // Fix whitespace at beginning of parageraph
                 app.findGrepPreferences = NothingEnum.NOTHING;
                 app.changeGrepPreferences = NothingEnum.NOTHING;
                 app.findGrepPreferences.findWhat = "^ +";
-                story.changeGrep();
+                currentEntryStory.changeGrep();
 
                 // Fix forced Line break at end of paragraph
                 app.findGrepPreferences = NothingEnum.NOTHING;
                 app.changeGrepPreferences = NothingEnum.NOTHING;
                 app.findGrepPreferences.findWhat = "\\n(?=\\r)";
-                story.changeGrep();
+                currentEntryStory.changeGrep();
 
                 // Kill Last white space.
                 app.findGrepPreferences = NothingEnum.NOTHING;
                 app.changeGrepPreferences = NothingEnum.NOTHING;
                 app.findGrepPreferences.findWhat = "\\s+\\Z";
                 try {
-                    story.changeGrep();
+                    currentEntryStory.changeGrep();
                 }
                 catch (e) {
                     log.info("Could not run '\\s+\\Z' GREP . InDesign CC 2020 Bug?");
@@ -354,9 +345,17 @@ function processDok(dok) {
 
                 untag(root);
             }
+            else if (configObject.modeDatabase) {
+                var singleACFBlock = oneBlogEntry.acf;
+                if (singleACFBlock == undefined) {
+                    log.warn(ui.undefinedACFBlock + " " + postObject.id + " " + postObject.entryTitle);
+                    continue;
+                }
+            }
 
+            progressbar.step("Platziere Daten für " + postObject.entryTitle); // label, [step]
 
-
+            // Place data in destination
             if (configObject.modePlaceGun) {
 
                 // Export to TEMP ICML
@@ -365,7 +364,7 @@ function processDok(dok) {
                 app.userName = "press2id";
                 try {
                     var tempICMLFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp.icml");
-                    story.exportFile(ExportFormat.INCOPY_MARKUP, tempICMLFile);
+                    currentEntryStory.exportFile(ExportFormat.INCOPY_MARKUP, tempICMLFile);
                     placeGunArray.unshift(tempICMLFile);
 
                     try {
@@ -394,7 +393,7 @@ function processDok(dok) {
             }
             else if (configObject.modeTemplate) {
                 // Wenn das Template nur eine Seite enthält, wird diese zum Einstieg verwendet. Ansonsten wird eine neue Seite hinten angehangen 
-                if (dok.pages.length == 1) {
+                if (r == 0 && dok.pages.length == 1) {
                     var page = dok.pages[0];
                 }
                 else {
@@ -416,50 +415,28 @@ function processDok(dok) {
                     return;
                 }
 
-                dok.placeGuns.textFrames[i].parentStory.move(LocationOptions.AT_BEGINNING, tf.insertionPoints[0]);
+                currentEntryStory.move(LocationOptions.AT_BEGINNING, tf.insertionPoints[0]);
 
-                if (postObjectArray[i].featuredImage) {
-                    if (page.side == PageSideOptions.RIGHT_HAND) {
-                        var fiRect = templateModeMasterSpread.pages[1].pageItems.itemByName("featured-image").getElements()[0];
-                    }
-                    else {
-                        var fiRect = templateModeMasterSpread.pages[0].pageItems.itemByName("featured-image").getElements()[0];
-                    }
+                // if (postObject.downloadFeaturedImage) {
+                //     if (page.side == PageSideOptions.RIGHT_HAND) {
+                //         var fiRect = templateModeMasterSpread.pages[1].pageItems.itemByName("featured-image").getElements()[0];
+                //     }
+                //     else {
+                //         var fiRect = templateModeMasterSpread.pages[0].pageItems.itemByName("featured-image").getElements()[0];
+                //     }
 
-                    if (fiRect.isValid) {
-                        var rect = fiRect.override(page);
-                        postObjectArray[i].rect = rect;
-                    }
-                    else {
-                        log.warn(ui.missingFeaturedImageFrame);
-                        return;
-                    }
-                }
-
-                fixOverflow(tf.parentStory);
-
-
-
-                if (postObjectArray[i].featuredImage) {
-                    // Fix anchored objects 
-                    var rect = postObjectArray[i].rect;
-                    rect.place(postObjectArray[i].featuredImageFile);
-                    rect.fit(FitOptions.FILL_PROPORTIONALLY)
-                }
-
+                //     if (fiRect.isValid) {
+                //         var rect = fiRect.override(page);
+                //         postObjectArray[i].rect = rect;
+                //     }
+                //     else {
+                //         log.warn(ui.missingFeaturedImageFrame);
+                //         return;
+                //     }
+                // }
 
             }
-
             else if (configObject.modeDatabase) {
-                singleACFBlock = oneBlogEntry.acf;
-                if (singleACFBlock == undefined) {
-                    log.warn(ui.undefinedACFBlock + " " + postObject.id + " " + postObject.entryTitle);
-                    continue;
-                }
-                log.info("process" + " " + postObject.id + " " + postObject.entryTitle);
-
-                pBar.hit(1);
-
                 dok.pages[0].duplicate(LocationOptions.AT_END);
                 px.removeFirstPage = true;
                 var lastPage = dok.pages[-1];
@@ -513,14 +490,14 @@ function processDok(dok) {
                         }
                     }
                 }
-
-                pBar.hit(1);
             }
         }
         catch (e) {
             log.warn(e);
         }
     }
+
+    progressbar.close();
 
     if (configObject.modePlaceGun || configObject.modeTemplate) {
         styleTemplateDok.close(SaveOptions.NO);
@@ -2406,6 +2383,41 @@ function untag(xmlElement) {
     }
     // TODO Text im Root Element entfernen vorher aber checken, das kein PageItem mehr verbunden ist. xmlElement.contents = "";
 }
+
+/**
+ * Fortschrittsanzeige 
+ */
+ function createProgressbar() {
+
+	progressbar = new Window("palette", undefined, undefined, { borderless: true });
+	progressbar.spacing = 10;
+	progressbar.margins = [10, 10, 10, 10];
+	progressbar.alignChildren = ["fill", "center"];
+	var titelText = progressbar.add("statictext");
+	titelText.characters = 30;
+	titelText.justify = "center";
+
+	var labelText = progressbar.add("statictext");
+	labelText.justify = "center";
+
+	var progressbarBar = progressbar.add("progressbar", undefined, 0, 0);
+	progressbarBar.minimumSize.width = 380;
+	progressbarBar.maximumSize.height = 6;
+
+
+	progressbar.init = function (title, max) {
+		titelText.text = (title && title.toString()) || "";
+		progressbarBar.maxvalue = (max && !isNaN(max) && Number(max)) || 0;
+		this.show();
+	};
+
+	progressbar.step = function (label, step) {
+		labelText.text = (label && label.toString()) || "";
+		progressbarBar.value = (step && !isNaN(step) && Number(step)) || progressbarBar.value + 1;
+		this.update();
+	};
+}
+
 
 /** Get Filepath from current script  */
 /*Folder*/ function getScriptFolderPath() {
