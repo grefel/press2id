@@ -632,7 +632,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
         }
 
         if (featuredImage.hasOwnProperty("code")) {
-            log.info("Bild [featuredImage] konnte nicht geladen werden:\nCode: " + featuredImage.code + " Message: " + featuredImage.message);
+            log.warn("Beitragsbild/FeaturedImage [" + blogURL  + "media/" + singlePost.featured_media + "] konnte nicht geladen werden. Code: " + featuredImage.code + " Message: " + featuredImage.message);
             postObject.featuredImageURL = null;
         }
         else {
