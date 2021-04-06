@@ -177,8 +177,8 @@ function processDok(dok) {
         var modeName = localize({ en: "Fill Place Gun", de: "Platzierungs-Einfügemarke befüllen" });
     }
     else if (configObject.modeTemplate) {
-        var templateModeMasterSpread = dok.masterSpreads.itemByName("W-Wordpress");
-        if (!templateModeMasterSpread.isValid) {
+        var templateMasterpread = dok.masterSpreads.itemByName("W-Wordpress");
+        if (!templateMasterpread.isValid) {
             log.warn(ui.missingMasterSpread);
             return;
         }
@@ -404,12 +404,12 @@ function processDok(dok) {
                     var page = dok.pages.add();
                 }
 
-                page.appliedMaster = templateModeMasterSpread;
+                page.appliedMaster = templateMasterpread;
                 if (page.side == PageSideOptions.RIGHT_HAND) {
-                    var textFrameContent = templateModeMasterSpread.pages[1].textFrames.itemByName("content");
+                    var textFrameContent = templateMasterpread.pages[1].textFrames.itemByName("content");
                 }
                 else {
-                    var textFrameContent = templateModeMasterSpread.pages[0].textFrames.itemByName("content");
+                    var textFrameContent = templateMasterpread.pages[0].textFrames.itemByName("content");
                 }
                 if (textFrameContent.isValid) {
                     var tf = textFrameContent.override(page);
@@ -423,10 +423,10 @@ function processDok(dok) {
 
                 if (postObject.featuredImageURL) {
                     if (page.side == PageSideOptions.RIGHT_HAND) {
-                        var fiRect = templateModeMasterSpread.pages[1].pageItems.itemByName("featured-image").getElements()[0];
+                        var fiRect = templateMasterpread.pages[1].pageItems.itemByName("featured-image").getElements()[0];
                     }
                     else {
-                        var fiRect = templateModeMasterSpread.pages[0].pageItems.itemByName("featured-image").getElements()[0];
+                        var fiRect = templateMasterpread.pages[0].pageItems.itemByName("featured-image").getElements()[0];
                     }
 
                     if (fiRect.isValid) {
@@ -440,7 +440,7 @@ function processDok(dok) {
 
                     if (imageFile != null && imageFile.exists && imageFile.length > 0) {
                         try {
-                            fiRect.place(imageFile);
+                            rect.place(imageFile);
                         }
                         catch (e) {
                             log.warn(e);
