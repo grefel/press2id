@@ -8,7 +8,7 @@
 
 var px = {
     projectName: "press2id",
-    version: "2021-04-04-v2.2",
+    version: "2021-04-06-v2.2",
 
     // Verwaltung
     showGUI: true,
@@ -632,7 +632,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
         }
 
         if (featuredImage.hasOwnProperty("code")) {
-            log.warn("Beitragsbild/FeaturedImage [" + blogURL  + "media/" + singlePost.featured_media + "] für " + postObject.entryTitle + "konnte nicht geladen werden. Code: " + featuredImage.code + " Message: " + featuredImage.message);
+            log.warn("Beitragsbild/FeaturedImage [" + blogURL  + "media/" + singlePost.featured_media + "] für " + postObject.entryTitle + " konnte nicht geladen werden. Code: " + featuredImage.code + " Message: " + featuredImage.message);
             postObject.featuredImageURL = null;
         }
         else {
