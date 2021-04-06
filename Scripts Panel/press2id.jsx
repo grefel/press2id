@@ -441,6 +441,7 @@ function processDok(dok) {
                     if (imageFile != null && imageFile.exists && imageFile.length > 0) {
                         try {
                             rect.place(imageFile);
+                            rect.fit(FitOptions.PROPORTIONALLY);
                         }
                         catch (e) {
                             log.warn(e);
