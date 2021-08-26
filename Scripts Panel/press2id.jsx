@@ -8,7 +8,7 @@
 
 var px = {
     projectName: "press2id",
-    version: "2021-04-06-v2.2",
+    version: "2021-08-26-v2.21",
 
     // Verwaltung
     showGUI: true,
@@ -392,7 +392,13 @@ function processDok(dok) {
                     log.warn(e);
                 }
                 finally {
-                    app.userName = oldUserName;
+                    try {
+                        app.userName = oldUserName;
+                    }
+                    catch (e) {
+                        log.info("Konnte User Name nicht auf " + oldUserName + " setzen!");
+                        log.warn(e);
+                    }
                 }
             }
             else if (configObject.modeTemplate) {
@@ -536,12 +542,14 @@ function getImageFile(configObject, fileURL) {
             log.warn("Could not find or create Folder [Links] use Desktop to download links instead!");
             linkPath = Folder.desktop;
         }
+        fileURL = fileURL.replace(/\?w=1024$/, "");
         log.info("Download image from URL " + fileURL);
         var fileName = getFileNameFromURL(fileURL)
         var imageFile = File(linkPath + "/" + fileName);
 
         var request = {
-            url: fileURL.toString()
+            url: fileURL.toString(),
+            headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
         }
 
         var response = restix.fetchFile(request, imageFile);
@@ -575,6 +583,7 @@ function getSingleEntity(blogURL, endPoint, postObject) {
     var request = {
         url: blogURL,
         command: endPoint + "/" + postObject.id,
+        headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
     }
     var response = restix.fetch(request);
     try {
@@ -618,6 +627,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
         var request = {
             url: blogURL,
             command: "media/" + singlePost.featured_media,
+            headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
         }
         var response = restix.fetch(request);
         try {
@@ -632,7 +642,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
         }
 
         if (featuredImage.hasOwnProperty("code")) {
-            log.warn("Beitragsbild/FeaturedImage [" + blogURL  + "media/" + singlePost.featured_media + "] für " + postObject.entryTitle + " konnte nicht geladen werden. Code: " + featuredImage.code + " Message: " + featuredImage.message);
+            log.warn("Beitragsbild/FeaturedImage [" + blogURL + "media/" + singlePost.featured_media + "] für " + postObject.entryTitle + " konnte nicht geladen werden. Code: " + featuredImage.code + " Message: " + featuredImage.message);
             postObject.featuredImageURL = null;
         }
         else {
@@ -1894,6 +1904,7 @@ function getConfig(newConfigObject) {
 
     function discoverRestURL(blogURL) {
         blogURL = blogURL.replace(/\/*\s*$/, "/");
+        var restURL = null;
         var ui = {};
         ui.pageNotFound = { en: "URL [%1] not found [%2]", de: "URL [%1] nicht gefunden [%2]" };
         ui.noRESTapiFound = { en: "No REST API found\n[%1]", de: "Keine WordPress Seite oder REST Schnittstelle deaktiviert unter\n[%1]" };
@@ -1909,19 +1920,14 @@ function getConfig(newConfigObject) {
         var response = restix.fetch(request);
         // log.info(JSON.stringify(response));
         var restRegex = /<(.+?)>; rel="https:\/\/api.w.org\/"/;
-        if (!response.error) {
-            if (response.head["link"] != undefined) {
-                var restRegexResult = response.head["link"].match(restRegex);
-            }
-            else {
-                throw Error(localize(ui.noRESTapiFound, blogURL));
-            }
+        if (response.error == true) {
+            throw Error(localize(ui.pageNotFound, blogURL, response.errorMsg));
+        }
+        if (response.head["link"] != undefined) {
+            var restRegexResult = response.head["link"].match(restRegex);
             if (restRegexResult) {
-                var restURL = restRegexResult[1];
+                restURL = restRegexResult[1];
                 return restURL + "wp/v2/";
-            }
-            else {
-                throw Error(localize(ui.noRESTapiFound, blogURL));
             }
         }
 
@@ -1943,17 +1949,41 @@ function getConfig(newConfigObject) {
 
         if (response.head["link"] != undefined) {
             var restRegexResult = response.head["link"].match(restRegex);
+            if (restRegexResult) {
+                var restURL = restRegexResult[1];
+                return restURL + "wp/v2/";
+            }
         }
-        else {
-            throw Error(localize(ui.noRESTapiFound, blogURL));
+
+        // Try wordpress.com REST Rewrite
+        var wordPressComPrefix = "https://public-api.wordpress.com/wp/v2/sites/"
+        var blogURL = blogURL.replace(/^https?:\/\//, "");
+        log.debug("Try wordpress.com REST Rewrite: " + wordPressComPrefix + blogURL + "");
+        // We put the user Agent here because of useless security options of some webservers restriction the REST API to browesers only
+        var request = {
+            url: wordPressComPrefix + blogURL,
+            method: "HEAD",
+            headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
         }
-        if (restRegexResult) {
-            var restURL = restRegexResult[1];
+
+        var response = restix.fetch(request);
+        // log.info(JSON.stringify(response));
+        var restRegex = /<(.+?)>; rel="https:\/\/api.w.org\/"/;
+        if (response.error == true) {
+            throw Error(localize(ui.pageNotFound, blogURL, response.errorMsg));
         }
-        else {
-            throw Error(localize(ui.noRESTapiFound, blogURL));
+
+        if (response.head["link"] != undefined) {
+            var restRegexResult = response.head["link"].match(restRegex);
+            if (restRegexResult) {
+                // <https://public-api.wordpress.com/>; rel="https://api.w.org/" immer gleich
+                var restURL = wordPressComPrefix + blogURL;
+                return restURL
+            }
         }
-        return restURL + "wp/v2/";
+
+
+        throw Error(localize(ui.noRESTapiFound, blogURL));
     }
 
     function getEndpoints(restURL) {
