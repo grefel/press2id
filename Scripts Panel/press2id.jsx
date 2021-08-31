@@ -1972,7 +1972,9 @@ function getConfig(newConfigObject) {
         if (response.error == true) {
             throw Error(localize(ui.pageNotFound, blogURL, response.errorMsg));
         }
-
+        if (response.httpStatus == 404) {
+            throw Error(localize(ui.pageNotFound, blogURL, response.errorMsg));
+        }
         if (response.head["link"] != undefined) {
             var restRegexResult = response.head["link"].match(restRegex);
             if (restRegexResult) {
