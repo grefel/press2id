@@ -1974,7 +1974,7 @@ function getConfig(newConfigObject) {
             throw Error(localize(ui.pageNotFound, logURL, response.errorMsg));
         }
         if (response.httpStatus == 404) {
-            throw Error(localize(ui.pageNotFound, logURL, response.errorMsg));
+            throw Error(localize(ui.pageNotFound, logURL, "httpStatus 404"));
         }
         if (response.head["link"] != undefined) {
             var restRegexResult = response.head["link"].match(restRegex);
