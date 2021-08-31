@@ -1903,6 +1903,7 @@ function getConfig(newConfigObject) {
 
 
     function discoverRestURL(blogURL) {
+        var logURL = blogURL;
         blogURL = blogURL.replace(/\/*\s*$/, "/");
         var restURL = null;
         var ui = {};
@@ -1921,7 +1922,7 @@ function getConfig(newConfigObject) {
         // log.info(JSON.stringify(response));
         var restRegex = /<(.+?)>; rel="https:\/\/api.w.org\/"/;
         if (response.error == true) {
-            throw Error(localize(ui.pageNotFound, blogURL, response.errorMsg));
+            throw Error(localize(ui.pageNotFound, logURL, response.errorMsg));
         }
         if (response.head["link"] != undefined) {
             var restRegexResult = response.head["link"].match(restRegex);
@@ -1944,7 +1945,7 @@ function getConfig(newConfigObject) {
         // log.info(JSON.stringify(response));
         var restRegex = /<(.+?)>; rel="https:\/\/api.w.org\/"/;
         if (response.error == true) {
-            throw Error(localize(ui.pageNotFound, blogURL, response.errorMsg));
+            throw Error(localize(ui.pageNotFound, logURL, response.errorMsg));
         }
 
         if (response.head["link"] != undefined) {
@@ -1970,10 +1971,10 @@ function getConfig(newConfigObject) {
         // log.info(JSON.stringify(response));
         var restRegex = /<(.+?)>; rel="https:\/\/api.w.org\/"/;
         if (response.error == true) {
-            throw Error(localize(ui.pageNotFound, blogURL, response.errorMsg));
+            throw Error(localize(ui.pageNotFound, logURL, response.errorMsg));
         }
         if (response.httpStatus == 404) {
-            throw Error(localize(ui.pageNotFound, blogURL, response.errorMsg));
+            throw Error(localize(ui.pageNotFound, logURL, response.errorMsg));
         }
         if (response.head["link"] != undefined) {
             var restRegexResult = response.head["link"].match(restRegex);
@@ -1985,7 +1986,7 @@ function getConfig(newConfigObject) {
         }
 
 
-        throw Error(localize(ui.noRESTapiFound, blogURL));
+        throw Error(localize(ui.noRESTapiFound, logURL));
     }
 
     function getEndpoints(restURL) {
