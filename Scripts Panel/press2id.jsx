@@ -8,7 +8,7 @@
 
 var px = {
     projectName: "press2id",
-    version: "2021-08-26-v2.21",
+    version: "2021-08-31-v2.22",
 
     // Verwaltung
     showGUI: true,
