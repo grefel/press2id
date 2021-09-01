@@ -534,6 +534,7 @@ function getImageFile(configObject, fileURL) {
     if (!fileURL.match(/^http/)) {
         fileURL = configObject.siteURL + fileURL;
     }
+    var fileName = getFileNameFromURL(fileURL)
     if (configObject.downloadImages) {
         // Bilder herunterladen 
         var linkPath = Folder(px.documentFolder + "/Links");
@@ -543,7 +544,6 @@ function getImageFile(configObject, fileURL) {
             linkPath = Folder.desktop;
         }
         log.info("Download image from URL " + fileURL);
-        var fileName = getFileNameFromURL(fileURL)
         var imageFile = File(linkPath + "/" + fileName);
 
         var request = {
