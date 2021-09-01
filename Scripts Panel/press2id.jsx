@@ -669,7 +669,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
 
     var xmlTempFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "result.html");
     writeTextFile(xmlTempFile, content);
-    var xmlLogTempFile = File(px.logFolder + "/donwload.xml");
+    var xmlLogTempFile = File(log.getLogFolder() + "/donwload.xml");
     writeTextFile(xmlLogTempFile, content);
 
     xmlTempFile = runTidy(xmlTempFile);
