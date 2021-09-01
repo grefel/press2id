@@ -557,7 +557,7 @@ function getImageFile(configObject, fileURL) {
         }
     }
     else {
-        var imageFile = File(localImageFolder + "/" + fileName);
+        var imageFile = File(configObject.localImageFolder + "/" + fileName);
         log.info("Link to local folder " + imageFile);
     }
 
