@@ -486,10 +486,16 @@ function processDok(dok) {
                             var graphicObject = singleACFBlock[datenFeld.fieldName];
 
                             if (!graphicObject.hasOwnProperty("url")) {
-                                log.warn(localize(ui.invalidGraphicDatafiled, datenFeld.fieldName));
-                                continue;
+                                var url = graphicObject.toString();
+                                if (url.indexOf("http") != 0) {
+                                    log.warn(localize(ui.invalidGraphicDatafiled, datenFeld.fieldName));
+                                    continue;
+                                }
                             }
-                            var imageFile = getImageFile(configObject, graphicObject.url);
+                            else {
+                                var url = graphicObject.url;
+                            }
+                            var imageFile = getImageFile(configObject, url);
 
                             if (imageFile != null && imageFile.exists && imageFile.length > 0) {
                                 try {
