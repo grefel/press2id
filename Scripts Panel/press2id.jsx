@@ -10,6 +10,8 @@ var px = {
     projectName: "press2id",
     version: "2021-09-17-v2.24",
 
+    defaultHeader: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }],
+
     // Verwaltung
     showGUI: true,
     debug: false
@@ -554,7 +556,7 @@ function getImageFile(configObject, fileURL) {
 
         var request = {
             url: fileURL.toString(),
-            headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
+            headers: px.defaultHeader
         }
 
         var response = restix.fetchFile(request, imageFile);
@@ -588,7 +590,7 @@ function getSingleEntity(blogURL, endPoint, postObject) {
     var request = {
         url: blogURL,
         command: endPoint + "/" + postObject.id,
-        headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
+        headers: px.defaultHeader
     }
     var response = restix.fetch(request);
     try {
@@ -632,7 +634,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
         var request = {
             url: blogURL,
             command: "media/" + singlePost.featured_media,
-            headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
+            headers: px.defaultHeader
         }
         var response = restix.fetch(request);
         try {
@@ -1923,7 +1925,7 @@ function getConfig(newConfigObject) {
         var request = {
             url: blogURL + "/index.php?rest_route=/",
             method: "HEAD",
-            headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
+            headers: px.defaultHeader
         }
         var response = restix.fetch(request);
         // log.info(JSON.stringify(response));
@@ -1945,7 +1947,7 @@ function getConfig(newConfigObject) {
         var request = {
             url: blogURL + "/wp-json",
             method: "HEAD",
-            headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
+            headers: px.defaultHeader
         }
 
         var response = restix.fetch(request);
@@ -1971,7 +1973,7 @@ function getConfig(newConfigObject) {
         var request = {
             url: wordPressComPrefix + blogURL,
             method: "HEAD",
-            headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
+            headers: px.defaultHeader
         }
 
         var response = restix.fetch(request);
@@ -2004,7 +2006,7 @@ function getConfig(newConfigObject) {
         var request = {
             url: restURL + "types/",
             command: urlCommandChar + "context=embed",
-            headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
+            headers: px.defaultHeader
         }
 
         var response = restix.fetch(request);
@@ -2047,7 +2049,7 @@ function getConfig(newConfigObject) {
         var request = {
             url: restURL + "categories/",
             command: urlCommandChar + "_fields[]=id&_fields[]=name&per_page=100",
-            headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
+            headers: px.defaultHeader
         }
 
         var response = restix.fetch(request);
@@ -2110,7 +2112,7 @@ function getConfig(newConfigObject) {
             var request = {
                 url: restURL + endPoint + "/",
                 command: action,
-                headers: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }]
+                headers: px.defaultHeader
             }
             var response = restix.fetch(request);
             try {
