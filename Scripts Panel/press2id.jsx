@@ -320,7 +320,7 @@ function processDok(dok) {
                         }
                     }
                     else {
-                        log.warn("Could not donwload/find image URL [" + fileURL + "]");
+                        log.warn("Could not download/find image URL [" + fileURL + "]");
                     }
                 }
 
@@ -509,7 +509,7 @@ function processDok(dok) {
                                 }
                             }
                             else {
-                                log.warn("Could not donwload/find image URL [" + fileURL + "]");
+                                log.warn("Could not download/find image URL [" + fileURL + "]");
                             }
                             datenFeld.object.clearObjectStyleOverrides();
                         }
@@ -677,7 +677,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
 
     var xmlTempFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "result.html");
     writeTextFile(xmlTempFile, content);
-    var xmlLogTempFile = File(log.getLogFolder() + "/donwload.xml");
+    var xmlLogTempFile = File(log.getLogFolder() + "/download.xml");
     writeTextFile(xmlLogTempFile, content);
 
     xmlTempFile = runTidy(xmlTempFile);
