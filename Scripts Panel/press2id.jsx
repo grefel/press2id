@@ -8,7 +8,7 @@
 
 var px = {
     projectName: "press2id",
-    version: "2021-09-01-v2.23",
+    version: "2021-09-17-v2.24",
 
     // Verwaltung
     showGUI: true,
@@ -1331,15 +1331,15 @@ function getConfig(newConfigObject) {
             filterEntries.visible = true;
             newConfigObject.endPointArray = getEndpoints(newConfigObject.restURL);
             endPointDropdown.removeAll();
-            var setNewCategory = true;
+            var setNewEndpoint = true;
             for (var f = 0; f < newConfigObject.endPointArray.length; f++) {
                 endPointDropdown.add("item", newConfigObject.endPointArray[f]);
                 if (newConfigObject.endPoint == newConfigObject.endPointArray[f]) {
                     endPointDropdown.selection = f;
-                    setNewCategory = false;
+                    setNewEndpoint = false;
                 }
             }
-            if (setNewCategory) {
+            if (setNewEndpoint) {
                 endPointDropdown.selection = 0;
                 newConfigObject.endPoint = endPointDropdown.selection.text;
             }
