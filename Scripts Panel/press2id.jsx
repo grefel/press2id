@@ -399,8 +399,9 @@ function processDok(dok) {
                     }
                     catch (e) {
                         log.info("Konnte User Name nicht auf " + oldUserName + " setzen!");
-                        log.warn(e);
-                    }
+                        if (e.number != 41993) {
+                            log.warn(e);
+                        }                    }
                 }
             }
             else if (configObject.modeTemplate) {
