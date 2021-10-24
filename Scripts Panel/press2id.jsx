@@ -4,11 +4,13 @@
 //@include "lib/json2.js"
 //@include "lib/idsLog.jsx"
 //@include "lib/restix.jsx"
+//@include "lib/Base64.jsx"
+//@include "lib/pjxml.js"
 
 
 var px = {
     projectName: "press2id",
-    version: "2021-09-17-v2.24",
+    version: "2021-09-21-v2.25",
 
     defaultHeader: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }],
 
@@ -18,10 +20,15 @@ var px = {
 }
 
 var configObject = {
-    version: "2.11",
+    version: "2.25",
     urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/"],
     siteURL: undefined,
     restURL: undefined,
+    basicAuthentication: {
+        authenticate: false,
+        user: "",
+        password: ""
+    },
     modePlaceGun: true,
     modeTemplate: false,
     modeDatabase: false,
@@ -219,6 +226,11 @@ function processDok(dok) {
                 continue;
             }
 
+            if (px.debug) {
+                var jsonTempFile = File(log.getLogFolder() + "/download.json");
+                writeTextFile(jsonTempFile, JSON.stringify(oneBlogEntry));
+            }
+
             progressbar.step(ui.progressBarProcess + postObject.entryTitle); // label, [step]
 
             // Prepare Data
@@ -259,6 +271,7 @@ function processDok(dok) {
 
                 var startPage = styleTemplateDok.pages[-1];
                 var contentFrame = startPage.textFrames.add();
+                contentFrame.geometricBounds = [0, 0, 1000, 5000]
                 contentFrame.placeXML(postXML);
 
 
@@ -349,7 +362,9 @@ function processDok(dok) {
                     log.info("Could not run '\\s+\\Z' GREP . InDesign CC 2020 Bug?");
                 }
 
-                untag(root);
+                if (!px.debug) {
+                    untag(root);
+                }
             }
             else if (configObject.modeDatabase) {
                 var singleACFBlock = oneBlogEntry.acf;
@@ -389,6 +404,7 @@ function processDok(dok) {
                     }
                     tempICMLFile.remove();
                     dok.links.itemByName(tempICMLFile.name).unlink();
+                    styleTemplateDok.links.everyItem().unlink();
                 }
                 catch (e) {
                     log.warn(e);
@@ -401,7 +417,8 @@ function processDok(dok) {
                         log.info("Konnte User Name nicht auf " + oldUserName + " setzen!");
                         if (e.number != 41993) {
                             log.warn(e);
-                        }                    }
+                        }
+                    }
                 }
             }
             else if (configObject.modeTemplate) {
@@ -1075,7 +1092,8 @@ function getConfig(newConfigObject) {
             try {
                 newConfigObject.siteURL = edittextBlogInfoURL.text;
                 newConfigObject.restURL = discoverRestURL(edittextBlogInfoURL.text);
-                log.info("Set new REST API " + newConfigObject.restURL);
+                log.info("siteURL " + newConfigObject.siteURL);
+                log.info("Set new REST API restURLs " + newConfigObject.restURL);
                 infoArea.text = "Die URL sieht gut aus.\nREST API: " + newConfigObject.restURL;
                 group3.graphics.backgroundColor = greenBrush;
                 newConfigObject.urlList.unshift(newConfigObject.siteURL);
@@ -1934,6 +1952,7 @@ function getConfig(newConfigObject) {
         if (response.error == true) {
             throw Error(localize(ui.pageNotFound, logURL, response.errorMsg));
         }
+
         if (response.head["link"] != undefined) {
             var restRegexResult = response.head["link"].match(restRegex);
             if (restRegexResult) {
@@ -2067,7 +2086,7 @@ function getConfig(newConfigObject) {
             log.info(e);
             return [alleObject];
         }
-
+        log.debug("categories " + JSON.stringify(categories))
         return categories;
     }
 
