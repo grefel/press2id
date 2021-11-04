@@ -681,7 +681,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
 
     }
     if (singlePost.content != undefined && singlePost.content.rendered != undefined) {
-        content += '<div id="content"><h1 class="title">' + postObject.entryTitle + '</h1>\r' + singlePost.content.rendered + '</div>'
+        content += '<div id="content"><h1 class="title">' + singlePost.title.rendered + '</h1>\r' + singlePost.content.rendered + '</div>'
     }
     //Warnung wenn kein Content
     if (!(singlePost.featured_media != 0 && singlePost.featured_media != undefined) &&
