@@ -699,6 +699,8 @@ function createXMLFile(singlePost, postObject, blogURL) {
     writeTextFile(xmlLogTempFile, content);
 
     xmlTempFile = runTidy(xmlTempFile);
+    var xmlLogTempTidyFile = File(log.getLogFolder() + "/download-tidy.xml");
+    xmlTempFile.copy(xmlLogTempTidyFile);
     return xmlTempFile;
 }
 
