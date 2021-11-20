@@ -870,7 +870,7 @@ function isOnline() {
         }
         var response = restix.fetch(request);
         if (response.httpStatus != 200) {
-            log.warn("Could not access " + request.url + " httpStatus " + response.httpStatus);
+            log.warn("Could not access " + request.url + " httpStatus " + response.httpStatus + " " + response.errorMsg);
         }
         else {
             hasAccess = true;
