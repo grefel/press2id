@@ -2161,8 +2161,8 @@ function getConfig(newConfigObject) {
                     break;
                 }
                 else {
+                    var msg = "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message  + " httpStatus: " + response.httpStatus;
                     if (verbose) {
-                        var msg = "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message  + " httpStatus: " + response.httpStatus;
                         log.infoAlert(msg);
                     }
                     else {
