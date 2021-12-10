@@ -2157,11 +2157,11 @@ function getConfig(newConfigObject) {
 
             if (postEmbed.hasOwnProperty("code")) {
                 if (postEmbed.code == "rest_post_invalid_page_number" && maxPages > 1) {
-                    log.info("Ende der Paginierung auf Seite [" + page + "]. Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message + " httpStatus: " + response.httpStatus );
+                    log.info("Ende der Paginierung auf Seite [" + page + "]. Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message + " httpStatus: " + response.httpStatus);
                     break;
                 }
                 else {
-                    var msg = "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message  + " httpStatus: " + response.httpStatus;
+                    var msg = "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message + " httpStatus: " + response.httpStatus;
                     if (verbose) {
                         log.infoAlert(msg);
                     }
