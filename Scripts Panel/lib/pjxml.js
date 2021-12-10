@@ -26,6 +26,9 @@ SOFTWARE.
 // https://github.com/smeans/pjxml
 // slightly adapted for Adobe ExtendScript
 
+// Helper to decode HTML-Entities 
+//@include "encoder.js"
+
 var pjXML = (function () {
 	var me = {};
 	var node_types = {
@@ -95,7 +98,7 @@ var pjXML = (function () {
 			entity = this.entities[entity];
 		}
 		else {
-			// Decode HTML enitites based on encoder.js !!!
+			// Decode HTML enitites based on encoder.js 
 			entity = Encoder.htmlDecode("&" + entity + ";")
 		}
 
@@ -118,6 +121,9 @@ var pjXML = (function () {
 			var er = '';
 			while ((ch = this.read()) != ';' && ch) {
 				er += ch;
+				if (ch.match(/[< '\"]/)) {
+					return "&" + er;
+				}
 			}
 
 			ch = this.getEntity(er);
@@ -432,6 +438,6 @@ var pjXML = (function () {
 	return me;
 }());
 
-// var xml = '<p><em><strong>Wie viele Mandate haben Sie schon gekillt?</strong></em><br />Das ist nicht unsere Aufgabe. Wir sind kein Ethik-TÜV, den beispielsweise neue Großmandate standardmäßig durchlaufen müssen. Dafür hat die Sozietät ein komplexes Mandatsannahmesystem, das neue Mandate auf Herz und Nieren überprüft. Wir regen durch unsere Regelbildung und durch Gespräche, durch kritische Fragen zur Reflexion anwaltlicher Selbstbeobachtung an. Aber wir prüfen auf Wunsch auch ethisch-moralische Zweifelsfälle und geben dann eine Empfehlung ab.</p>'
-// var doc = pjXML.parse(xml);
-// $.writeln(doc.xml());
+//  var xml = '<p test="t&auml; &">Test & Test</p>'
+//  var doc = pjXML.parse(xml);
+//  $.writeln(doc.xml());
