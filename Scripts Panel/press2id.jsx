@@ -90,27 +90,26 @@ function main() {
         return;
     }
 
-    if (!px.siteURL) {
-        var historyConfigObject = app.extractLabel("px:press2idConfig");
-        if (historyConfigObject != "") {
-            log.info("Found old config");
-            historyConfigObject = JSON.parse(historyConfigObject);
-            if (historyConfigObject.version === configObject.version) {
-                configObject = historyConfigObject;
-                if (configObject.styleTemplateFile && File(configObject.styleTemplateFile).exists) {
-                    configObject.styleTemplateFile = File(configObject.styleTemplateFile);
-                }
-                if (configObject.localImageFolder && Folder(configObject.localImageFolder).exists) {
-                    configObject.localImageFolder = Folder(configObject.localImageFolder);
-                }
+    var historyConfigObject = app.extractLabel("px:press2idConfig");
+    if (historyConfigObject != "") {
+        log.info("Found old config");
+        historyConfigObject = JSON.parse(historyConfigObject);
+        if (historyConfigObject.version === configObject.version) {
+            configObject = historyConfigObject;
+            if (configObject.styleTemplateFile && File(configObject.styleTemplateFile).exists) {
+                configObject.styleTemplateFile = File(configObject.styleTemplateFile);
             }
-            else {
-                log.info("saved config object has an old version is ignored!");
+            if (configObject.localImageFolder && Folder(configObject.localImageFolder).exists) {
+                configObject.localImageFolder = Folder(configObject.localImageFolder);
             }
-            configObject.siteURL = undefined;
-            configObject.restURL = undefined;
         }
+        else {
+            log.info("saved config object has an old version is ignored!");
+        }
+        configObject.siteURL = undefined;
+        configObject.restURL = undefined;
     }
+
 
     if (configObject.basicAuthentication != undefined &&
         configObject.basicAuthentication.authenticate) {
