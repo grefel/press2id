@@ -870,7 +870,7 @@ function getConfig(newConfigObject) {
     var loadMaxPages = 1;
 
     var dialog = new Window("dialog");
-    dialog.text = px.projectName + " v" + px.version;
+    dialog.text = px.projectName + " " + px.version;
     dialog.preferredSize.width = 560;
     dialog.preferredSize.height = 540;
     dialog.orientation = "stack";
@@ -907,7 +907,7 @@ function getConfig(newConfigObject) {
     createOptionsDatabase();
     createOptionsTemplate();
 
-    buttonNextMode.onClick();
+    // buttonNextMode.onClick();
     progressbar.step("Werte auslesen 3/3");
     progressbar.close();
 
@@ -2084,7 +2084,7 @@ function getConfig(newConfigObject) {
 
         for (var page = 1; page <= maxPages; page++) {
             var action = urlCommandChar + "_fields[]=title&_fields[]=id&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&filter[orderby]=date&order=" + orderBy;
-            if (categoryID && categoryID != "") {
+            if (categoryID && categoryID * 1 > -1) {
                 action += "&categories=" + categoryID;
             }
             log.info("fn ListOfBlogEntries: " + restURL + endPoint + "/" + action + " mode verbose " + verbose);
