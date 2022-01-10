@@ -1399,7 +1399,7 @@ function getConfig(newConfigObject) {
         // PANEL1
         // ======
         var panel1 = filterEntries.add("panel", undefined, undefined, { name: "panel1" });
-        panel1.text = localize(ui.staticTextFilterElements) + " - " + newConfigObject.siteURL;
+        panel1.text = localize(ui.staticTextFilterElements) + " - " + (px.siteURL ? px.siteURL : newConfigObject.siteURL);
         panel1.preferredSize.width = 540;
         panel1.preferredSize.height = 170;
         panel1.orientation = "column";
