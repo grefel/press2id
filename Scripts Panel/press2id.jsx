@@ -90,24 +90,26 @@ function main() {
         return;
     }
 
-    var historyConfigObject = app.extractLabel("px:press2idConfig");
-    if (historyConfigObject != "") {
-        log.info("Found old config");
-        historyConfigObject = JSON.parse(historyConfigObject);
-        if (historyConfigObject.version === configObject.version) {
-            configObject = historyConfigObject;
-            if (configObject.styleTemplateFile && File(configObject.styleTemplateFile).exists) {
-                configObject.styleTemplateFile = File(configObject.styleTemplateFile);
+    if (!px.siteURL) {
+        var historyConfigObject = app.extractLabel("px:press2idConfig");
+        if (historyConfigObject != "") {
+            log.info("Found old config");
+            historyConfigObject = JSON.parse(historyConfigObject);
+            if (historyConfigObject.version === configObject.version) {
+                configObject = historyConfigObject;
+                if (configObject.styleTemplateFile && File(configObject.styleTemplateFile).exists) {
+                    configObject.styleTemplateFile = File(configObject.styleTemplateFile);
+                }
+                if (configObject.localImageFolder && Folder(configObject.localImageFolder).exists) {
+                    configObject.localImageFolder = Folder(configObject.localImageFolder);
+                }
             }
-            if (configObject.localImageFolder && Folder(configObject.localImageFolder).exists) {
-                configObject.localImageFolder = Folder(configObject.localImageFolder);
+            else {
+                log.info("saved config object has an old version is ignored!");
             }
+            configObject.siteURL = undefined;
+            configObject.restURL = undefined;
         }
-        else {
-            log.info("saved config object has an old version is ignored!");
-        }
-        configObject.siteURL = undefined;
-        configObject.restURL = undefined;
     }
 
     if (configObject.basicAuthentication != undefined &&
@@ -866,7 +868,7 @@ function getConfig(newConfigObject) {
     ui.buttonImageManagementFolderSelect = { en: "Choose", de: "Wählen" };
     ui.buttonImageManagementFolderSelectOnClick = { en: "Select the folder", de: "Wählen Sie den Ordner aus" };
     ui.panelACFFileds = { en: "Fill prepared data fields", de: "Vorbereitete Datenfelder befüllen" };
-    ui.staticTextFilterElements= {en: "Filter elements", de: "Auswahl verfeinern" };
+    ui.staticTextFilterElements = { en: "Filter elements", de: "Auswahl verfeinern" };
 
 
 
@@ -945,7 +947,7 @@ function getConfig(newConfigObject) {
             filterEntries.visible = true;
         }
         else {
-            processingMode.visible = true;        
+            processingMode.visible = true;
         }
     }
     progressbar.step("Werte auslesen 3/3");
