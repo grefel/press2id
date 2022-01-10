@@ -7,9 +7,20 @@
 //@include "lib/pjxml.js"
 
 
+var RunModes = {
+    PLACE_GUN: "placeGun",
+    TEMPLATE: "template",
+    DATABASE: "database"
+}
+
 var px = {
     projectName: "press2id",
-    version: "2022-01-10-v2.26",
+    version: "2022-01-10-v2.28",
+
+    siteURL: null, // Wenn ein Wert eingetragen wird, wird die Startseite übersprungen z.B, siteURL: "https://www.indesignblog.com",
+    // siteURL: "https://www.indesignblog.com",
+    runMode: null, // Wenn ein Wert eingetragen ist, wird die Modus Auswahlseite übersprungen
+    // runMode: RunModes.TEMPLATE,
 
     defaultHeader: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }],
 
@@ -19,7 +30,7 @@ var px = {
 }
 
 var configObject = {
-    version: "2.26",
+    version: "2.28",
     urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/"],
     siteURL: undefined,
     restURL: undefined,
@@ -28,9 +39,9 @@ var configObject = {
         user: "",
         password: ""
     },
-    modePlaceGun: true,
-    modeTemplate: false,
-    modeDatabase: false,
+
+    runMode: RunModes.PLACE_GUN,
+
     filterAfterDate: "2003-05-27",
     filterBeforeDate: "2030-01-01",
     orderBy: "desc", // asc oder desc
@@ -189,11 +200,11 @@ function processDok(dok) {
     log.debug(JSON.stringify(configObject));
 
     // Init
-    if (configObject.modePlaceGun) {
+    if (configObject.runMode == RunModes.PLACE_GUN) {
         dok.placeGuns.abortPlaceGun();
         var modeName = localize({ en: "Fill Place Gun", de: "Platzierungs-Einfügemarke befüllen" });
     }
-    else if (configObject.modeTemplate) {
+    else if (configObject.runMode == RunModes.TEMPLATE) {
         var templateMasterpread = dok.masterSpreads.itemByName("W-Wordpress");
         if (!templateMasterpread.isValid) {
             log.warn(ui.missingMasterSpread);
@@ -201,11 +212,11 @@ function processDok(dok) {
         }
         var modeName = localize({ en: "Fill Masterspread", de: "Musterseiten befüllen" });
     }
-    else if (configObject.modeDatabase) {
+    else if (configObject.runMode == RunModes.DATABASE) {
         var modeName = localize({ en: "Fill Data Fields", de: "Datenfelder befüllen" });
     }
 
-    if (configObject.modePlaceGun || configObject.modeTemplate) {
+    if (configObject.runMode == RunModes.PLACE_GUN || configObject.runMode == RunModes.TEMPLATE) {
         try {
             var styleTemplateDok = app.open(configObject.styleTemplateFile, px.debug, OpenOptions.OPEN_COPY);
         }
@@ -241,11 +252,11 @@ function processDok(dok) {
             progressbar.step(ui.progressBarProcess + postObject.entryTitle); // label, [step]
 
             // Prepare Data
-            if (configObject.modePlaceGun) {
+            if (configObject.runMode == RunModes.PLACE_GUN) {
                 var placeGunArray = [];
             }
 
-            if (configObject.modePlaceGun || configObject.modeTemplate) {
+            if (configObject.runMode == RunModes.PLACE_GUN || configObject.runMode == RunModes.TEMPLATE) {
                 var xmlTempFile = createXMLFile(oneBlogEntry, postObject, restURL);
 
                 // Remove Existing XML
@@ -316,7 +327,7 @@ function processDok(dok) {
 
                     if (imageFile != null && imageFile.exists && imageFile.length > 0) {
 
-                        if (configObject.modePlaceGun && configObject.loadImagesToPlaceGun) {
+                        if (configObject.runMode == RunModes.PLACE_GUN && configObject.loadImagesToPlaceGun) {
                             placeGunArray.push(imageFile);
                         }
                         else {
@@ -376,7 +387,7 @@ function processDok(dok) {
                     untag(root);
                 }
             }
-            else if (configObject.modeDatabase) {
+            else if (configObject.runMode == RunModes.DATABASE) {
                 var singleACFBlock = oneBlogEntry.acf;
                 if (singleACFBlock == undefined) {
                     log.warn(ui.undefinedACFBlock + " " + postObject.id + " " + postObject.entryTitle);
@@ -387,7 +398,7 @@ function processDok(dok) {
             progressbar.step(ui.progressBarPlace + postObject.entryTitle); // label, [step]
 
             // Place data in destination
-            if (configObject.modePlaceGun) {
+            if (configObject.runMode == RunModes.PLACE_GUN) {
 
                 // Export to TEMP ICML
                 var oldUserName = app.userName;
@@ -431,7 +442,7 @@ function processDok(dok) {
                     }
                 }
             }
-            else if (configObject.modeTemplate) {
+            else if (configObject.runMode == RunModes.TEMPLATE) {
                 // Wenn das Template nur eine Seite enthält, wird diese zum Einstieg verwendet. Ansonsten wird eine neue Seite hinten angehangen
                 if (r == 0 && dok.pages.length == 1) {
                     var page = dok.pages[0];
@@ -486,7 +497,7 @@ function processDok(dok) {
                 }
 
             }
-            else if (configObject.modeDatabase) {
+            else if (configObject.runMode == RunModes.DATABASE) {
                 dok.pages[0].duplicate(LocationOptions.AT_END);
                 px.removeFirstPage = true;
                 var lastPage = dok.pages[-1];
@@ -555,11 +566,11 @@ function processDok(dok) {
 
     progressbar.close();
 
-    if (configObject.modePlaceGun || configObject.modeTemplate) {
+    if (configObject.runMode == RunModes.PLACE_GUN || configObject.runMode == RunModes.TEMPLATE) {
         styleTemplateDok.close(SaveOptions.NO);
     }
 
-    if (configObject.modeDatabase && px.removeFirstPage) {
+    if (configObject.runMode == RunModes.DATABASE && px.removeFirstPage) {
         dok.pages[0].remove();
     }
 
@@ -703,10 +714,10 @@ function createXMLFile(singlePost, postObject, blogURL) {
             postObject.featuredImageURL = null;
         }
         else {
-            if (configObject.modePlaceGun) {
+            if (configObject.runMode == RunModes.PLACE_GUN) {
                 htmlString += '<div id="featuredImage">' + featuredImage.source_url + '</div>'
             }
-            else { //if (configObject.modeTemplate) {
+            else { //if (configObject.runMode ==  RunModes.TEMPLATE) {
                 postObject.featuredImageURL = featuredImage.source_url;
             }
         }
@@ -855,6 +866,7 @@ function getConfig(newConfigObject) {
     ui.buttonImageManagementFolderSelect = { en: "Choose", de: "Wählen" };
     ui.buttonImageManagementFolderSelectOnClick = { en: "Select the folder", de: "Wählen Sie den Ordner aus" };
     ui.panelACFFileds = { en: "Fill prepared data fields", de: "Vorbereitete Datenfelder befüllen" };
+    ui.staticTextFilterElements= {en: "Filter elements", de: "Auswahl verfeinern" };
 
 
 
@@ -907,9 +919,38 @@ function getConfig(newConfigObject) {
     createOptionsDatabase();
     createOptionsTemplate();
 
-    // buttonNextMode.onClick();
+    if (px.siteURL) {
+        var request = {
+            url: px.siteURL,
+            method: "HEAD"
+        }
+        var response = restix.fetch(request);
+        if (response.httpStatus != 200) {
+            log.warn("Could not access " + request.url + " httpStatus " + response.httpStatus + " " + response.errorMsg);
+            return;
+        }
+        try {
+            newConfigObject.siteURL = px.siteURL;
+            newConfigObject.restURL = discoverRestURL(px.siteURL);
+        }
+        catch (e) {
+            log.warn(e);
+            return;
+        }
+        geturl.visible = false;
+        if (px.runMode) {
+            newConfigObject.runMode = px.runMode;
+            processingMode.visible = false;
+            buttonNextMode.onClick();
+            filterEntries.visible = true;
+        }
+        else {
+            processingMode.visible = true;        
+        }
+    }
     progressbar.step("Werte auslesen 3/3");
     progressbar.close();
+
 
     var dialogResult = dialog.show();
 
@@ -1123,7 +1164,7 @@ function getConfig(newConfigObject) {
         group5.margins = [0, 1, 0, 0];
 
         var rbPlaceGun = group5.add("radiobutton");
-        rbPlaceGun.value = newConfigObject.modePlaceGun;
+        rbPlaceGun.value = newConfigObject.runMode == RunModes.PLACE_GUN;
         rbPlaceGun.preferredSize.width = 18;
         rbPlaceGun.alignment = ["left", "top"];
 
@@ -1178,7 +1219,7 @@ function getConfig(newConfigObject) {
 
         var rbTemplate = group8.add("radiobutton", undefined, undefined, { name: "multiPost" });
         rbTemplate.preferredSize.width = 18;
-        rbTemplate.value = newConfigObject.modeTemplate;
+        rbTemplate.value = newConfigObject.runMode == RunModes.TEMPLATE;
 
 
         // templateInfoGroup
@@ -1227,7 +1268,7 @@ function getConfig(newConfigObject) {
 
         var rbDatabasePublishing = group11.add("radiobutton", undefined, undefined, { name: "databasePublishing" });
         rbDatabasePublishing.preferredSize.width = 18;
-        rbDatabasePublishing.value = newConfigObject.modeDatabase;
+        rbDatabasePublishing.value = newConfigObject.runMode == RunModes.DATABASE;
 
 
         // acfInfoGroup
@@ -1263,27 +1304,30 @@ function getConfig(newConfigObject) {
         rbPlaceGun.onClick = placeGunMode;
         placeGunInfoGroup.addEventListener('mousedown', placeGunMode);
         function placeGunMode() {
-            rbPlaceGun.value = newConfigObject.modePlaceGun = true;
-            rbTemplate.value = newConfigObject.modeTemplate = false;
-            rbDatabasePublishing.value = newConfigObject.modeDatabase = false;
+            newConfigObject.runMode = RunModes.PLACE_GUN;
+            rbPlaceGun.value = true;
+            rbTemplate.value = false;
+            rbDatabasePublishing.value = false;
             buttonNextMode.enabled = true;
         }
 
         rbTemplate.onClick = templateMode;
         templateInfoGroup.addEventListener('mousedown', templateMode);
         function templateMode() {
-            rbPlaceGun.value = newConfigObject.modePlaceGun = false;
-            rbTemplate.value = newConfigObject.modeTemplate = true;
-            rbDatabasePublishing.value = newConfigObject.modeDatabase = false;
+            newConfigObject.runMode = RunModes.TEMPLATE;
+            rbPlaceGun.value = false;
+            rbTemplate.value = true;
+            rbDatabasePublishing.value = false;
             buttonNextMode.enabled = true;
         }
 
         rbDatabasePublishing.onClick = databaseMode;
         acfInfoGroup.addEventListener('mousedown', databaseMode);
         function databaseMode() {
-            rbPlaceGun.value = newConfigObject.modePlaceGun = false;
-            rbTemplate.value = newConfigObject.modeTemplate = false;
-            rbDatabasePublishing.value = newConfigObject.modeDatabase = true;
+            newConfigObject.runMode = RunModes.DATABASE;
+            rbPlaceGun.value = false;
+            rbTemplate.value = false;
+            rbDatabasePublishing.value = true;
             buttonNextMode.enabled = true;
         }
 
@@ -1354,7 +1398,7 @@ function getConfig(newConfigObject) {
         // PANEL1
         // ======
         var panel1 = filterEntries.add("panel", undefined, undefined, { name: "panel1" });
-        panel1.text = "Auswahl verfeinern";
+        panel1.text = localize(ui.staticTextFilterElements) + " - " + newConfigObject.siteURL;
         panel1.preferredSize.width = 540;
         panel1.preferredSize.height = 170;
         panel1.orientation = "column";
@@ -1510,13 +1554,13 @@ function getConfig(newConfigObject) {
         buttonNext.text = "Weitere Optionen";
         buttonNext.onClick = function () {
             filterEntries.visible = false;
-            if (newConfigObject.modePlaceGun) {
+            if (newConfigObject.runMode == RunModes.PLACE_GUN) {
                 optionsPlaceGun.visible = true;
             }
-            if (newConfigObject.modeTemplate) {
+            if (newConfigObject.runMode == RunModes.TEMPLATE) {
                 optionsTemplate.visible = true;
             }
-            if (newConfigObject.modeDatabase) {
+            if (newConfigObject.runMode == RunModes.DATABASE) {
                 optionsDatabase.visible = true;
             }
         }
@@ -2070,7 +2114,7 @@ function getConfig(newConfigObject) {
      * @param {Number} maxPages Results are paginated by 100 entries, if page > 1 this functions reads until maxPages is reached, or no more entries are found
      * @param {Boolean} verbose
      */
-     function getListOfBlogEntries(newConfigObject, maxPages, verbose) {
+    function getListOfBlogEntries(newConfigObject, maxPages, verbose) {
         var restURL = newConfigObject.restURL;
         var endPoint = newConfigObject.endPoint;
         var beforeDate = newConfigObject.filterBeforeDate;
