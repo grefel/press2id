@@ -1,6 +1,5 @@
-//DESCRIPTION:press2id – Access Wordpress Sites
+//DESCRIPTION:press2id – Access WordPress Sites
 //Author: Gregor Fellenz - http://www.publishingx.de
-//@include "lib/encoder.js"
 //@include "lib/json2.js"
 //@include "lib/idsLog.jsx"
 //@include "lib/restix.jsx"
@@ -10,7 +9,7 @@
 
 var px = {
     projectName: "press2id",
-    version: "2021-09-21-v2.25",
+    version: "2022-01-10-v2.26",
 
     defaultHeader: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }],
 
@@ -20,7 +19,7 @@ var px = {
 }
 
 var configObject = {
-    version: "2.25",
+    version: "2.26",
     urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/"],
     siteURL: undefined,
     restURL: undefined,
@@ -43,6 +42,7 @@ var configObject = {
     localImageFolder: undefined,
     endPoint: "posts",
     category: undefined,
+    xsltFile: "wp2id_import.xsl"
 }
 
 var jsonFieldType = {
@@ -68,6 +68,10 @@ function main() {
 
     // Init Log
     initLog();
+    createProgressbar();
+
+    progressbar.init(px.projectName, 3); // title, max
+    progressbar.step("Teste Internet Verbindung 1/3");
 
     if (!isOnline()) {
         log.warn(localize({ de: "Kein Internetzugang", en: "No internet access" }));
@@ -95,21 +99,25 @@ function main() {
         configObject.restURL = undefined;
     }
 
-    // TODO bring to Config Panel -> Option to select a template
-    var templateFile = getTemplateFile();
-    if (templateFile == null) {
-        log.warn(localize(ui.noTemplate));
-        return false;
+    if (configObject.basicAuthentication != undefined &&
+        configObject.basicAuthentication.authenticate) {
+        px.defaultHeader.push({ name: "Authorization", value: "Basic " + Base64.encode(configObject.basicAuthentication.user + ":" + configObject.basicAuthentication.password) });
     }
-    configObject.styleTemplateFile = templateFile;
 
-
+    progressbar.step("Seitendaten laden 2/3");
 
     var result = getConfig(configObject);
     if (result != null) {
         configObject = result;
         log.info("User Ok, Write Config to app");
-        configObject.styleTemplateFile = (configObject.styleTemplateFile && configObject.styleTemplateFile.constructor.name == "File" && configObject.styleTemplateFile.exists) ? configObject.styleTemplateFile.fullName : undefined;
+
+        // TODO bring to Config Panel -> Option to select a template
+        var templateFile = getTemplateFile(configObject);
+        if (templateFile == null) {
+            log.warn(localize(ui.noTemplate));
+            return false;
+        }
+        configObject.styleTemplateFile = templateFile;
         configObject.localImageFolder = (configObject.localImageFolder && configObject.localImageFolder.constructor.name == "Folder" && configObject.localImageFolder.exists) ? configObject.localImageFolder.fullName : undefined;
         app.insertLabel("px:press2idConfig", JSON.stringify(configObject));
         configObject.styleTemplateFile = (configObject.styleTemplateFile) ? File(configObject.styleTemplateFile) : undefined;
@@ -180,7 +188,7 @@ function processDok(dok) {
 
     log.debug(JSON.stringify(configObject));
 
-    // Init 
+    // Init
     if (configObject.modePlaceGun) {
         dok.placeGuns.abortPlaceGun();
         var modeName = localize({ en: "Fill Place Gun", de: "Platzierungs-Einfügemarke befüllen" });
@@ -210,7 +218,6 @@ function processDok(dok) {
 
     var restURL = configObject.restURL;
     var endPoint = configObject.endPoint;
-    createProgressbar();
     progressbar.init(localize(ui.progressBarInit, configObject.selectedPostsArray.length, modeName), configObject.selectedPostsArray.length * 2); // title, max
 
     // Process selected entries
@@ -242,12 +249,18 @@ function processDok(dok) {
                 var xmlTempFile = createXMLFile(oneBlogEntry, postObject, restURL);
 
                 // Remove Existing XML
-                styleTemplateDok.xmlElements[0].contents = "";
+                try {
+                    // styleTemplateDok.xmlElements[0].contents = "";
+                    untag(styleTemplateDok.xmlElements[0]);
+                }
+                catch (e) {
+                    log.warn(e);
+                }
 
-                // Set Import Preferences 
+                // Set Import Preferences
                 with (styleTemplateDok.xmlImportPreferences) {
                     allowTransform = true;
-                    transformFilename = File(getScriptFolderPath() + "/lib/wp2id_import.xsl");
+                    transformFilename = File(getScriptFolderPath() + "/lib/" + configObject.xsltFile);
                     transformParameters = [];
                     createLinkToXML = false;
                     ignoreUnmatchedIncoming = false;
@@ -275,7 +288,7 @@ function processDok(dok) {
                 contentFrame.placeXML(postXML);
 
 
-                // Bilder platzieren 
+                // Bilder platzieren
                 var imgArray = postXML.evaluateXPathExpression("//*[@src]");
                 for (var i = 0; i < imgArray.length; i++) {
                     var imgXML = imgArray[i];
@@ -339,10 +352,15 @@ function processDok(dok) {
 
                 var currentEntryStory = contentFrame.parentStory;
 
-                // Fix whitespace at beginning of parageraph
+                // Fix whitespace at beginning of paragraph
                 app.findGrepPreferences = NothingEnum.NOTHING;
                 app.changeGrepPreferences = NothingEnum.NOTHING;
+                app.findGrepPreferences.findWhat = " (?= )";
+                app.changeGrepPreferences.changeTo = "";
+                currentEntryStory.changeGrep();
                 app.findGrepPreferences.findWhat = "^ +";
+                app.changeGrepPreferences.changeTo = "";
+
                 currentEntryStory.changeGrep();
 
                 // Fix forced Line break at end of paragraph
@@ -352,17 +370,9 @@ function processDok(dok) {
                 currentEntryStory.changeGrep();
 
                 // Kill Last white space.
-                app.findGrepPreferences = NothingEnum.NOTHING;
-                app.changeGrepPreferences = NothingEnum.NOTHING;
-                app.findGrepPreferences.findWhat = "\\s+\\Z";
-                try {
-                    currentEntryStory.changeGrep();
-                }
-                catch (e) {
-                    log.info("Could not run '\\s+\\Z' GREP . InDesign CC 2020 Bug?");
-                }
+                fixStoryEnd(currentEntryStory);
 
-                if (!px.debug) {
+                if (!px.debug && configObject.selectedPostsArray.length == 1) {
                     untag(root);
                 }
             }
@@ -422,7 +432,7 @@ function processDok(dok) {
                 }
             }
             else if (configObject.modeTemplate) {
-                // Wenn das Template nur eine Seite enthält, wird diese zum Einstieg verwendet. Ansonsten wird eine neue Seite hinten angehangen 
+                // Wenn das Template nur eine Seite enthält, wird diese zum Einstieg verwendet. Ansonsten wird eine neue Seite hinten angehangen
                 if (r == 0 && dok.pages.length == 1) {
                     var page = dok.pages[0];
                 }
@@ -555,6 +565,28 @@ function processDok(dok) {
 
 }
 
+function fixStoryEnd(story) {
+    try {
+        var lastCharCounter = -1
+        var lastChar = story.characters[lastCharCounter]
+        while (lastChar.isValid) {
+            if (lastChar.contents == "\r") {
+                lastChar.contents = "";
+                break;
+            }
+            else if (lastChar.contents == "\uFEFF") {
+                lastCharCounter--;
+                lastChar = story.characters[lastCharCounter]
+            }
+            else {
+                break;
+            }
+        }
+    }
+    catch (e) {
+        log.warn(e);
+    }
+}
 
 function getImageFile(configObject, fileURL) {
     if (!fileURL.match(/^http/)) {
@@ -562,7 +594,7 @@ function getImageFile(configObject, fileURL) {
     }
     var fileName = getFileNameFromURL(fileURL)
     if (configObject.downloadImages) {
-        // Bilder herunterladen 
+        // Bilder herunterladen
         var linkPath = Folder(px.documentFolder + "/Links");
         linkPath.create();
         if (!linkPath.exists) {
@@ -636,14 +668,14 @@ function getSingleEntity(blogURL, endPoint, postObject) {
 
 function createXMLFile(singlePost, postObject, blogURL) {
 
-    // HTML zusammebauen 
-    var content = '<html><head><title>' + postObject.id + '</title>'
+    // HTML zusammenbauen
+    var htmlString = '<html><head><title>' + postObject.id + '</title>'
     if (singlePost.acf != undefined) {
         for (prop in singlePost.acf) {
-            content += '<meta name="' + prop + '" content="' + singlePost.acf[prop] + '"></acf>';
+            htmlString += '<meta name="' + prop + '" content="' + singlePost.acf[prop] + '"></acf>';
         }
     }
-    content += '</head><body>'
+    htmlString += '</head><body>'
 
 
     // Featured Image einbinden
@@ -672,7 +704,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
         }
         else {
             if (configObject.modePlaceGun) {
-                content += '<div id="featuredImage">' + featuredImage.source_url + '</div>'
+                htmlString += '<div id="featuredImage">' + featuredImage.source_url + '</div>'
             }
             else { //if (configObject.modeTemplate) {
                 postObject.featuredImageURL = featuredImage.source_url;
@@ -681,7 +713,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
 
     }
     if (singlePost.content != undefined && singlePost.content.rendered != undefined) {
-        content += '<div id="content"><h1 class="title">' + singlePost.title.rendered + '</h1>\r' + singlePost.content.rendered + '</div>'
+        htmlString += '<div id="content"><h1 class="title">' + singlePost.title.rendered + '</h1>\r' + singlePost.content.rendered + '</div>'
     }
     //Warnung wenn kein Content
     if (!(singlePost.featured_media != 0 && singlePost.featured_media != undefined) &&
@@ -689,104 +721,26 @@ function createXMLFile(singlePost, postObject, blogURL) {
     ) {
         log.warn("No content in [" + postObject.entryTitle + "]");
     }
-    content += '</body></html>';
+    htmlString += '</body></html>';
 
+    // Fix self closing tags before parse
+    htmlString = htmlString.replace(/<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr|command|keygen|menuitem)\s*([^>]*)\s*\/?\s*>/g, '<$1 $2/>');
+    htmlString = htmlString.replace(/<\/(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr|command|keygen|menuitem)>/g, '');
+    // not escaped & in html...
+    htmlString = htmlString.replace(/&(?=\s)/, "&amp;");
 
+    var xmlTempFile = File(log.getLogFolder() + "/download.html");
+    writeTextFile(xmlTempFile, htmlString);
 
-    var xmlTempFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "result.html");
-    writeTextFile(xmlTempFile, content);
-    var xmlLogTempFile = File(log.getLogFolder() + "/download.xml");
-    writeTextFile(xmlLogTempFile, content);
+    var xmlDoc = pjXML.parse(htmlString);
+    var xmlString = xmlDoc.xml();
 
-    xmlTempFile = runTidy(xmlTempFile);
-    var xmlLogTempTidyFile = File(log.getLogFolder() + "/download-tidy.xml");
-    xmlTempFile.copy(xmlLogTempTidyFile);
+    xmlTempFile = File(log.getLogFolder() + "/download.xml");
+    writeTextFile(xmlTempFile, xmlString);
+
     return xmlTempFile;
 }
 
-/* HTML Tidy aufrufen */
-function runTidy(xmlTempFile) {
-    try {
-        var cmd = "";
-        var systemCmd = "";
-        var timeOut = 0;
-        var processResultFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "result.txt");
-        var libPath = Folder(getScriptFolderPath() + "/lib");
-
-
-        if ($.os.indexOf("Windows") > -1) {
-            var tidyBinPath = '"' + libPath.fsName + '/tidy-win/tidy.exe"';
-            var tidyConfigPath = '"' + libPath.fsName + '/tidyconfig.txt"';
-            var tidyErrorPath = '"' + libPath.parent.fsName + '/log/tidyError.txt"';
-            cmd = [
-                tidyBinPath + ' -config ' + tidyConfigPath + ' -f ' + tidyErrorPath + ' -m ' + xmlTempFile.fsName,
-                'echo Exit Code is %errorlevel% > "' + processResultFile.fsName + '"'
-            ].join("\n");
-
-            systemScriptFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "system.bat");
-            writeTextFileLocal(systemScriptFile, cmd, "UTF-8", "WINDOWS");
-
-            systemCmd = "Set WshShell = CreateObject(\"WScript.Shell\")\r";
-            systemCmd += "WshShell.Run chr(34) & \"" + systemScriptFile.fsName + "\" & Chr(34), 0\r";
-            systemCmd += "Set WshShell = Nothing\r";
-            systemCmd += "\r";
-            app.doScript(systemCmd, ScriptLanguage.VISUAL_BASIC);
-        }
-        else { // Mac
-            var tidyBinPath = '"' + libPath.fsName + '/tidy-mac/tidy"';
-            systemCmd = 'do shell script "chmod u+x \'' + libPath.fsName + '/tidy-mac/tidy' + '\'"';
-            app.doScript(systemCmd, ScriptLanguage.APPLESCRIPT_LANGUAGE);
-
-            var tidyConfigPath = '"' + libPath.fsName + '/tidyconfig.txt"';
-            var tidyErrorPath = '"' + libPath.parent.fsName + '/log/tidyError.txt"';
-
-            cmd = [
-                '#!/bin/bash',
-                tidyBinPath + ' -config ' + tidyConfigPath + ' -f ' + tidyErrorPath + ' -m ' + xmlTempFile.fsName,
-                'echo $? >> "' + processResultFile.fsName + '"',
-                'echo 0',
-            ].join("\n");
-
-            systemScriptFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "system.sh");
-            writeTextFileLocal(systemScriptFile, cmd, "UTF-8", "UNIX");
-
-            //~ 			We dont need +x because of call with bash ...
-            //~ 			systemCmd = 'do shell script "chmod u+x \'' +systemScriptFile.fsName + '\'"';
-            //~ 			app.doScript(systemCmd, ScriptLanguage.APPLESCRIPT_LANGUAGE);						
-
-            systemCmd = 'do shell script "bash \'' + systemScriptFile.fsName + '\'"';
-            app.doScript(systemCmd, ScriptLanguage.APPLESCRIPT_LANGUAGE);
-
-        }
-
-        timeoutFileExistence(processResultFile, 60);
-
-        if (!processResultFile.exists) {
-            throw Error("Could not execute System Script!");
-        }
-        processResultFile.open("r");
-        var resultString = processResultFile.readln();
-        processResultFile.close();
-        processResultFile.remove();
-
-        log.info("Transform result: " + resultString);
-        //~ 		if (resultString.indexOf ("java version") == 0) {
-        //~ 			return true;
-        //~ 		} else {
-        //~ 			log.info("Java Test Result: " +  resultString);
-        //~ 			return false;
-        //~ 		}
-    }
-    catch (e) {
-        throw e;
-    }
-    finally {
-        // Clean up
-        if (processResultFile && processResultFile.exists) processResultFile.remove();
-        if (systemScriptFile && systemScriptFile.exists) systemScriptFile.remove();
-        return xmlTempFile;
-    }
-}
 
 /* Wirft eine Fehlermeldung nach der angegeben Zeit */
 function timeoutFileExistence(processResultFile, seconds) {
@@ -916,7 +870,7 @@ function getConfig(newConfigObject) {
     var loadMaxPages = 1;
 
     var dialog = new Window("dialog");
-    dialog.text = "press2id - Bring your WordPress Content to InDesign v" + px.version;
+    dialog.text = px.projectName + " v" + px.version;
     dialog.preferredSize.width = 560;
     dialog.preferredSize.height = 540;
     dialog.orientation = "stack";
@@ -952,6 +906,10 @@ function getConfig(newConfigObject) {
     createOptionsImages();
     createOptionsDatabase();
     createOptionsTemplate();
+
+    buttonNextMode.onClick();
+    progressbar.step("Werte auslesen 3/3");
+    progressbar.close();
 
     var dialogResult = dialog.show();
 
@@ -1382,8 +1340,8 @@ function getConfig(newConfigObject) {
                 newConfigObject.categoryID = categoryDropDown.selection.categoryID;
             }
 
-            // Fill 
-            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
+            // Fill
+            listItems = getListOfBlogEntries(newConfigObject, loadMaxPages, false);
             fillListboxSelectPost(listItems);
         }
     }
@@ -1422,7 +1380,7 @@ function getConfig(newConfigObject) {
             }
             if (isValidDate(edittextAfterDate.text)) {
                 newConfigObject.filterAfterDate = edittextAfterDate.text;
-                listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
+                listItems = getListOfBlogEntries(newConfigObject, loadMaxPages, false);
                 fillListboxSelectPost(listItems);
             }
             else {
@@ -1438,7 +1396,7 @@ function getConfig(newConfigObject) {
             }
             if (isValidDate(edittextBeforeDate.text)) {
                 newConfigObject.filterBeforeDate = edittextBeforeDate.text;
-                listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
+                listItems = getListOfBlogEntries(newConfigObject, loadMaxPages, false);
                 fillListboxSelectPost(listItems);
             }
             else {
@@ -1452,7 +1410,7 @@ function getConfig(newConfigObject) {
         orderByDD.selection = (newConfigObject.orderBy == "desc") ? 0 : 1;
         orderByDD.onChange = function () {
             newConfigObject.orderBy = (orderByDD.selection == 0) ? "desc" : "asc";
-            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
+            listItems = getListOfBlogEntries(newConfigObject, loadMaxPages, false);
             fillListboxSelectPost(listItems);
         }
 
@@ -1466,7 +1424,7 @@ function getConfig(newConfigObject) {
 
         endPointDropdown.onChange = function () {
             newConfigObject.endPoint = endPointDropdown.selection.text;
-            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
+            listItems = getListOfBlogEntries(newConfigObject, loadMaxPages, false);
             fillListboxSelectPost(listItems);
         }
 
@@ -1478,7 +1436,7 @@ function getConfig(newConfigObject) {
 
         categoryDropDown.onChange = function () {
             newConfigObject.categoryID = categoryDropDown.selection.categoryID;
-            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
+            listItems = getListOfBlogEntries(newConfigObject, loadMaxPages, false);
             fillListboxSelectPost(listItems);
         }
 
@@ -1491,7 +1449,7 @@ function getConfig(newConfigObject) {
 
         buttonFilter.onClick = function () {
             loadMaxPages = 50;
-            listItems = getListOfBlogEntries(newConfigObject.restURL, loadMaxPages, false, newConfigObject.endPoint, newConfigObject.filterBeforeDate, newConfigObject.filterAfterDate, newConfigObject.categoryID, newConfigObject.orderBy);
+            listItems = getListOfBlogEntries(newConfigObject, loadMaxPages, false);
             fillListboxSelectPost(listItems);
         }
 
@@ -1675,7 +1633,7 @@ function getConfig(newConfigObject) {
         group1.spacing = 10;
         group1.margins = [0, 20, 0, 0];
 
-        // Panel Image Management 	
+        // Panel Image Management
         var groupImageManagementRadioSelect = group1.add("group {spacing:5, alignChildren:['left', 'top'], orientation:'column'}");
         var radioImageManagementDownload = groupImageManagementRadioSelect.add("radiobutton");
         radioImageManagementDownload.text = localize(ui.radioImageManagementDownload);
@@ -1701,10 +1659,10 @@ function getConfig(newConfigObject) {
             var res = configObject.localImageFolder;
             edittextImageManagementFolder.text = (res.parent) ? ".../" + res.parent.name : "";
             if (res.parent && res.parent == "~") edittextImageManagementFolder.text = res.parent;
-            edittextImageManagementFolder.text += "/" + res.name; //fsName.toString().substring(0,2000);            
+            edittextImageManagementFolder.text += "/" + res.name; //fsName.toString().substring(0,2000);
         }
         else {
-            // TODO eigentlich müsste man warnen, wenn der Ordner nicht mehr existiert ... 
+            // TODO eigentlich müsste man warnen, wenn der Ordner nicht mehr existiert ...
             radioImageManagementDownload.value = true;
         }
         groupImageManagementFolderSelect.enabled = radioImageManagementLocalFolder.value;
@@ -1893,7 +1851,7 @@ function getConfig(newConfigObject) {
     }
 
 
-    // Replace the Listbox with posts 
+    // Replace the Listbox with posts
     function fillListboxSelectPost(localListItems) {
         var tempMatcher = escapeRegExpJS(etPostFilter.text.toLowerCase());
         var tempArray = [];
@@ -2107,17 +2065,18 @@ function getConfig(newConfigObject) {
     }
 
     /**
-     * Fetch Blog Posts 
-     * @param {String} restURL 
+     * Fetch Blog Posts
+     * @param {Object} newConfigObject
      * @param {Number} maxPages Results are paginated by 100 entries, if page > 1 this functions reads until maxPages is reached, or no more entries are found
-     * @param {Boolean} verbose 
-     * @param {String} endPoint posts, pages, ...
-     * @param {String} beforeDate 
-     * @param {String} afterDate 
-     * @param {String} categoryID
-     * @param {String} orderBy (asc|desc)
+     * @param {Boolean} verbose
      */
-    function getListOfBlogEntries(restURL, maxPages, verbose, endPoint, beforeDate, afterDate, categoryID, orderBy) {
+     function getListOfBlogEntries(newConfigObject, maxPages, verbose) {
+        var restURL = newConfigObject.restURL;
+        var endPoint = newConfigObject.endPoint;
+        var beforeDate = newConfigObject.filterBeforeDate;
+        var afterDate = newConfigObject.filterAfterDate;
+        var categoryID = newConfigObject.categoryID;
+        var orderBy = newConfigObject.orderBy;
         var localListItems = [];
         var ui = {};
         ui.noBlogPostsOnSite = { en: "No content entries on [%1] for endpoint [%2]", de: "Keine Inhalte auf [%1] für endpoint [%2]" };
@@ -2125,7 +2084,7 @@ function getConfig(newConfigObject) {
 
         for (var page = 1; page <= maxPages; page++) {
             var action = urlCommandChar + "_fields[]=title&_fields[]=id&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&filter[orderby]=date&order=" + orderBy;
-            if (categoryID && categoryID * 1 > -1) {
+            if (categoryID && categoryID != "") {
                 action += "&categories=" + categoryID;
             }
             log.info("fn ListOfBlogEntries: " + restURL + endPoint + "/" + action + " mode verbose " + verbose);
@@ -2192,7 +2151,7 @@ function getConfig(newConfigObject) {
 
 /**
  * Liest aus einer InDesign-Gruppe die Datenfelder für die JSON-Befüllung aus
- * @param {Page} jsonDatenfeldPage 
+ * @param {Page} jsonDatenfeldPage
  */
 function getDatenfelder(jsonDatenfeldPage) {
     var jsonDatenfelder = [];
@@ -2226,7 +2185,7 @@ function getDatenfelder(jsonDatenfeldPage) {
 
 /**
  * Find or change with GREP
- * @param {Object} where An InDesign Object to search within (Document, Story, Text, Table, TextFrame) 
+ * @param {Object} where An InDesign Object to search within (Document, Story, Text, Table, TextFrame)
  * @param {Object|String} find String or findGrepPreferences.properties to search for
  * @param {Object|String|null} change String or changeGrepPreferences.properties to search for. If null, will only search in object *where* Note: Resulting Array is reversed
  * @param {Boolean} includeMaster Defaults to false
@@ -2319,7 +2278,7 @@ function escapeRegExpJS(str) {
 
 /**
  * Unique an array
- * @param {*} arr 
+ * @param {*} arr
  */
 function unique(arr) {
     var hash = {}, result = [];
@@ -2368,7 +2327,7 @@ function setDefaultValues(dok) {
     dok.textDefaults.appliedParagraphStyle = dok.paragraphStyles[1];
     //~ 	px.idDocument.pageItemDefaults.appliedGraphicObjectStyle
     //~ 	px.idDocument.pageItemDefaults.appliedGridObjectStyle
-    //~ 	px.idDocument.pageItemDefaults.appliedTextObjectStyle		
+    //~ 	px.idDocument.pageItemDefaults.appliedTextObjectStyle
     dok.viewPreferences.horizontalMeasurementUnits = MeasurementUnits.MILLIMETERS;
     dok.viewPreferences.verticalMeasurementUnits = MeasurementUnits.MILLIMETERS;
     dok.viewPreferences.rulerOrigin = RulerOrigin.PAGE_ORIGIN;
@@ -2454,6 +2413,9 @@ function getFileNameFromURL(fileURL) {
     fileName = fileName.replace(regexSymbolWithCombiningMarks, '$1');
     fileName = encodeURI(fileName)
     fileName = fileName.replace(/%/g, "");
+    if (fileName == "main.php") {
+        fileName = new Date().getTime() + Math.random().toString().replace(/\./, '') + ".jpg";
+    }
     return fileName;
 }
 
@@ -2468,7 +2430,7 @@ function untag(xmlElement) {
 }
 
 /**
- * Fortschrittsanzeige 
+ * Fortschrittsanzeige
  */
 function createProgressbar() {
 
