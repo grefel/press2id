@@ -15,7 +15,7 @@ var RunModes = {
 
 var px = {
     projectName: "press2id",
-    version: "2022-01-10-v2.28",
+    version: "2022-02-02-v2.29",
 
     siteURL: null, // Wenn ein Wert eingetragen wird, wird die Startseite übersprungen z.B, siteURL: "https://www.indesignblog.com",
     // siteURL: "https://www.indesignblog.com",
@@ -684,7 +684,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
     var htmlString = '<html><head><title>' + postObject.id + '</title>'
     if (singlePost.acf != undefined) {
         for (prop in singlePost.acf) {
-            htmlString += '<meta name="' + prop + '" content="' + singlePost.acf[prop] + '"></acf>';
+            htmlString += '<meta name="' + prop + '">"' + singlePost.acf[prop] + '</acf>';
         }
     }
     htmlString += '</head><body>'
@@ -736,7 +736,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
     htmlString += '</body></html>';
 
     // Fix self closing tags before parse
-    htmlString = htmlString.replace(/<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr|command|keygen|menuitem)\s*([^>]*)\s*\/?\s*>/g, '<$1 $2/>');
+    htmlString = htmlString.replace(/<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr|command|keygen|menuitem)\s*([^>\/]*)\s*\/?\s*>/g, '<$1 $2/>');
     htmlString = htmlString.replace(/<\/(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr|command|keygen|menuitem)>/g, '');
     // not escaped & in html...
     htmlString = htmlString.replace(/&(?=\s)/, "&amp;");
@@ -880,6 +880,7 @@ function getConfig(newConfigObject) {
     var stNumberOfEntries
     var groupSelectPost;
     var buttonNextMode;
+    var filterPanel;
     var loadMaxPages = 1;
 
     var dialog = new Window("dialog");
@@ -1388,6 +1389,8 @@ function getConfig(newConfigObject) {
             // Fill
             listItems = getListOfBlogEntries(newConfigObject, loadMaxPages, false);
             fillListboxSelectPost(listItems);
+
+            filterPanel.text = localize(ui.staticTextFilterElements) + " - " + newConfigObject.siteURL;
         }
     }
     function createFilterPanel() {
@@ -1398,18 +1401,18 @@ function getConfig(newConfigObject) {
 
         // PANEL1
         // ======
-        var panel1 = filterEntries.add("panel", undefined, undefined, { name: "panel1" });
-        panel1.text = localize(ui.staticTextFilterElements) + " - " + (px.siteURL ? px.siteURL : newConfigObject.siteURL);
-        panel1.preferredSize.width = 540;
-        panel1.preferredSize.height = 170;
-        panel1.orientation = "column";
-        panel1.alignChildren = ["left", "top"];
-        panel1.spacing = 10;
-        panel1.margins = 10;
+        filterPanel = filterEntries.add("panel", undefined, undefined, { name: "filterPanel" });
+        filterPanel.text = localize(ui.staticTextFilterElements);
+        filterPanel.preferredSize.width = 540;
+        filterPanel.preferredSize.height = 170;
+        filterPanel.orientation = "column";
+        filterPanel.alignChildren = ["left", "top"];
+        filterPanel.spacing = 10;
+        filterPanel.margins = 10;
 
         // GROUP1
         // ======
-        var group1 = panel1.add("group", undefined, { name: "group1" });
+        var group1 = filterPanel.add("group", undefined, { name: "group1" });
         group1.orientation = "column";
         group1.alignChildren = ["left", "center"];
         group1.spacing = 10;
