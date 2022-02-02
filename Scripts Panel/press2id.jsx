@@ -381,6 +381,12 @@ function processDok(dok) {
                 app.findGrepPreferences.findWhat = "\\n(?=\\r)";
                 currentEntryStory.changeGrep();
 
+                // Fix empty lines
+                app.findGrepPreferences = NothingEnum.NOTHING;
+                app.changeGrepPreferences = NothingEnum.NOTHING;
+                app.findGrepPreferences.findWhat = "\\r(?=\\r)";
+                currentEntryStory.changeGrep();
+
                 // Kill Last white space.
                 fixStoryEnd(currentEntryStory);
 
