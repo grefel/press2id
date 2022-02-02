@@ -300,11 +300,12 @@ var pjXML = (function () {
 	}
 
 	Node.prototype.parse = function (lex) {
-		var ch;
+		var p = lex.peek();
+		var ch = lex.nextChar();
 		var s = '';
 
-		while (ch = lex.nextChar()) {
-			if (ch == '<') {
+		while (ch) {
+			if (ch == '<' && p != '&') {
 				this.append(s);
 				s = '';
 				ch = lex.nextChar();
@@ -342,7 +343,7 @@ var pjXML = (function () {
 						while ((ch = lex.peek()) && (ch != '/' && ch != '>')) {
 							lex.skipSpace();
 							var an = lex.readName();
-                                if (an == "") continue;
+							if (an == "") continue;
 							lex.consumeString('=');
 							en.attributes[an] = lex.replaceEntities(lex.readQuotedString());
 							lex.skipSpace();
@@ -357,9 +358,12 @@ var pjXML = (function () {
 						this.append(en);
 					} break;
 				}
-			} else {
+			}
+			else {
 				s += ch;
 			}
+			p = lex.peek();
+			ch = lex.nextChar();
 		}
 
 		if (s.length) {
@@ -438,6 +442,6 @@ var pjXML = (function () {
 	return me;
 }());
 
-//  var xml = '<p test="t&auml; &">Test & Test</p>'
-//  var doc = pjXML.parse(xml);
-//  $.writeln(doc.xml());
+// var xml = '<p>Users/&lt;username&gt;/Library</p>'
+// var doc = pjXML.parse(xml);
+// $.writeln(doc.xml());

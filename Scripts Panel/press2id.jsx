@@ -684,7 +684,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
     var htmlString = '<html><head><title>' + postObject.id + '</title>'
     if (singlePost.acf != undefined) {
         for (prop in singlePost.acf) {
-            htmlString += '<meta name="' + prop + '">"' + singlePost.acf[prop] + '</acf>';
+            htmlString += '<meta name="' + prop + '">"' + singlePost.acf[prop] + '</meta>';
         }
     }
     htmlString += '</head><body>'
