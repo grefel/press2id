@@ -629,7 +629,12 @@ function getImageFile(configObject, fileURL) {
 
         var response = restix.fetchFile(request, imageFile);
         if (response.error) {
-            log.warn("Error while download image [" + fileName + "]\nfrom URL [" + fileURL + "]\nto local file [" + imageFile + "]\n\n" + response.errorMsg);
+            log.warn("Error while download image [" + fileName + "]\nfrom URL [" + fileURL + "]\nto local file [" + imageFile + "]\n" + response.errorMsg + "\n" + response.httpStatus);
+            return null;
+        }
+        if (response.httpStatus == 404) {
+            log.warn("Error while download image [" + fileName + "]\nfrom URL [" + fileURL + "]\nto local file [" + imageFile + "]\n" + response.httpStatus);
+            return null;
         }
     }
     else {
