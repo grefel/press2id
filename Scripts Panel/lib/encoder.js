@@ -24,7 +24,7 @@
  *
  * Revision:
  *  2012-09-23, Alex Oss: 
- *		 - replaced string concatonation in numEncode with string builder, push and join for peformance with ammendments by Rob Reid
+ *		 - replaced string concatenation in numEncode with string builder, push and join for performance with ammendments by Rob Reid
  */
 
 Encoder = {
@@ -241,3 +241,5 @@ Encoder = {
 	}
 
 }
+
+alert(Encoder.htmlDecode('&#x1D306;'))
