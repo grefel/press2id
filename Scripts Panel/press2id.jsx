@@ -22,6 +22,10 @@ var px = {
     runMode: null, // Wenn ein Wert eingetragen ist, wird die Modus Auswahlseite übersprungen
     // runMode: RunModes.TEMPLATE,
 
+    authenticate: false,
+    user: "",
+    password: "",
+
     defaultHeader: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }],
 
     // Verwaltung
@@ -34,7 +38,7 @@ var configObject = {
     urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/"],
     siteURL: undefined,
     restURL: undefined,
-    basicAuthentication: {
+    basicAuthentication: {  // Do not put values here! Defaults are defined in px.authenticate
         authenticate: false,
         user: "",
         password: ""
@@ -108,12 +112,6 @@ function main() {
         }
         configObject.siteURL = undefined;
         configObject.restURL = undefined;
-    }
-
-
-    if (configObject.basicAuthentication != undefined &&
-        configObject.basicAuthentication.authenticate) {
-        px.defaultHeader.push({ name: "Authorization", value: "Basic " + Base64.encode(configObject.basicAuthentication.user + ":" + configObject.basicAuthentication.password) });
     }
 
     progressbar.step("Seitendaten laden 2/3");
@@ -285,7 +283,14 @@ function processDok(dok) {
                     repeatTextElements = false;
                 }
 
-                styleTemplateDok.importXML(xmlTempFile);
+                try {
+                    styleTemplateDok.importXML(xmlTempFile);
+                }
+                catch(e) {
+                    log.warn("Die XML-Datei konnte nicht importiert werden! Wahrscheinlich konnte eine HTML-Struktur nicht richtig analysiert werden!");
+                    log.warn(e);
+                    return;
+                }
 
                 var root = styleTemplateDok.xmlElements[0];
                 var postXML = root.xmlElements.itemByName("post");
@@ -370,7 +375,7 @@ function processDok(dok) {
                 app.findGrepPreferences.findWhat = " (?= )";
                 app.changeGrepPreferences.changeTo = "";
                 currentEntryStory.changeGrep();
-                app.findGrepPreferences.findWhat = "^ +";
+                app.findGrepPreferences.findWhat = "^\\h+";
                 app.changeGrepPreferences.changeTo = "";
 
                 currentEntryStory.changeGrep();
@@ -384,7 +389,7 @@ function processDok(dok) {
                 // Fix empty lines
                 app.findGrepPreferences = NothingEnum.NOTHING;
                 app.changeGrepPreferences = NothingEnum.NOTHING;
-                app.findGrepPreferences.findWhat = "\\r(?=\\r)";
+                app.findGrepPreferences.findWhat = "\\r\\h*(?=\\r)";
                 currentEntryStory.changeGrep();
 
                 // Kill Last white space.
@@ -749,6 +754,8 @@ function createXMLFile(singlePost, postObject, blogURL) {
     // Fix self closing tags before parse
     htmlString = htmlString.replace(/<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr|command|keygen|menuitem)\s*([^>\/]*)\s*\/?\s*>/g, '<$1 $2/>');
     htmlString = htmlString.replace(/<\/(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr|command|keygen|menuitem)>/g, '');
+    // remove script
+    htmlString = htmlString.replace(/<script[^>]*>[\s\S]*?<\/script>/g, '');
     // not escaped & in html...
     htmlString = htmlString.replace(/&(?=\s)/, "&amp;");
 
@@ -933,6 +940,14 @@ function getConfig(newConfigObject) {
     createOptionsTemplate();
 
     if (px.siteURL) {
+        newConfigObject.basicAuthentication.authenticate = px.authenticate;
+        newConfigObject.basicAuthentication.user = px.user;
+        newConfigObject.basicAuthentication.password = px.password;
+
+        if (newConfigObject.basicAuthentication.authenticate) {
+            px.defaultHeader.push({ name: "Authorization", value: "Basic " + Base64.encode(newConfigObject.basicAuthentication.user + ":" + newConfigObject.basicAuthentication.password) });
+        }
+
         var request = {
             url: px.siteURL,
             method: "HEAD"
@@ -2097,6 +2112,10 @@ function getConfig(newConfigObject) {
                 throw Error(response.errorMsg);
             }
             var categories = JSON.parse(response.body);
+            if (categories.hasOwnProperty("code")) {
+                log.info("No categories found");
+                return [alleObject];
+            }
             categories.unshift(alleObject);
         }
         catch (e) {
@@ -2179,7 +2198,7 @@ function getConfig(newConfigObject) {
                     break;
                 }
                 else {
-                    var msg = "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message + " httpStatus: " + response.httpStatus;
+                    var msg = "Es konnte kein Beitrag heruntergeladen werden:\n\nCode: " + postEmbed.code + " Message: " + postEmbed.message + " httpStatus: " + response.httpStatus;
                     if (verbose) {
                         log.infoAlert(msg);
                     }
