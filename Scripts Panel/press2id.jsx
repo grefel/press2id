@@ -83,6 +83,7 @@ function main() {
 
     // Init Log
     initLog();
+
     createProgressbar();
 
     progressbar.init(px.projectName, 3); // title, max
@@ -161,7 +162,9 @@ function main() {
     }
     finally {
         // dok.close(SaveOptions.NO);
-        setValues(dok, oldValues);
+        if (dok && dok.isValid) {
+            setValues(dok, oldValues);
+        }
         app.scriptPreferences.userInteractionLevel = ial;
         app.scriptPreferences.enableRedraw = redraw;
         app.scriptPreferences.version = scriptPrefVersion;
@@ -233,7 +236,7 @@ function processDok(dok) {
     // Process selected entries
     for (var r = 0; r < configObject.selectedPostsArray.length; r++) {
         var postObject = configObject.selectedPostsArray[r];
-        log.info("Verarbeite Entry mit ID " + postObject.id + " titel " + postObject.entryTitle + " run " + r);
+        log.warnInfo("--- Verarbeite [" + postObject.entryTitle + "]");
 
         try {
 
@@ -1963,7 +1966,6 @@ function getConfig(newConfigObject) {
 
     }
 
-
     function discoverRestURL(blogURL) {
         var logURL = blogURL;
         blogURL = blogURL.replace(/\/*\s*$/, "/");
@@ -2053,6 +2055,7 @@ function getConfig(newConfigObject) {
     }
 
     function getEndpoints(restURL) {
+        log.debug("getEndpoints()");
         var endPointArray = ["posts", "pages"];
 
         // We put the user Agent here because of useless security options of some webservers restriction the REST API to browesers only
@@ -2130,6 +2133,17 @@ function getConfig(newConfigObject) {
 
     // Adapted for ExtendScript from https://stackoverflow.com/questions/18758772/how-do-i-validate-a-date-in-this-format-yyyy-mm-dd-using-jquery
     function isValidDate(dateString) {
+        var d = getDateFromString(dateString);
+        if (d) {
+            var dString = d.getFullYear() + "-" + pad(d.getMonth() + 1, 2) + "-" + pad(d.getDate(), 2);
+            return dString === dateString;
+        }
+        else {
+            return false;
+        }
+    }
+
+    function getDateFromString(dateString) {
         var regEx = /^(\d{4})-(\d{2})-(\d{2})$/;
         if (!dateString.match(regEx)) return false;  // Invalid format
         var d = new Date();
@@ -2138,8 +2152,7 @@ function getConfig(newConfigObject) {
         d.setFullYear((dateString.match(regEx)[1] * 1));
         var dNum = d.getTime();
         if (!dNum && dNum !== 0) return false; // NaN value, Invalid date
-        var dString = d.getFullYear() + "-" + pad(d.getMonth() + 1, 2) + "-" + pad(d.getDate(), 2);
-        return dString === dateString;
+        return d;
     }
 
     /**
@@ -2151,8 +2164,8 @@ function getConfig(newConfigObject) {
     function getListOfBlogEntries(newConfigObject, maxPages, verbose) {
         var restURL = newConfigObject.restURL;
         var endPoint = newConfigObject.endPoint;
-        var beforeDate = newConfigObject.filterBeforeDate;
-        var afterDate = newConfigObject.filterAfterDate;
+        var beforeDate = getDateFromString(newConfigObject.filterBeforeDate);
+        var afterDate = getDateFromString(newConfigObject.filterAfterDate);
         var categoryID = newConfigObject.categoryID;
         var orderBy = newConfigObject.orderBy;
         var localListItems = [];
@@ -2198,7 +2211,7 @@ function getConfig(newConfigObject) {
                     break;
                 }
                 else {
-                    var msg = "Es konnte kein Beitrag heruntergeladen werden:\n\nCode: " + postEmbed.code + " Message: " + postEmbed.message + " httpStatus: " + response.httpStatus;
+                    var msg = "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message + " httpStatus: " + response.httpStatus;
                     if (verbose) {
                         log.infoAlert(msg);
                     }
@@ -2396,7 +2409,7 @@ function setDefaultValues(dok) {
         zeroPoint: dok.zeroPoint,
         textDefaultParStyle: dok.textDefaults.appliedParagraphStyle,
         textDefaultCharStyle: dok.textDefaults.appliedCharacterStyle,
-        // transformReferencePoint: dok.layoutWindows[0].transformReferencePoint,
+        transformReferencePoint: dok.layoutWindows[0].transformReferencePoint,
         smartTextReflow: dok.textPreferences.smartTextReflow,
         preflightOff: app.preflightOptions.preflightOff
 
@@ -2413,7 +2426,7 @@ function setDefaultValues(dok) {
     dok.textPreferences.smartTextReflow = false;
     app.preflightOptions.preflightOff = true;
 
-    //    dok.layoutWindows[0].transformReferencePoint = AnchorPoint.TOP_LEFT_ANCHOR;
+    dok.layoutWindows[0].transformReferencePoint = AnchorPoint.TOP_LEFT_ANCHOR;
     return oldValues;
 }
 /**
@@ -2434,29 +2447,7 @@ function setValues(dok, values) {
         dok.textDefaults.appliedCharacterStyle = values.textDefaultCharStyle;
     }
 
-    // dok.layoutWindows[0].transformReferencePoint = values.transformReferencePoint;
-}
-
-/**  Init Log File and System */
-function initLog() {
-    var scriptFolderPath = getScriptFolderPath();
-    if (scriptFolderPath.fullName.match(/lib$/)) {
-        scriptFolderPath = scriptFolderPath.parent;
-    }
-
-    var logFolder = Folder(scriptFolderPath + "/log/");
-    logFolder.create();
-    var logFile = File(logFolder + "/" + px.projectName + "_log.txt");
-
-    if (px.debug) {
-        log = idsLog.getLogger(logFile, "DEBUG", true);
-        log.clearLog();
-    }
-    else {
-        log = idsLog.getLogger(logFile, "INFO", false);
-    }
-    log.info("Starte " + px.projectName + " v " + px.version + " Debug: " + px.debug + " ScriptPrefVersion: " + app.scriptPreferences.version + " InDesign v " + app.version);
-    return logFile;
+    dok.layoutWindows[0].transformReferencePoint = values.transformReferencePoint;
 }
 
 /* Search Template File */
@@ -2542,16 +2533,241 @@ function createProgressbar() {
 }
 
 
+function readConfigFilesAndFolders(dok, book) {
+    var isFolderPathRegex = /^(.+Folder)Path$/;
+    var isFilePathRegex = /^(.+File)Path$/;
+    var isWinRegex = /Win(Folder|File)Path$/;
+    var isMacRegex = /Mac(Folder|File)Path$/;
+
+
+    for (var key in px) {
+        // skip loop if the property is from prototype
+        if (!px.hasOwnProperty(key)) continue;
+
+        if (File.fs == "Windows") {
+            if (key.match(isMacRegex)) continue;
+        }
+        else {
+            if (key.match(isWinRegex)) continue;
+        }
+
+        // Folder
+        if (key.match(isFolderPathRegex)) {
+            var folderPath = px[key];
+            var newKeyName = key.match(isFolderPathRegex)[1];
+            newKeyName = newKeyName.replace(/(Win|Mac)Folder/, "Folder");
+            log.writeln(newKeyName + " -> " + folderPath);
+
+            if (folderPath.match(/\[:NONE:\]/)) continue;
+            if (folderPath.match(/^\[:SCRIPT:\]/)) {
+                folderPath = folderPath.replace(/^\[:SCRIPT:\]\/?/, "");
+                folderPath = getScriptFolderPath() + "/" + folderPath;
+            }
+            else if (folderPath.match(/^\[:DOCUMENT:\]/)) {
+                folderPath = folderPath.replace(/^\[:DOCUMENT:\]\/?/, "");
+                try {
+                    var dokFolderPath = dok.fullName.parent;
+                } catch (e) {
+                    try {
+                        var dokFolderPath = Folder.selectDialog("Bitte bestimmen Sie den Dokumentordner");
+                        if (dokFolderPath == null) {
+                            log.warn("Dokumentordner nicht ausgewählt, Setze Dokumentpfad auf Desktop!");
+                            dokFolderPath = Folder.desktop;
+                        }
+                    }
+                    catch (e) {
+                        log.warn(e);
+                        log.warn("Dokumentordner nicht ermittelbar, Setze Dokumentpfad auf Desktop!");
+                        dokFolderPath = Folder.desktop;
+                    }
+                }
+                folderPath = dokFolderPath + "/" + folderPath;
+            }
+            if (folderPath.match(/^\[:BOOK:\]/)) {
+                folderPath = folderPath.replace(/^\[:BOOK:\]\/?/, "");
+                try {
+                    var bookFolderPath = book.fullName.parent;
+                } catch (e) {
+                    try {
+                        var bookFolderPath = Folder.selectDialog("Bitte bestimmen Sie den Buchordner");
+                        if (bookFolderPath == null) {
+                            log.warn("Buchordner nicht ausgewählt, Setze Buchpfad auf Desktop!");
+                            bookFolderPath = Folder.desktop;
+                        }
+                    }
+                    catch (e) {
+                        log.warn(e);
+                        log.warn("Buchordner nicht ermittelbar, Setze Buchpfad auf Desktop!");
+                        bookFolderPath = Folder.desktop;
+                    }
+                }
+                folderPath = bookFolderPath + "/" + folderPath;
+            }
+
+            var folderPath = Folder(folderPath)
+            if (!folderPath.exists) { // [:SELECT:] wird nie existieren 
+                log.info("Benutzer wählt Pfad für [" + key + "]");
+                if (px[newKeyName + "PathDialog"] !== undefined) {
+                    var msg = px[newKeyName + "PathDialog"]
+                }
+                else {
+                    var msg = "Bitte wählen Sie den Ordner für [" + key + "]";
+                }
+                folderPath = Folder.selectDialog(msg);
+                if (folderPath == null) return false; // User canceled
+            }
+            if (!folderPath.exists) {
+                log.warn("Der Ordner [" + folderPath + "] konnte nicht gefunden werden!");
+                return false;
+            }
+            px[newKeyName] = folderPath;
+            log.info("Die Eigenschaft [" + newKeyName + "] wurde auf den Ordner [" + folderPath + "] gesetzt.");
+        }
+        else if (key.match(isFilePathRegex)) {
+            var filePath = px[key];
+            var newKeyName = key.match(isFilePathRegex)[1];
+            newKeyName = newKeyName.replace(/(Win|Mac)File/, "File");
+            log.writeln(newKeyName + " -> " + filePath);
+
+            if (filePath.match(/\[:NONE:\]/)) continue;
+            if (filePath.match(/^\[:SCRIPT:\]/)) {
+                filePath = filePath.replace(/^\[:SCRIPT:\]\/?/, "");
+                filePath = getScriptFolderPath() + "/" + filePath;
+            }
+            var filePath = File(filePath);
+            if (!filePath.exists) { // [:SELECT:] wird nie existieren 
+                log.info("Benutzer wählt Pfad für [" + key + "]");
+                if (px[newKeyName + "PathDialog"] !== undefined) {
+                    var msg = px[newKeyName + "PathDialog"]
+                }
+                else {
+                    var msg = "Bitte wählen Sie die Datei für [" + key + "]";
+                }
+                filePath = File.openDialog(msg, getFileFilter(px[newKeyName + "PathFilter"]));
+                if (filePath == null) return false; // User canceled
+            }
+            if (!filePath.exists) {
+                log.warn("Der Datei [" + filePath + "] konnte nicht gefunden werden!");
+                return false;
+            }
+
+            px[newKeyName] = filePath;
+            log.info("Die Eigenschaft [" + newKeyName + "] wurde auf die Datei [" + filePath + "] gesetzt.");
+
+        }
+    }
+    return true;
+}
+
+
+/**
+* Returns a File-Filter for a File-Dialog
+* @param {String} filter The File filter string in Windows Syntax: A filter expression such as "Javascript files:*.jsx;All files:*.*".
+* @return {String|Function} The Filter String for Windows, the Filter Function for MacOS
+*/
+function getFileFilter(fileFilter) {
+    if (fileFilter == undefined || File.fs == "Windows") {
+        return fileFilter;
+    }
+    else {
+        // Mac
+        var extArray = fileFilter.split(":")[1].split(",");
+        return function fileFilter(file) {
+            if (file.constructor.name === "Folder") return true;
+            if (file.alias) return true;
+            for (var e = 0; e < extArray.length; e++) {
+                var ext = extArray[e];
+                ext = ext.replace(/\*/g, "");
+                // log.writeln(ext);
+                // log.writeln(file.name);
+                // log.writeln(file.name.slice(ext.length * -1) === ext);
+                // log.writeln("---")
+                if (file.name.slice(ext.length * -1) === ext) return true;
+            }
+        }
+    }
+}
+
+
+/**  Init Log File and System */
+function initLog() {
+    var version = "-1";
+    var projectName = "noProjectName";
+    var appendLog = true;
+    var debug = false;
+    var logFolderName = "log";
+    if (typeof px != "undefined") {
+        var version = px.version
+        var projectName = px.projectName;
+        var appendLog = px.appendLog;
+        var debug = px.debug;
+        if (px.logFolderName) logFolderName = px.logFolderName;
+    }
+    var scriptFolderPath = getScriptFolderPath();
+    if (scriptFolderPath.fullName.match(/lib$/)) {
+        scriptFolderPath = scriptFolderPath.parent;
+    }
+
+    var logFolder = Folder(scriptFolderPath + "/" + logFolderName + "/");
+    if (!logFolder.create()) {
+        // Schreibe Log auf den Desktop
+        logFolder = Folder(Folder.desktop + "/indesign-log/");
+        logFolder.create();
+    }
+    if (appendLog) {
+        var logFile = File(logFolder + "/" + projectName + "_" + getUserName() + "_log.txt");
+    }
+    else {
+        var date = new Date();
+        date = date.getFullYear() + "-" + pad(date.getMonth() + 1, 2) + "-" + pad(date.getDate(), 2) + "_" + pad(date.getHours(), 2) + "-" + pad(date.getMinutes(), 2) + "-" + pad(date.getSeconds(), 2);
+        var logFile = File(logFolder + "/" + date + "_" + projectName + "_" + getUserName() + "_log.txt");
+    }
+    if (debug) {
+        log = idsLog.getLogger(logFile, "DEBUG", true);
+        log.clearLog();
+    }
+    else {
+        log = idsLog.getLogger(logFile, "INFO", false);
+    }
+    log.info("Starte " + projectName + " v " + version + " Debug: " + debug + " ScriptPrefVersion: " + app.scriptPreferences.version + " InDesign v " + app.version);
+    return logFile;
+}
+
+/** Pad a number with leading zeros 
+ * @param {Number} number 
+ * @param {Number} length 
+ * @param {String} fill 
+ * @returns {String}
+ */
+function pad(number, length, fill) {
+    if (fill == undefined) fill = "0";
+    var str = '' + number;
+    while (str.length < length) {
+        str = fill + str;
+    }
+    return str;
+}
+
+/** Get os specific user name
+ * @returns {String} current user name
+ */
+function getUserName() {
+    if (File.fs == "Windows") {
+        return $.getenv("USERNAME");
+    }
+    else {
+        return $.getenv("USER");
+    }
+}
+
 /** Get Filepath from current script  */
 /*Folder*/ function getScriptFolderPath() {
     var skriptPath;
     try {
-        $.level = 0;
         skriptPath = app.activeScript.parent;
     }
     catch (e) {
         /* We're running from the ESTK*/
-        $.level = 2;
         skriptPath = File(e.fileName).parent;
     }
     return skriptPath;
