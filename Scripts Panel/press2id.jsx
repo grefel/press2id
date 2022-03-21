@@ -889,7 +889,7 @@ function getConfig(newConfigObject) {
     ui.buttonImageManagementFolderSelectOnClick = { en: "Select the folder", de: "Wählen Sie den Ordner aus" };
     ui.panelACFFileds = { en: "Fill prepared data fields", de: "Vorbereitete Datenfelder befüllen" };
     ui.staticTextFilterElements = { en: "Filter elements", de: "Auswahl verfeinern" };
-
+    ui.datePatternError = { en: "Wrong Date format YYYY-MM-DD", de: "Falsches Datumsformat JJJJ-MM-TT" };
 
 
     var listBounds = [0, 0, 520, 256];

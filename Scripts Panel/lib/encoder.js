@@ -242,4 +242,4 @@ Encoder = {
 
 }
 
-alert(Encoder.htmlDecode('&#x1D306;'))
+// alert(Encoder.htmlDecode('&#x1D306;'))
