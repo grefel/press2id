@@ -2164,8 +2164,8 @@ function getConfig(newConfigObject) {
     function getListOfBlogEntries(newConfigObject, maxPages, verbose) {
         var restURL = newConfigObject.restURL;
         var endPoint = newConfigObject.endPoint;
-        var beforeDate = getDateFromString(newConfigObject.filterBeforeDate);
-        var afterDate = getDateFromString(newConfigObject.filterAfterDate);
+        var beforeDate = newConfigObject.filterBeforeDate;
+        var afterDate = newConfigObject.filterAfterDate;
         var categoryID = newConfigObject.categoryID;
         var orderBy = newConfigObject.orderBy;
         var localListItems = [];
