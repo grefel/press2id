@@ -531,7 +531,7 @@ function processDok(dok) {
                             }
                             // var startIndex = datenFeld.object.insertionPoints[0].index;
                             // var dataFieldLength = setThisString.length - 1;
-                            datenFeld.object.contents = setThisString.toString();
+                            datenFeld.object.contents = setThisString.toString().replace(/<br>/, "\n");
                         }
                         else {
                             log.warn("Datenfeld [" + datenFeld.fieldName + "] ist nicht in JSON-Datensatz enthalten!");
