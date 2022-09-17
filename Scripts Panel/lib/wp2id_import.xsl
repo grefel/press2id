@@ -218,10 +218,11 @@
 
     <!--Links are currently ignored -->
     <xsl:template match="a">
+        <xsl:copy-of select="@href"/>
         <xsl:apply-templates/>
-        <xsl:text>[</xsl:text>
+        <!-- <xsl:text>[</xsl:text>
         <xsl:value-of select="@href"/>
-        <xsl:text>]</xsl:text>
+        <xsl:text>]</xsl:text> -->
     </xsl:template>
 
     <!--Images -->
@@ -274,6 +275,7 @@
     <!--Tables-->
     <xsl:template match="table">
         <p>Tables are not supported</p>
+        <xsl:value-of select="."/>
     </xsl:template>
 
 
