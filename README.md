@@ -31,7 +31,6 @@ The script places Worpress posts in the active Document. See details in the [ger
 
 ### Technical details of the script
 * REST Access with [restix](https://github.com/grefel/restix)
-* Based on XHTML cleaned by [HTML Tidy](http://www.html-tidy.org/)
 * Preprocessing with XSLT (InDesign XSLT Processor -> only 1.0)
 * JavaScript/Extendscript for postprocessing.
 * Import is template based. The scirpt uses an InDesign file in folder **templates**  for basic styling. HTML element names are mapped to InDesign styles by element names. Change any style here.
