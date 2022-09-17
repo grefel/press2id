@@ -121,12 +121,13 @@ var pjXML = (function () {
 			var er = '';
 			while ((ch = this.read()) != ';' && ch) {
 				er += ch;
-				if (ch.match(/[< '\"]/)) {
-					return "&" + er;
-				}
 			}
 
 			ch = this.getEntity(er);
+
+			if (ch.match(/[<>&'"]/)) {
+				return "&" + er;
+			}
 		}
 
 		return ch;
@@ -343,7 +344,7 @@ var pjXML = (function () {
 						while ((ch = lex.peek()) && (ch != '/' && ch != '>')) {
 							lex.skipSpace();
 							var an = lex.readName();
-							if (an == "") continue;
+                                if (an == "") continue;
 							lex.consumeString('=');
 							en.attributes[an] = lex.replaceEntities(lex.readQuotedString());
 							lex.skipSpace();
@@ -429,7 +430,7 @@ var pjXML = (function () {
 	}
 
 	me.parse = function (xml) {
-		// fix empty strings in empty elements
+		// fix whitespace in empty elements
 		xml = xml.replace(/\/\s+>/g, '/>')
 		var lex = new Lexer(xml);
 
@@ -443,5 +444,6 @@ var pjXML = (function () {
 }());
 
 // var xml = '<p>Users/&lt;username&gt;/Library</p>'
+// var xml = '<p>Absat<x>xxxx </x>z 1 <strong>bold</strong></p><p>[[Absatz 2 <sup>h<x>ddd</x>och</sup></p><p>Absatz 3 <sub>tief</sub></p>'
 // var doc = pjXML.parse(xml);
 // $.writeln(doc.xml());
