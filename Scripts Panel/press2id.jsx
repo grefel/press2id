@@ -395,6 +395,9 @@ function processDok(dok) {
                 app.findGrepPreferences.findWhat = "\\r\\h*(?=\\r)";
                 currentEntryStory.changeGrep();
 
+                // Create Hyperlinks TODO
+                
+
                 // Kill Last white space.
                 fixStoryEnd(currentEntryStory);
 
@@ -474,7 +477,9 @@ function processDok(dok) {
                     var textFrameContent = templateMasterpread.pages[0].textFrames.itemByName("content");
                 }
                 if (textFrameContent.isValid) {
+                    var gb = textFrameContent.geometricBounds;
                     var tf = textFrameContent.override(page);
+                    tf.geometricBounds = gb;
                 }
                 else {
                     log.warn(ui.missingContentTextFrame);
@@ -492,7 +497,9 @@ function processDok(dok) {
                     }
 
                     if (fiRect.isValid) {
+                        var gb = fiRect.geometricBounds;
                         var rect = fiRect.override(page);
+                        rect.geometricBounds = gb;
                     }
                     else {
                         log.warn(ui.missingFeaturedImageFrame);
