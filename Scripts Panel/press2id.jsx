@@ -15,7 +15,7 @@ var RunModes = {
 
 var px = {
     projectName: "press2id",
-    version: "2022-02-02-v2.29",
+    version: "2022-09-22-v2.30",
 
     siteURL: null, // Wenn ein Wert eingetragen wird, wird die Startseite übersprungen z.B, siteURL: "https://www.indesignblog.com",
     // siteURL: "https://www.indesignblog.com",
@@ -289,7 +289,7 @@ function processDok(dok) {
                 try {
                     styleTemplateDok.importXML(xmlTempFile);
                 }
-                catch(e) {
+                catch (e) {
                     log.warn("Die XML-Datei konnte nicht importiert werden! Wahrscheinlich konnte eine HTML-Struktur nicht richtig analysiert werden!");
                     log.warn(e);
                     return;
@@ -395,8 +395,33 @@ function processDok(dok) {
                 app.findGrepPreferences.findWhat = "\\r\\h*(?=\\r)";
                 currentEntryStory.changeGrep();
 
+                // Fix empty lines
+                app.findGrepPreferences = NothingEnum.NOTHING;
+                app.changeGrepPreferences = NothingEnum.NOTHING;
+                app.findGrepPreferences.findWhat = "^\\t+~b";
+                currentEntryStory.changeGrep();
+
                 // Create Hyperlinks TODO
-                
+                var hyperlinkNodes = postXML.evaluateXPathExpression("//hyperlink");
+                for (var h = 0; h < hyperlinkNodes.length; h++) {
+                    try {
+                        var node = hyperlinkNodes[h];
+                        var url = node.xmlAttributes.itemByName("href").value;
+                        var quelle = styleTemplateDok.hyperlinkTextSources.add(node.xmlContent.texts[0]);
+                        var urlDestination = styleTemplateDok.hyperlinkURLDestinations.itemByName(url);
+                        if (!urlDestination.isValid) urlDestination = styleTemplateDok.hyperlinkURLDestinations.add(url, { name: url });
+                        var hlink = styleTemplateDok.hyperlinks.add(quelle, urlDestination);
+                        hlink.name = url;
+                    }
+                    catch (e) {
+                        if (e.number == 79110) {
+                            log.info("Hyperlink Name alreadey used");
+                        }
+                        else {
+                            log.warn(e);
+                        }
+                    }
+                }
 
                 // Kill Last white space.
                 fixStoryEnd(currentEntryStory);

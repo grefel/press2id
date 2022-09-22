@@ -218,10 +218,10 @@
     
     <!--Links Process Links and anchors -->
     <xsl:template match="a[@href]" priority="1">
-        <a aid:cstyle="hyperlink">
+        <hyperlink aid:cstyle="hyperlink">
             <xsl:copy-of select="@href"/>
             <xsl:apply-templates/>
-        </a>
+        </hyperlink>
     </xsl:template>
     <xsl:template match="a">
         <xsl:apply-templates/>
