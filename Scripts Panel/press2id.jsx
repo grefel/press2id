@@ -2281,7 +2281,20 @@ function getDatenfelder(jsonDatenfeldPage) {
     log.info("Search Datafiles on page " + jsonDatenfeldPage.name);
     for (var i = 0; i < jsonDatenfeldPage.pageItems.length; i++) {
         var pi = jsonDatenfeldPage.pageItems[i].getElements()[0];
-        if (pi.hasOwnProperty("contents") ) {
+        if (pi.textPaths.length > 0 ) {
+            var searchResults = findOrChangeGrep(pi.textPaths[0], "<<[a-zA-Z\\d_-]+>>", null, false);
+            for (var f = 0; f < searchResults.length; f++) {
+                var text = searchResults[f];
+                var textFieldName = text.contents.replace(/[><]/g, "");
+                log.debug("Setze Textdatenfeld: " + textFieldName);
+                jsonDatenfelder.push({
+                    fieldName: textFieldName,
+                    object: text.getElements()[0],
+                    type: jsonFieldType.TEXT
+                });
+            }
+        }
+        if (pi.hasOwnProperty("parentStory")) {
             var searchResults = findOrChangeGrep(pi.parentStory, "<<[a-zA-Z\\d_-]+>>", null, false);
             for (var f = 0; f < searchResults.length; f++) {
                 var text = searchResults[f];
