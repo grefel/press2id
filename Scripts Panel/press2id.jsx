@@ -415,7 +415,7 @@ function processDok(dok) {
                     }
                     catch (e) {
                         if (e.number == 79110) {
-                            log.info("Hyperlink Name alreadey used");
+                            log.info("Hyperlink Name already used");
                         }
                         else {
                             log.warn(e);
