@@ -2281,7 +2281,7 @@ function getDatenfelder(jsonDatenfeldPage) {
     log.info("Search Datafiles on page " + jsonDatenfeldPage.name);
     for (var i = 0; i < jsonDatenfeldPage.pageItems.length; i++) {
         var pi = jsonDatenfeldPage.pageItems[i].getElements()[0];
-        if (pi.constructor.name == "TextFrame") {
+        if (pi.hasOwnProperty("contents") ) {
             var searchResults = findOrChangeGrep(pi.parentStory, "<<[a-zA-Z\\d_-]+>>", null, false);
             for (var f = 0; f < searchResults.length; f++) {
                 var text = searchResults[f];
