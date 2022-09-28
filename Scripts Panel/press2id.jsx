@@ -15,7 +15,7 @@ var RunModes = {
 
 var px = {
     projectName: "press2id",
-    version: "2022-09-22-v2.30",
+    version: "2022-09-28-v2.31",
 
     siteURL: null, // Wenn ein Wert eingetragen wird, wird die Startseite übersprungen z.B, siteURL: "https://www.indesignblog.com",
     // siteURL: "https://www.indesignblog.com",
@@ -27,6 +27,8 @@ var px = {
     password: "",
 
     defaultHeader: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }],
+
+    postIDLabel: "px:postID:px",
 
     // Verwaltung
     showGUI: true,
@@ -401,7 +403,7 @@ function processDok(dok) {
                 app.findGrepPreferences.findWhat = "^\\t+~b";
                 currentEntryStory.changeGrep();
 
-                // Create Hyperlinks TODO
+                // Create Hyperlinks 
                 var hyperlinkNodes = postXML.evaluateXPathExpression("//hyperlink");
                 for (var h = 0; h < hyperlinkNodes.length; h++) {
                     try {
@@ -449,6 +451,7 @@ function processDok(dok) {
                 app.userName = "press2id";
                 try {
                     var tempICMLFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp.icml");
+                    currentEntryStory.insertLabel(px.postIDLabel, postObject.id + "");
                     currentEntryStory.exportFile(ExportFormat.INCOPY_MARKUP, tempICMLFile);
                     placeGunArray.unshift(tempICMLFile);
 
@@ -2281,7 +2284,7 @@ function getDatenfelder(jsonDatenfeldPage) {
     log.info("Search Datafiles on page " + jsonDatenfeldPage.name);
     for (var i = 0; i < jsonDatenfeldPage.pageItems.length; i++) {
         var pi = jsonDatenfeldPage.pageItems[i].getElements()[0];
-        if (pi.textPaths.length > 0 ) {
+        if (pi.textPaths.length > 0) {
             var searchResults = findOrChangeGrep(pi.textPaths[0], "<<[a-zA-Z\\d_-]+>>", null, false);
             for (var f = 0; f < searchResults.length; f++) {
                 var text = searchResults[f];
