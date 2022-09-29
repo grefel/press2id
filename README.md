@@ -14,7 +14,9 @@ Detailed infos are found at [publishing.blog [DE]](https://publishing.blog/press
 1. Download the current version [press2id-latest.zip](https://raw.githubusercontent.com/grefel/press2id/master/release/press2id-latest.zip).
 1. Unzip the archive.
 1. Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel**. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
+
 If you never installed a script, help is here:
+
 * [How to install a script](https://indesignsecrets.com/how-to-install-scripts-in-indesign.php)
 * [Skripte in InDesign installieren](https://www.publishingx.de/skripte-installieren/) 
 
