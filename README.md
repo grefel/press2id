@@ -12,17 +12,16 @@ Detailed infos about the script is found at [publishing.blog [DE]](https://publi
 * [Deutsche Anleitung](#wie-geht-das)
 
 ## Download and Install
-1. Download the most current Archive [press2id-latest.zip](https://raw.githubusercontent.com/grefel/press2id/master/release/press2id-latest.zip).
-2. Unzip the archive
+1. Download the current version [press2id-latest.zip](https://raw.githubusercontent.com/grefel/press2id/master/release/press2id-latest.zip).
+2. Unzip the archive.
 3. Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel**. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
-
+If you never installed a script, help is here:
 * [How to install a script](https://indesignsecrets.com/how-to-install-scripts-in-indesign.php)
 * [Skripte in InDesign installieren](https://www.publishingx.de/skripte-installieren/) 
 
-
 ## Quick start guide 
 The script places WordPress posts in the active Document. See details in the [german how to](#Wie geht das?)
-1. For a simple start, use the file `press2id_PlaceGun.idml` from the `examples` folder.
+1. For a simple start open a new document or use the file `press2id_PlaceGun.idml` from the `examples` folder.
 1. Start the script and enter a WordPress blog URL. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/enterURL.png" width="500" alt="Place Gun Mode">
 2. Select ***Place Gun Mode***. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/placeGunMode.png" width="500" alt="Enter URL">
 3. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/selectAPost.png" width="500" alt="Select Post">

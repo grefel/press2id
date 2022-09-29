@@ -2,6 +2,7 @@
 dist/*
 demo/*
 src/log/*
+*.lst
 concat.json
 concatJSX.js
 jsconfig.json
