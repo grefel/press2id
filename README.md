@@ -23,17 +23,16 @@ For a simple start, use the file `press2id_PlaceGun.idml` from the `Example File
 
 ## Quick start guide 
 The script places WordPress posts in the active Document. See details in the [german how to](#Wie geht das?)
-1. Start the script and enter a WordPress blog URL.
-1. Select ***Place Gun Mode***. <br/>  <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/placeGunMode.png" width="300" alt="Place  Gun Mode">
-1. Select a post and press ***Start*** -> The script loads the post content an images in the place gun.
+1. Start the script and enter a WordPress blog URL. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/enterURL.png" width="300" alt="Place Gun Mode">
+1. Select ***Place Gun Mode***. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/placeGunMode.png" width="300" alt="Enter URL">
+1. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/selectAPost.png" width="300" alt="Select Post">
+1.  The script loads the post content an images in the place gun.
 1. Change styles according to your needs (you can do this also before placing)
 
 ### Technical details of the script
 * REST Access with [restix](https://github.com/grefel/restix)
-* Preprocessing with XSLT (InDesign XSLT Processor -> only 1.0)
 * JavaScript/Extendscript for postprocessing.
-* Import is template based. The scirpt uses an InDesign file in folder **templates**  for basic styling. HTML element names are mapped to InDesign styles by element names. Change any style here.
-* Loads the Post content and featured image into the place gun.
+* Import is template based. The script uses an InDesign file in folder **templates**  for basic styling. HTML element names are mapped to InDesign styles by element names. Change any style here.
 * You can link to local image files with the same name.
 
 ## Wie geht das?
@@ -41,10 +40,8 @@ The script places WordPress posts in the active Document. See details in the [ge
 
   ![Scripts Panel](https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/scriptsPanel.png)
 
-* Bevor du loslegen kannst, brauchst du ein geöffnetes Dokument. Das kann ganz leer sein. Wichtig ist nur, dass es gespeichert ist. Der Speicherort ist notwendig, da *press2id* die Bider im Ordner Links neben dem Dokument speichert. Alternativ kannst du auch das CC 2020 Dokument `press2id_example.indd` (CC 2020) aus dem Ordner `Example Files` verwenden. Hier sind dann alle Schriften aus dem danebenliegenden Ordner `Document Fonts` aktiviert.
+* Bevor du loslegen kannst, brauchst du ein geöffnetes Dokument. Das kann ganz leer sein. Wichtig ist nur, dass es gespeichert ist. Der Speicherort ist notwendig, da *press2id* die Bider im Ordner Links neben dem Dokument speichert. Alternativ kannst du auch das CC 2020 Dokument `press2id_PlaceGun.idml` (CC 2020) aus dem Ordner `Example Files` verwenden. Hier sind dann alle Schriften aus dem danebenliegenden Ordner `Document Fonts` aktiviert.
 * Starte jetzt das Skript mit einem Doppelklick auf `press2id.jsx`. Das Fenster mit den Einstellungen erscheint.
-
-  ![Importeinstellungen](https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/gui.png)
 
 * Du kannst deinen eigenen WordPress-Blog eintragen oder erstmal einen Artikel von meinem [Blog](https://www.indesignblog.com/) verwenden z.B. den Beitrag [	
 XML suchen und Text hinzufügen
