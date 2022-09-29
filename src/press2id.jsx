@@ -276,7 +276,7 @@ function processDok(dok) {
                 // Set Import Preferences
                 with (styleTemplateDok.xmlImportPreferences) {
                     allowTransform = true;
-                    transformFilename = File(getScriptFolderPath() + "/lib/" + configObject.xsltFile);
+                    transformFilename = File(getScriptFolderPath() + "/templates/" + configObject.xsltFile);
                     transformParameters = [];
                     createLinkToXML = false;
                     ignoreUnmatchedIncoming = false;
