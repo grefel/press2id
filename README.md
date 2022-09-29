@@ -12,8 +12,9 @@ Detailed infos about the script is found at [publishing.blog [DE]](https://publi
 * [Deutsche Anleitung](#wie-geht-das)
 
 ## Download and Install
-1. Clone this repository or download the most current ZIP-Archive from [release](https://github.com/grefel/press2id/tree/master/release)
-1. Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel**. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
+1. Download the most current Archive [press2id-latest.zip](https://raw.githubusercontent.com/grefel/press2id/master/release/press2id-latest.zip).
+2. Unzip the archive
+3. Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel**. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
 
 * [How to install a script](https://indesignsecrets.com/how-to-install-scripts-in-indesign.php)
 * [Skripte in InDesign installieren](https://www.publishingx.de/skripte-installieren/) 
