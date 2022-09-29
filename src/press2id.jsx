@@ -827,6 +827,8 @@ function createXMLFile(singlePost, postObject, blogURL) {
     htmlString = htmlString.replace(/<\/(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr|command|keygen|menuitem)>/g, '');
     // remove script
     htmlString = htmlString.replace(/<script[^>]*>[\s\S]*?<\/script>/g, '');
+    // remove iframe
+    htmlString = htmlString.replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/g, '');
     // not escaped & in html...
     htmlString = htmlString.replace(/&(?=\s)/, "&amp;");
 
