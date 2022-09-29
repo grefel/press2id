@@ -30,7 +30,7 @@ var px = {
 }
 
 var configObject = {
-    version: "2.28",
+    version: "2.29",
     urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/"],
     siteURL: undefined,
     restURL: undefined,
@@ -273,10 +273,15 @@ function processDok(dok) {
                     log.warn(e);
                 }
 
+                var xsltFile = File(getScriptFolderPath() + "/templates/" + configObject.xsltFile);
+                if (!xsltFile.exists) {
+                    log.warn( localize({en:"Could not locate XSL-File", de:"Konnte XSL-Datei nicht finden"}) + " " + xsltFile);
+                }
+
                 // Set Import Preferences
                 with (styleTemplateDok.xmlImportPreferences) {
                     allowTransform = true;
-                    transformFilename = File(getScriptFolderPath() + "/templates/" + configObject.xsltFile);
+                    transformFilename = xsltFile;
                     transformParameters = [];
                     createLinkToXML = false;
                     ignoreUnmatchedIncoming = false;
