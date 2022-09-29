@@ -1,11 +1,5 @@
 //DESCRIPTION:press2id – Access WordPress Sites
 //Author: Gregor Fellenz - http://www.publishingx.de
-//@include "lib/json2.js"
-//@include "lib/idsLog.jsx"
-//@include "lib/restix.jsx"
-//@include "lib/Base64.jsx"
-//@include "lib/pjxml.js"
-
 
 var RunModes = {
     PLACE_GUN: "placeGun",
@@ -14,8 +8,8 @@ var RunModes = {
 }
 
 var px = {
-    projectName: "press2id",
-    version: "2022-09-28-v2.31",
+    projectName: "@px:project@",
+    version: "@px:date@-@px:version@",
 
     siteURL: null, // Wenn ein Wert eingetragen wird, wird die Startseite übersprungen z.B, siteURL: "https://www.indesignblog.com",
     // siteURL: "https://www.indesignblog.com",
@@ -66,6 +60,12 @@ var jsonFieldType = {
     TEXT: "TEXT",
     GRAPHIC: "GRAPHIC"
 }
+
+//@include "lib/json2.js"
+//@include "lib/idsLog.jsx"
+//@include "lib/restix.jsx"
+//@include "lib/Base64.jsx"
+//@include "lib/pjxml.js"
 
 main();
 

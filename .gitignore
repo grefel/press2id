@@ -1,10 +1,7 @@
 .vscode/*
-Scripts Panel/log/*
-Links/*
-Demonstration/*
-*.lst
-press2id.code-workspace
-*.idlk
+dist/*
+demo/*
+src/log/*
 concat.json
 concatJSX.js
 jsconfig.json
