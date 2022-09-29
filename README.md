@@ -1,33 +1,32 @@
 # press2id
-Connect Adobe InDesign to a WordPress Blog via REST
+Connect Adobe InDesign to a WordPress Blog
 - Works with *Adobe InDesign* CS 6 and higher
 - Connects to any *WordPress* 4.7 or higher
 
 Detailed infos about the script is found at [publishing.blog [DE]](https://publishing.blog/press2id) and [publishing.blog ACF [DE]](https://publishing.blog/WordPress-nach-indesign-press2id-jetzt-mit-custom-fields-und-custom-post-types/) by @haemeulrich and [creative-aktuell.de [DE]](https://www.creative-aktuell.de/de/blog-details/indesign-WordPress-artikel-weiterverarbeiten.html) by @einmanncombo
 
 # Table of contents
-* [Install information](#install)
+* [Download and Install](#install)
 * [Quick start guide](#quick-start-guide)
 * [Workflow](#some-notes-on-the-workflow)
 * [Deutsche Anleitung](#wie-geht-das)
 
-## Install
-Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel**. 
-
-<img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
+## Download and Install
+1. Clone this repository or download the most current ZIP-Archive from [release](https://github.com/grefel/press2id/tree/master/release)
+1. Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel**. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
 
 * [How to install a script](https://indesignsecrets.com/how-to-install-scripts-in-indesign.php)
 * [Skripte in InDesign installieren](https://www.publishingx.de/skripte-installieren/) 
 
-For a simple start, use the file `press2id_PlaceGun.idml` from the `Example Files` folder.
 
 ## Quick start guide 
 The script places WordPress posts in the active Document. See details in the [german how to](#Wie geht das?)
-1. Start the script and enter a WordPress blog URL. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/enterURL.png" width="500" alt="Place Gun Mode">
-1. Select ***Place Gun Mode***. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/placeGunMode.png" width="500" alt="Enter URL">
-1. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/selectAPost.png" width="500" alt="Select Post">
-1.  The script loads the post content an images in the place gun.
-1. Change styles according to your needs (you can do this also before placing)
+1. For a simple start, use the file `press2id_PlaceGun.idml` from the `examples` folder.
+1. Start the script and enter a WordPress blog URL. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/enterURL.png" width="500" alt="Place Gun Mode">
+2. Select ***Place Gun Mode***. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/placeGunMode.png" width="500" alt="Enter URL">
+3. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/selectAPost.png" width="500" alt="Select Post">
+4.  The script loads the post content an images in the place gun.
+5. Change styles according to your needs (you can do this also before placing)
 
 ### Technical details of the script
 * REST Access with [restix](https://github.com/grefel/restix)
@@ -38,7 +37,7 @@ The script places WordPress posts in the active Document. See details in the [ge
 ## Wie geht das?
 * Nach der [Installation](https://www.publishingx.de/skripte-installieren/) sollte das Bedienfeld **Skripte** den gesamten Skriptordner anzeigen. Wichtig ist erstmal nur das eigentliche Skript `press2id.jsx`. 
 
-<img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
+<img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
 
 * Bevor du loslegen kannst, brauchst du ein geöffnetes Dokument. Das kann ganz leer sein. Wichtig ist nur, dass es gespeichert ist. Der Speicherort ist notwendig, da *press2id* die Bider im Ordner Links neben dem Dokument speichert. Alternativ kannst du auch das CC 2020 Dokument `press2id_PlaceGun.idml` (CC 2020) aus dem Ordner `Example Files` verwenden. Hier sind dann alle Schriften aus dem danebenliegenden Ordner `Document Fonts` aktiviert.
 * Starte jetzt das Skript mit einem Doppelklick auf `press2id.jsx`. Das Fenster mit den Einstellungen erscheint.
@@ -47,7 +46,7 @@ The script places WordPress posts in the active Document. See details in the [ge
 XML suchen und Text hinzufügen
 ](https://www.indesignblog.com/2017/05/xml-suchen-und-text-hinzufuegen/).
 
-  ![Screenshot](https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/blog.png)
+  ![Screenshot](https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/blog.png)
 
 * Mit dem Datumsfilter kannst du die Auswahl der Beiträge eingrenzen. Wenn du ihn unverändert lässt, werden alle Beiträge des Blogs angezeigt.
 
@@ -55,16 +54,16 @@ XML suchen und Text hinzufügen
 * Wähle einen Beitrag aus der Liste aus und drücke auf **Platzieren**. 
 * *press2id* lädt nun den Inhalt und die Bilder herunter und lädt Sie in die PlaceGun des Mauszeigers. Die benötigten Formate werden automatisch erstellt.  Nach dem Platzieren sieht das Ergebnis so aus:
 
-  ![InDesign Import](https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/result.png)
+  ![InDesign Import](https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/result.png)
 
 * Für die Formatierung der Texte werden Absatz- und Zeichenformate entsprechend den Namen der HTML-Elemente verwendet. Ein ganz normaler Absatz `<p>` wird entsprechend in InDesign mit dem Absatzformat `p` ausgezeichnet. Die Bilder `<img>` werden wiederum mit dem Objektformat `img` ausgezeichnet. 
 
 ### Mehrere Beiträge platzieren
 * Wenn du mehr als einen Beitrag platzieren willst, benötigst du eine Musterseite mit dem Namen ***W-WordPress***.
-![Masterspread](https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/masterSpread.png)
+![Masterspread](https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/masterSpread.png)
 
 * Auf der Musterseite W-WordPress müssen benannte Rahmen für den Inhalt und das Beitragsbild (Featured Image) erstellt werden. Namen für Rahmen können im Bedienfeld *Ebenen* zugewiesen werden. Für den Beitragsinhalt erstelle einen Textrahmen mit dem Namen ***content*** für das Beitragsbild einen Rechteckrahmen mit dem Namen ***featured-image***
-![Named Frames](https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/namedFrames.png)
+![Named Frames](https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/namedFrames.png)
 Im Dokument `press2id_example.indd` ist das schon erledigt!
 
 * Wähle nun die gewünschten Beiträg aus der Liste aus und drücke auf **Platzieren**. 
