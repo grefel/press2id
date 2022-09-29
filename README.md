@@ -12,7 +12,7 @@ Detailed infos about the script is found at [publishing.blog [DE]](https://publi
 * [Deutsche Anleitung](#wie-geht-das)
 
 ## Install
-Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel**. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/scriptsPanel.png" width="400" alt="Scripts Panel">
+Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel**. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/scriptsPanel.png" width="200" alt="Scripts Panel">
 
 * [How to install a script](https://indesignsecrets.com/how-to-install-scripts-in-indesign.php)
 * [Skripte in InDesign installieren](https://www.publishingx.de/skripte-installieren/) 
