@@ -7,3 +7,56 @@ press2id.code-workspace
 Links/*
 Demonstration/*
 Example Files/*
+concat.json
+concatJSX.js
+jsconfig.json
+demo/01_press2id_Database_Bierdeckel.indd
+demo/02_press2id_OnePost_Volkswirtschaft.indd
+demo/03_press2id_Multipage_doppel.indd
+demo/04_press2id_Database_Produkt.indd
+demo/05_press2id_Database_zurück.indd
+demo/Assets/Biasiada_Krone.tif
+demo/Assets/Biasiada_Spezialita╠êtenbrauerei.ai
+demo/Assets/Biasiada_Spezialitaetenbrauerei_negativ.ai
+demo/Document fonts/AdobeFnt22.lst
+demo/Document fonts/AdobeFnt23.lst
+demo/Document fonts/DIN Alternate Bold.ttf
+demo/Document fonts/IBMPlexSansCondensed-Bold.ttf
+demo/Document fonts/IBMPlexSansCondensed-BoldItalic.ttf
+demo/Document fonts/IBMPlexSansCondensed-ExtraLight.ttf
+demo/Document fonts/IBMPlexSansCondensed-ExtraLightItalic.ttf
+demo/Document fonts/IBMPlexSansCondensed-Italic.ttf
+demo/Document fonts/IBMPlexSansCondensed-Light.ttf
+demo/Document fonts/IBMPlexSansCondensed-LightItalic.ttf
+demo/Document fonts/IBMPlexSansCondensed-Medium.ttf
+demo/Document fonts/IBMPlexSansCondensed-MediumItalic.ttf
+demo/Document fonts/IBMPlexSansCondensed-Regular.ttf
+demo/Document fonts/IBMPlexSansCondensed-SemiBold.ttf
+demo/Document fonts/IBMPlexSansCondensed-SemiBoldItalic.ttf
+demo/Document fonts/IBMPlexSansCondensed-Thin.ttf
+demo/Document fonts/IBMPlexSansCondensed-ThinItalic.ttf
+demo/Document fonts/IBM_Plex_Sans_Condensed/OFL.txt
+demo/Links/201006-automation_4-1000x550.jpg
+demo/Links/apple-997044_1280.jpg
+demo/Links/bananas-3700718_1280.jpg
+demo/Links/Bedeutung-des-Projektstarts.jpeg
+demo/Links/berries-2277_1280.jpg
+demo/Links/Designers-Holy-Triangle.jpeg
+demo/Links/fruits-1534494_1280.jpg
+demo/Links/logolounge-logotrends-2022.jpg
+demo/Links/Magische-Dreieck.jpeg
+demo/Links/Nela_FamilienBild-1024x615.jpg
+demo/Links/project-management-hr-small-scaled.jpg
+demo/Links/Siegrist_9G_09-22_221689044.jpg
+demo/raus/press2id_Database.indd
+dist/Dokumentation_Skripte_installieren.pdf
+dist/Scripts Panel/press2id.jsx
+dist/Scripts Panel/templates/wordrepss_basic.idml
+dist/Scripts Panel/templates/wordrepss_basic.xsl
+examples/Document fonts/AdobeFnt20.lst
+examples/Document fonts/AdobeFnt23.lst
+examples/Document fonts/NotoSerif-Italic.ttf
+src/log/@px
+src/log/download.html
+src/log/download.json
+src/log/download.xml
