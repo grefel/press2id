@@ -38,7 +38,7 @@ The script places WordPress posts in the active Document. See details in the [ge
 ## Wie geht das?
 * Nach der [Installation](https://www.publishingx.de/skripte-installieren/) sollte das Bedienfeld **Skripte** den gesamten Skriptordner anzeigen. Wichtig ist erstmal nur das eigentliche Skript `press2id.jsx`. 
 
-  ![Scripts Panel](https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/scriptsPanel.png)
+<img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/scriptsPanel.png" width="200" alt="Scripts Panel">
 
 * Bevor du loslegen kannst, brauchst du ein geöffnetes Dokument. Das kann ganz leer sein. Wichtig ist nur, dass es gespeichert ist. Der Speicherort ist notwendig, da *press2id* die Bider im Ordner Links neben dem Dokument speichert. Alternativ kannst du auch das CC 2020 Dokument `press2id_PlaceGun.idml` (CC 2020) aus dem Ordner `Example Files` verwenden. Hier sind dann alle Schriften aus dem danebenliegenden Ordner `Document Fonts` aktiviert.
 * Starte jetzt das Skript mit einem Doppelklick auf `press2id.jsx`. Das Fenster mit den Einstellungen erscheint.
