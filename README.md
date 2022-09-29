@@ -3,7 +3,7 @@ Connect Adobe InDesign to a Wordpress Blog via REST
 - Works with *Adobe InDesign* CS 6 and higher
 - Connects to any *Wordpress* 4.7 or higher
 
-Detailed infos about the script is found at [publishingblog.ch [DE]](https://www.publishingblog.ch/press2id/) by @haemeulrich and [creative-aktuell.de [DE]](https://www.creative-aktuell.de/de/blog-details/indesign-wordpress-artikel-weiterverarbeiten.html) by @einmanncombo
+Detailed infos about the script is found at [publishing.blog [DE]](https://publishing.blog/press2id) and [publishing.blog ACF [DE]](https://publishing.blog/wordpress-nach-indesign-press2id-jetzt-mit-custom-fields-und-custom-post-types/) by @haemeulrich and [creative-aktuell.de [DE]](https://www.creative-aktuell.de/de/blog-details/indesign-wordpress-artikel-weiterverarbeiten.html) by @einmanncombo
 
 # Table of contents
 * [Install information](#install)
