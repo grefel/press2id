@@ -1,9 +1,7 @@
-
-Scripts Panel/log/
-add_custom_field_to_functions.php.md
 .vscode/*
-press2id.code-workspace
-*.idlk
+Scripts Panel/log/*
 Links/*
 Demonstration/*
-Example Files/*
+*.lst
+press2id.code-workspace
+*.idlk

@@ -23,8 +23,8 @@ Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel
 For a simple start, use the file `press2id_PlaceGun.idml` from the `Example Files` folder.
 
 ## Quick start guide 
-The script places Worpress posts in the active Document. See details in the [german how to](#Wie geht das?)
-1. Start the script and enter a WordPress Blog URL.
+The script places WordPress posts in the active Document. See details in the [german how to](#Wie geht das?)
+1. Start the script and enter a WordPress blog URL.
 2. Select your processing mode. For a first start ***Place Gun Mode*** fits well.
 3. Select a post and press ***Start*** -> The script loads the post content an images in the place gun.
 5. Change styles according to your needs (you can do this also before placing)
