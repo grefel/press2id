@@ -26,8 +26,7 @@ SOFTWARE.
 // https://github.com/smeans/pjxml
 // slightly adapted for Adobe ExtendScript
 
-// Helper to decode HTML-Entities 
-//@include "encoder.js"
+
 
 var pjXML = (function () {
 	var me = {};

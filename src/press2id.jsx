@@ -65,6 +65,7 @@ var jsonFieldType = {
 //@include "lib/idsLog.jsx"
 //@include "lib/restix.jsx"
 //@include "lib/Base64.jsx"
+//@include "lib/encoder.js"
 //@include "lib/pjxml.js"
 
 main();
