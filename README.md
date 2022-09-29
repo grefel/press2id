@@ -20,14 +20,14 @@ Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel
 * [How to install a script](https://indesignsecrets.com/how-to-install-scripts-in-indesign.php)
 * [Skripte in InDesign installieren](https://www.publishingx.de/skripte-installieren/) 
 
-For a simple start, use the file `press2id_example.indd` (CC 2018) from the `Example Files` folder.
+For a simple start, use the file `press2id_PlaceGun.idml` from the `Example Files` folder.
 
-## Some notes on the Workflow 
+## Quick start guide 
 The script places Worpress posts in the active Document. See details in the [german how to](#Wie geht das?)
-1. Start the script and enter a Blog URL.
-2. Select a post. -> The script loads the post content an images in the place gun.
-2. or Select severals posts -> The script renders the posts intor named frames with the masterspreda W-Wordpress  
-4. Change styles according to your needs (you can do this also before placing)
+1. Start the script and enter a WordPress Blog URL.
+2. Select your processing mode. For a first start ***Place Gun Mode*** fits well.
+3. Select a post and press ***Start*** -> The script loads the post content an images in the place gun.
+5. Change styles according to your needs (you can do this also before placing)
 
 ### Technical details of the script
 * REST Access with [restix](https://github.com/grefel/restix)
