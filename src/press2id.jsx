@@ -26,6 +26,7 @@ var px = {
 
     // Verwaltung
     showGUI: true,
+    appendLog: true,
     debug: false
 }
 
@@ -201,6 +202,7 @@ function processDok(dok) {
     ui.missingDataFields = localize({ en: "No data field (<<data field name>> or named graphics frame) could be found in the current document!", de: "Im aktuellen Dokument konnt kein Datenfeld (<<Datenfeldname>> oder benannter Grafikrahmen) gefunden werden!" });
     ui.undefinedACFBlock = localize({ en: "JSON Object has no acf property. You need the Plugins https://wordpress.org/plugins/advanced-custom-fields/ and https://de.wordpress.org/plugins/acf-to-rest-api/", de: "Die Eigenschaft acf konnte nicht im JSON Objekt gefunden werden. Du brauchst das Plugin https://wordpress.org/plugins/advanced-custom-fields/ und https://de.wordpress.org/plugins/acf-to-rest-api/" });
     ui.invalidGraphicDatafiled = { en: "Datafield [%1] has no URL. Cannot place image", de: "Datenfeld [%1] hat keine Eigenschaft url. Das Bild kann nicht platziert werden!" };
+    ui.invalidMediaID = { en: "media ID [%1] not dound", de: "Medien ID [%1] nicht gefunden!" };
 
     log.debug(JSON.stringify(configObject));
 
@@ -583,10 +585,35 @@ function processDok(dok) {
                             var graphicObject = singleACFBlock[datenFeld.fieldName];
 
                             if (!graphicObject.hasOwnProperty("url")) {
-                                var url = graphicObject.toString();
-                                if (url.indexOf("http") != 0) {
-                                    log.warn(localize(ui.invalidGraphicDatafiled, datenFeld.fieldName));
-                                    continue;
+                                if (graphicObject.constructor.name == "Number") {
+                                    var request = {
+                                        url: restURL + "media",
+                                        command: graphicObject + "",
+                                        headers: px.defaultHeader
+                                    }
+                                    var response = restix.fetch(request);
+                                    try {
+                                        if (response.error) {
+                                            throw Error(response.errorMsg);
+                                        }
+                                        var urlObject = JSON.parse(response.body);
+                                        url = urlObject.source_url;
+                                    }
+                                    catch (e) {
+                                        var msg = "Could not connect to\n" + restURL + "\n\n" + e;
+                                        log.info(msg);
+                                        log.info(e);
+                                        log.warn(localize(ui.invalidMediaID, graphicObject+""));
+                                        continue;
+                                    }
+                                    
+                                }
+                                else {
+                                    var url = graphicObject.toString();
+                                    if (url.indexOf("http") != 0) {
+                                        log.warn(localize(ui.invalidGraphicDatafiled, datenFeld.fieldName));
+                                        continue;
+                                    }
                                 }
                             }
                             else {
