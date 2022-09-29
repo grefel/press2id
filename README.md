@@ -25,9 +25,9 @@ For a simple start, use the file `press2id_PlaceGun.idml` from the `Example File
 The script places WordPress posts in the active Document. See details in the [german how to](#Wie geht das?)
 1. Start the script and enter a WordPress blog URL.
 2. Select your processing mode. For a first start ***Place Gun Mode*** fits well.
-   ![Place  Gun Mode](https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/placeGunMode.png)
-3. Select a post and press ***Start*** -> The script loads the post content an images in the place gun.
-4. Change styles according to your needs (you can do this also before placing)
+ <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/placeGunMode.png" width="100" alt="Place  Gun Mode">
+   Select a post and press ***Start*** -> The script loads the post content an images in the place gun.
+5. Change styles according to your needs (you can do this also before placing)
 
 ### Technical details of the script
 * REST Access with [restix](https://github.com/grefel/restix)
