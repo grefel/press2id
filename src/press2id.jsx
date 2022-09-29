@@ -53,7 +53,7 @@ var configObject = {
     localImageFolder: undefined,
     endPoint: "posts",
     category: undefined,
-    xsltFile: "wp2id_import.xsl"
+    xsltFile: "wordrepss_basic.xsl"
 }
 
 var jsonFieldType = {
