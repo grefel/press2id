@@ -1,20 +1,19 @@
 # press2id
 Connect Adobe InDesign to a WordPress Blog
-- Works with *Adobe InDesign* CS 6 and higher
-- Connects to any *WordPress* 4.7 or higher
+* Works with *Adobe InDesign* CS 6 and higher
+* Connects to any *WordPress* 4.7 or higher
 
-Detailed infos about the script is found at [publishing.blog [DE]](https://publishing.blog/press2id) and [publishing.blog ACF [DE]](https://publishing.blog/WordPress-nach-indesign-press2id-jetzt-mit-custom-fields-und-custom-post-types/) by @haemeulrich
+Detailed infos are found at [publishing.blog [DE]](https://publishing.blog/press2id) and [publishing.blog ACF [DE]](https://publishing.blog/WordPress-nach-indesign-press2id-jetzt-mit-custom-fields-und-custom-post-types/) by @haemeulrich
 
 # Table of contents
 * [Download and Install](#install)
 * [Quick start guide](#quick-start-guide)
-* [Workflow](#some-notes-on-the-workflow)
-* [Deutsche Anleitung](#wie-geht-das)
+* [Technical notes on the Workflow](#some-notes-on-the-workflow)
 
 ## Download and Install
 1. Download the current version [press2id-latest.zip](https://raw.githubusercontent.com/grefel/press2id/master/release/press2id-latest.zip).
-2. Unzip the archive.
-3. Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel**. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
+1. Unzip the archive.
+1. Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel**. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
 If you never installed a script, help is here:
 * [How to install a script](https://indesignsecrets.com/how-to-install-scripts-in-indesign.php)
 * [Skripte in InDesign installieren](https://www.publishingx.de/skripte-installieren/) 
@@ -22,16 +21,26 @@ If you never installed a script, help is here:
 ## Quick start guide 
 The script places WordPress posts in the active Document. See details in the [german how to](#Wie geht das?)
 1. For a simple start open a new document or use the file `press2id_PlaceGun.idml` from the `examples` folder.
-1. Start the script and enter a WordPress blog URL. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/enterURL.png" width="500" alt="Place Gun Mode">
-2. Select ***Place Gun Mode***. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/placeGunMode.png" width="500" alt="Enter URL">
-3. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/selectAPost.png" width="500" alt="Select Post">
-4. The script loads the post content an images in the place gun.
-5. Change styles according to your needs (you can do this also before placing)
+1. Start the script and enter a WordPress blog URL. Unsure which, just enter `https://www.indesignblog.com/` <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/enterURL.png" width="500" alt="Place Gun Mode">
+1. Press `Next`
+1. Select ***Place Gun Mode***. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/placeGunMode.png" width="500" alt="Enter URL">
+1. Press `Next`
+4. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/selectAPost.png" width="500" alt="Select Post">
+5. Press `Start`
+6. The script loads the post content an images in the place gun.
+7. Change styles according to your needs (you can do this also before placing)
 
 ### Technical details of the script
-* REST Access with [restix](https://github.com/grefel/restix)
-* JavaScript/Extendscript for postprocessing.
-* Import is template based. The script uses an InDesign file and a XSL-Transformation in folder **templates**  for basic styling. HTML element names are mapped to InDesign styles by element names. Change any style definition here.
+* InDesign is managed with [JavaScript](https://www.indesignjs.de/auflage2/).
+* REST access with [restix](https://github.com/grefel/restix) to the [WordPress API](https://developer.wordpress.org/rest-api/)
+* Post content needs to be XHTML and is processed via InDesign XML Import. 
+* Styling is template based. The script uses the InDesign file `wordrepss_basic.idml` and a XSL-Transformation `wordrepss_basic.xsl` from the folder `templates`  for basic styling. HTML element names are mapped to InDesign styles by element names. Change any style definition here.
+* Suported HTML
+  * Block elements `h1`...`h6`, `p`, `quote` and some more
+  * Lists `ul` and `ol`
+  * Inline elements `b`, `i`, `em`, `strong`, `span`
+  * Figures `figure`, `img` and `caption`
+  * Hyperlinks `a`
 * You can link to local image files with the same name.
 
 ## Wie geht das?
