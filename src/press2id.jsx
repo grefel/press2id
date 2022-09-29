@@ -714,7 +714,8 @@ function getImageFile(configObject, fileURL) {
         }
     }
     else {
-        var imageFile = File(configObject.localImageFolder + "/" + fileName);
+        // TODO fix WP size endings...
+        var imageFile = File(configObject.localImageFolder + "/" + fileName.replace(/-.+(\.[a-z]+)$/, "$1"));
         log.info("Link to local folder " + imageFile);
     }
 
