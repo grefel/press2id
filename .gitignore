@@ -5,3 +5,6 @@ Demonstration/*
 *.lst
 press2id.code-workspace
 *.idlk
+concat.json
+concatJSX.js
+jsconfig.json
