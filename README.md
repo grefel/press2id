@@ -14,7 +14,7 @@ Detailed infos about the script is found at [publishing.blog [DE]](https://publi
 ## Install
 Copy the contents of the folder `Scripts Panel` to your InDesign **Scripts Panel**. 
 
-<img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/scriptsPanel.png" width="200" alt="Scripts Panel">
+<img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
 
 * [How to install a script](https://indesignsecrets.com/how-to-install-scripts-in-indesign.php)
 * [Skripte in InDesign installieren](https://www.publishingx.de/skripte-installieren/) 
@@ -23,9 +23,9 @@ For a simple start, use the file `press2id_PlaceGun.idml` from the `Example File
 
 ## Quick start guide 
 The script places WordPress posts in the active Document. See details in the [german how to](#Wie geht das?)
-1. Start the script and enter a WordPress blog URL. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/enterURL.png" width="400" alt="Place Gun Mode">
-1. Select ***Place Gun Mode***. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/placeGunMode.png" width="400" alt="Enter URL">
-1. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/selectAPost.png" width="400" alt="Select Post">
+1. Start the script and enter a WordPress blog URL. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/enterURL.png" width="500" alt="Place Gun Mode">
+1. Select ***Place Gun Mode***. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/placeGunMode.png" width="500" alt="Enter URL">
+1. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/selectAPost.png" width="500" alt="Select Post">
 1.  The script loads the post content an images in the place gun.
 1. Change styles according to your needs (you can do this also before placing)
 
@@ -38,7 +38,7 @@ The script places WordPress posts in the active Document. See details in the [ge
 ## Wie geht das?
 * Nach der [Installation](https://www.publishingx.de/skripte-installieren/) sollte das Bedienfeld **Skripte** den gesamten Skriptordner anzeigen. Wichtig ist erstmal nur das eigentliche Skript `press2id.jsx`. 
 
-<img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/scriptsPanel.png" width="200" alt="Scripts Panel">
+<img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
 
 * Bevor du loslegen kannst, brauchst du ein geöffnetes Dokument. Das kann ganz leer sein. Wichtig ist nur, dass es gespeichert ist. Der Speicherort ist notwendig, da *press2id* die Bider im Ordner Links neben dem Dokument speichert. Alternativ kannst du auch das CC 2020 Dokument `press2id_PlaceGun.idml` (CC 2020) aus dem Ordner `Example Files` verwenden. Hier sind dann alle Schriften aus dem danebenliegenden Ordner `Document Fonts` aktiviert.
 * Starte jetzt das Skript mit einem Doppelklick auf `press2id.jsx`. Das Fenster mit den Einstellungen erscheint.
