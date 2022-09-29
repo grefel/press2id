@@ -23,9 +23,9 @@ For a simple start, use the file `press2id_PlaceGun.idml` from the `Example File
 
 ## Quick start guide 
 The script places WordPress posts in the active Document. See details in the [german how to](#Wie geht das?)
-1. Start the script and enter a WordPress blog URL. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/enterURL.png" width="300" alt="Place Gun Mode">
-1. Select ***Place Gun Mode***. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/placeGunMode.png" width="300" alt="Enter URL">
-1. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/selectAPost.png" width="300" alt="Select Post">
+1. Start the script and enter a WordPress blog URL. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/enterURL.png" width="400" alt="Place Gun Mode">
+1. Select ***Place Gun Mode***. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/placeGunMode.png" width="400" alt="Enter URL">
+1. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/Documentation/assets/selectAPost.png" width="400" alt="Select Post">
 1.  The script loads the post content an images in the place gun.
 1. Change styles according to your needs (you can do this also before placing)
 
