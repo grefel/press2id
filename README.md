@@ -3,7 +3,7 @@ Connect Adobe InDesign to a WordPress Blog
 - Works with *Adobe InDesign* CS 6 and higher
 - Connects to any *WordPress* 4.7 or higher
 
-Detailed infos about the script is found at [publishing.blog [DE]](https://publishing.blog/press2id) and [publishing.blog ACF [DE]](https://publishing.blog/WordPress-nach-indesign-press2id-jetzt-mit-custom-fields-und-custom-post-types/) by @haemeulrich and [creative-aktuell.de [DE]](https://www.creative-aktuell.de/de/blog-details/indesign-WordPress-artikel-weiterverarbeiten.html) by @einmanncombo
+Detailed infos about the script is found at [publishing.blog [DE]](https://publishing.blog/press2id) and [publishing.blog ACF [DE]](https://publishing.blog/WordPress-nach-indesign-press2id-jetzt-mit-custom-fields-und-custom-post-types/) by @haemeulrich
 
 # Table of contents
 * [Download and Install](#install)
@@ -25,13 +25,13 @@ The script places WordPress posts in the active Document. See details in the [ge
 1. Start the script and enter a WordPress blog URL. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/enterURL.png" width="500" alt="Place Gun Mode">
 2. Select ***Place Gun Mode***. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/placeGunMode.png" width="500" alt="Enter URL">
 3. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/selectAPost.png" width="500" alt="Select Post">
-4.  The script loads the post content an images in the place gun.
+4. The script loads the post content an images in the place gun.
 5. Change styles according to your needs (you can do this also before placing)
 
 ### Technical details of the script
 * REST Access with [restix](https://github.com/grefel/restix)
 * JavaScript/Extendscript for postprocessing.
-* Import is template based. The script uses an InDesign file in folder **templates**  for basic styling. HTML element names are mapped to InDesign styles by element names. Change any style here.
+* Import is template based. The script uses an InDesign file and a XSL-Transformation in folder **templates**  for basic styling. HTML element names are mapped to InDesign styles by element names. Change any style definition here.
 * You can link to local image files with the same name.
 
 ## Wie geht das?
