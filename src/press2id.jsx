@@ -2320,7 +2320,7 @@ function getDatenfelder(jsonDatenfeldPage) {
     for (var i = 0; i < jsonDatenfeldPage.pageItems.length; i++) {
         var pi = jsonDatenfeldPage.pageItems[i].getElements()[0];
         if (pi.textPaths.length > 0) {
-            var searchResults = findOrChangeGrep(pi.textPaths[0], "<<[a-zA-Z\\d_-]+>>", null, false);
+            var searchResults = findOrChangeGrep(pi.textPaths[0].parentStory, "<<[a-zA-Z\\d_-]+>>", null, false);
             for (var f = 0; f < searchResults.length; f++) {
                 var text = searchResults[f];
                 var textFieldName = text.contents.replace(/[><]/g, "");
