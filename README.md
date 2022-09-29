@@ -32,7 +32,7 @@ The script places WordPress posts in the active Document. See details in the [ge
 
 ### Fill Masterspread Mode
 If you want to add several Posts in document you can try the ***Fill Masterspread*** mode. 
-1. The script uses the Masterspread `W-Wordpress` you can use the file `press2id_Multipage.idml` from the `examples` folder.
+1. The script uses the Masterspread `W-Wordpress` you can use the file `press2id_Masterspread.idml` from the `examples` folder.
 1. Choose the mode  <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/masterSpreadMode.png" width="500" alt="Fill Masterspread Mode">
 2. Select several posts.
 
