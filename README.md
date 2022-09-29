@@ -21,14 +21,20 @@ If you never installed a script, help is here:
 ## Quick start guide 
 The script places WordPress posts in the active Document. See details in the [german how to](#Wie geht das?)
 1. For a simple start open a new document or use the file `press2id_PlaceGun.idml` from the `examples` folder.
-1. Start the script and enter a WordPress blog URL. Unsure which, just enter `https://www.indesignblog.com/` <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/enterURL.png" width="500" alt="Place Gun Mode">
+1. Start the script and enter a WordPress blog URL. Unsure which, just enter `https://www.indesignblog.com/` <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/enterURL.png" width="500" alt="Enter URL">
 1. Press `Next`
-1. Select ***Place Gun Mode***. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/placeGunMode.png" width="500" alt="Enter URL">
+1. Select ***Fill Place Gun*** mode. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/placeGunMode.png" width="500" alt="Place Gun Mode">
 1. Press `Next`
 4. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/selectAPost.png" width="500" alt="Select Post">
 5. Press `Start`
 6. The script loads the post content an images in the place gun.
 7. Change styles according to your needs (you can do this also before placing)
+
+### Fill Masterspread Mode
+If you want to add several Posts in document you can try the ***Fill Masterspread*** mode. 
+1. The script uses the Masterspread `W-Wordpress` you can use the file `press2id_Multipage.idml` from the `examples` folder.
+1. Choose the mode  <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/masterSpreadMode.png" width="500" alt="Fill Masterspread Mode">
+2. Select several posts.
 
 ### Technical details of the script
 * InDesign is managed with [JavaScript](https://www.indesignjs.de/auflage2/).
