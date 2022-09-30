@@ -1,3 +1,5 @@
+tl;dr – I just want the script: [press2id-latest.zip](https://raw.githubusercontent.com/grefel/press2id/master/release/press2id-latest.zip).
+
 # press2id
 Connect Adobe InDesign to a WordPress Blog
 * Works with *Adobe InDesign* CS 6 and higher
