@@ -2773,7 +2773,7 @@ function getFileFilter(fileFilter) {
 }
 
 
-/**  Init Log File and System */
+/** Init Log File and System */
 function initLog() {
     var version = "-1";
     var projectName = "noProjectName";
@@ -2782,7 +2782,6 @@ function initLog() {
     var logFolderName = "log";
     if (typeof px != "undefined") {
         var version = px.version
-        var projectName = px.projectName;
         var appendLog = px.appendLog;
         var debug = px.debug;
         if (px.logFolderName) logFolderName = px.logFolderName;
@@ -2798,13 +2797,12 @@ function initLog() {
         logFolder = Folder(Folder.desktop + "/indesign-log/");
         logFolder.create();
     }
+    projectName = px.projectName.replace(/:/g, "_");
     if (appendLog) {
         var logFile = File(logFolder + "/" + projectName + "_" + getUserName() + "_log.txt");
     }
     else {
-        var date = new Date();
-        date = date.getFullYear() + "-" + pad(date.getMonth() + 1, 2) + "-" + pad(date.getDate(), 2) + "_" + pad(date.getHours(), 2) + "-" + pad(date.getMinutes(), 2) + "-" + pad(date.getSeconds(), 2);
-        var logFile = File(logFolder + "/" + date + "_" + projectName + "_" + getUserName() + "_log.txt");
+        var logFile = File(logFolder + "/" + getFormattedDateString(new Date()) + "_" + projectName + "_" + getUserName() + "_log.txt");
     }
     if (debug) {
         log = idsLog.getLogger(logFile, "DEBUG", true);
@@ -2813,8 +2811,18 @@ function initLog() {
     else {
         log = idsLog.getLogger(logFile, "INFO", false);
     }
-    log.info("Starte " + projectName + " v " + version + " Debug: " + debug + " ScriptPrefVersion: " + app.scriptPreferences.version + " InDesign v " + app.version);
+    log.warnInfo("Starte " + projectName + " v " + version + " Debug: " + debug + " ScriptPrefVersion: " + app.scriptPreferences.version + " InDesign v " + app.version);
     return logFile;
+}
+
+/** Returns a formatted String  */
+function getFormattedDateString(date, addTime) {
+    if (addTime) {
+        return date.getFullYear() + "-" + pad(date.getMonth() + 1, 2) + "-" + pad(date.getDate(), 2) + "_" + pad(date.getHours(), 2) + "-" + pad(date.getMinutes(), 2) + "-" + pad(date.getSeconds(), 2);
+    }
+    else {
+        return date.getFullYear() + "-" + pad(date.getMonth() + 1, 2) + "-" + pad(date.getDate(), 2)
+    }
 }
 
 /** Pad a number with leading zeros 
@@ -2844,15 +2852,20 @@ function getUserName() {
     }
 }
 
-/** Get Filepath from current script  */
-/*Folder*/ function getScriptFolderPath() {
+/** Get Filepath from current script  
+ * @returns {Folder} script folder  
+*/
+function getScriptFolderPath() {
     var skriptPath;
     try {
         skriptPath = app.activeScript.parent;
     }
     catch (e) {
-        /* We're running from the ESTK*/
+        /* We're running from the VSC */
         skriptPath = File(e.fileName).parent;
+    }
+    if (skriptPath.toString().match(/\/lib$/)) {
+        skriptPath = skriptPath.parent;
     }
     return skriptPath;
 }
