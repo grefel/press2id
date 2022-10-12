@@ -27,7 +27,7 @@ var px = {
     // Verwaltung
     showGUI: true,
     appendLog: true,
-    debug: true
+    debug: false
 }
 
 var configObject = {
