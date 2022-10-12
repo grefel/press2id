@@ -27,7 +27,7 @@ var px = {
     // Verwaltung
     showGUI: true,
     appendLog: true,
-    debug: false
+    debug: true
 }
 
 var configObject = {
@@ -824,7 +824,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
     htmlString += '</body></html>';
 
     // Fix self closing tags before parse
-    htmlString = htmlString.replace(/<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr|command|keygen|menuitem)\s*([^>\/]*)\s*\/?\s*>/g, '<$1 $2/>');
+    htmlString = htmlString.replace(/<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr|command|keygen|menuitem)\s*([^>]*?)\s*\/?\s*>/g, '<$1 $2/>');
     htmlString = htmlString.replace(/<\/(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr|command|keygen|menuitem)>/g, '');
     // remove script
     htmlString = htmlString.replace(/<script[^>]*>[\s\S]*?<\/script>/g, '');
