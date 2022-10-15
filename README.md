@@ -7,7 +7,7 @@ Connect Adobe InDesign to a WordPress Blog
 
 Detailed infos are found at [publishing.blog [DE]](https://publishing.blog/press2id) and [publishing.blog ACF [DE]](https://publishing.blog/WordPress-nach-indesign-press2id-jetzt-mit-custom-fields-und-custom-post-types/) by @haemeulrich
 
-press2id is successfully used with the following publications. If you also use it and want to be added to this list, just send us a message!
+press2id is successfully used with the following publications. If you also use it and want to be added to this list, just send a message!
 #### Fill Place Gun Mode
 * https://www.azur-online.de
 * https://dievolkswirtschaft.ch/de/
