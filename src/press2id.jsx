@@ -804,7 +804,10 @@ function createXMLFile(singlePost, postObject, blogURL) {
         }
         else {
             if (configObject.runMode == RunModes.PLACE_GUN) {
-                htmlString += '<div id="featuredImage">' + featuredImage.source_url + '</div>'
+                htmlString += '<figure id="featuredImage">';
+                htmlString += '<img src="' + featuredImage.source_url + '" />';
+                htmlString += '<figcaption>' + featuredImage.caption.rendered + '</figcaption>';
+                htmlString += '</div>';
             }
             else { //if (configObject.runMode ==  RunModes.TEMPLATE) {
                 postObject.featuredImageURL = featuredImage.source_url;

@@ -60,16 +60,36 @@
         </content>
     </xsl:template>
     
-    <xsl:template match="div[@id = 'featuredImage']">
+    <xsl:template match="figure[@id = 'featuredImage']">
         <featuredImage>
             <xsl:attribute name="src">
-                <xsl:apply-templates/>
+                <xsl:value-of select="img/@src"/>
             </xsl:attribute>
             <!--<xsl:attribute name="ostyle">
                  <xsl:text>featuredImage</xsl:text>
                  </xsl:attribute>-->
          </featuredImage>
+        <xsl:text>&#x0A;</xsl:text>
+        <xsl:apply-templates select="figcaption"/>
     </xsl:template>
+
+    <xsl:template match="p[ancestor::figcaption]">
+        <xsl:variable name="textContents" select="normalize-space(.)"/>
+        
+        <!--Remove empty (whitespace only elements) blocks -->
+        <xsl:if test="$textContents != ''">
+            <xsl:copy>
+                <xsl:attribute name="aid:pstyle">
+                    <xsl:text>featuredImageCaption</xsl:text>
+                </xsl:attribute>
+                <xsl:copy-of select="@*"/>
+                <xsl:apply-templates/>
+            </xsl:copy>
+            <xsl:text>&#x0A;</xsl:text>
+        </xsl:if>
+        
+    </xsl:template>
+
     
     
     <!--Simple Block Elements-->
