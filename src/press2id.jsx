@@ -2099,8 +2099,16 @@ function getConfig(newConfigObject) {
         if (response.head["link"] != undefined) {
             var restRegexResult = response.head["link"].match(restRegex);
             if (restRegexResult) {
-                var restURL = restRegexResult[1];
-                return restURL + "wp/v2/";
+                restURL = restRegexResult[1] + "wp/v2/";
+                request = {
+                    url: restURL,
+                    headers: px.defaultHeader
+                }
+                var response = restix.fetch(request);
+                if (response.httpStatus >= 400) {
+                    throw Error(localize(ui.RESTapiHttpStatus, logURL, response.httpStatus, response.body));
+                }
+                return restURL;
             }
         }
 
