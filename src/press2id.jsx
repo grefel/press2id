@@ -1596,7 +1596,7 @@ function getConfig(newConfigObject) {
         stNumberOfEntries = groupRefilter.add("statictext");
         stNumberOfEntries.preferredSize.width = 300;
         var buttonFilter = groupRefilter.add("button", undefined, undefined, { name: "" });
-        buttonFilter.text = "Alle Einträge laden";
+        buttonFilter.text = localize({de:"Alle Einträge laden",en:"Load all entries"});
 
         buttonFilter.onClick = function () {
             loadMaxPages = 50;
@@ -2264,6 +2264,10 @@ function getConfig(newConfigObject) {
             try {
                 if (response.error) {
                     throw Error(response.errorMsg);
+                }
+                else if (response.httpStatus >= 400) {
+                    log.infoAlert("Fehler httpStatus " + response.httpStatus + "\n" + response.body);
+                    return [];
                 }
                 var postEmbed = JSON.parse(response.body);
             }
