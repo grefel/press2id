@@ -277,7 +277,7 @@ function processDok(dok) {
 
                 var xsltFile = File(getScriptFolderPath() + "/templates/" + configObject.xsltFile);
                 if (!xsltFile.exists) {
-                    log.warn( localize({en:"Could not locate XSL-File", de:"Konnte XSL-Datei nicht finden"}) + " " + xsltFile);
+                    log.warn(localize({ en: "Could not locate XSL-File", de: "Konnte XSL-Datei nicht finden" }) + " " + xsltFile);
                 }
 
                 // Set Import Preferences
@@ -603,10 +603,10 @@ function processDok(dok) {
                                         var msg = "Could not connect to\n" + restURL + "\n\n" + e;
                                         log.info(msg);
                                         log.info(e);
-                                        log.warn(localize(ui.invalidMediaID, graphicObject+""));
+                                        log.warn(localize(ui.invalidMediaID, graphicObject + ""));
                                         continue;
                                     }
-                                    
+
                                 }
                                 else {
                                     var url = graphicObject.toString();
@@ -1596,7 +1596,7 @@ function getConfig(newConfigObject) {
         stNumberOfEntries = groupRefilter.add("statictext");
         stNumberOfEntries.preferredSize.width = 300;
         var buttonFilter = groupRefilter.add("button", undefined, undefined, { name: "" });
-        buttonFilter.text = localize({de:"Alle Einträge laden",en:"Load all entries"});
+        buttonFilter.text = localize({ de: "Alle Einträge laden", en: "Load all entries" });
 
         buttonFilter.onClick = function () {
             loadMaxPages = 50;
@@ -2047,6 +2047,7 @@ function getConfig(newConfigObject) {
         var ui = {};
         ui.pageNotFound = { en: "URL [%1] not found [%2]", de: "URL [%1] nicht gefunden [%2]" };
         ui.noRESTapiFound = { en: "No REST API found\n[%1]", de: "Keine WordPress Seite oder REST Schnittstelle deaktiviert unter\n[%1]" };
+        ui.RESTapiHttpStatus = { en: "Found REST API [%1]\nBut could not connect due to httpStatus[%2]\n[%3]", de: "REST API gefunden [%1]\nEs trat jedoch ein Fehler auf httpStatus[%2]\n[%3]" };
 
         // Guess the REST-Route for sites in subfolders or simple permalinks
         log.debug("check for rest URL: " + blogURL + "/index.php?rest_route=/");
@@ -2066,8 +2067,16 @@ function getConfig(newConfigObject) {
         if (response.head["link"] != undefined) {
             var restRegexResult = response.head["link"].match(restRegex);
             if (restRegexResult) {
-                restURL = restRegexResult[1];
-                return restURL + "wp/v2/";
+                restURL = restRegexResult[1] + "wp/v2/";
+                request = {
+                    url: restURL,
+                    headers: px.defaultHeader
+                }
+                var response = restix.fetch(request);
+                if (response.httpStatus >= 400) {
+                    throw Error(localize(ui.RESTapiHttpStatus, logURL, response.httpStatus, response.body));
+                }
+                return restURL;
             }
         }
 
