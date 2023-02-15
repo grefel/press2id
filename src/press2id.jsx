@@ -25,9 +25,10 @@ var px = {
     postIDLabel: "px:postID:px",
 
     // Verwaltung
+    tempFileArray: [],
     showGUI: true,
     appendLog: true,
-    debug: false
+    debug: true // release with false
 }
 
 var configObject = {
@@ -345,34 +346,60 @@ function processDok(dok) {
                     var imageFile = getImageFile(configObject, fileURL)
 
                     if (imageFile != null && imageFile.exists && imageFile.length > 0) {
+                        var rect = styleTemplateDok.rectangles.add();
+                        rect.geometricBounds = [0, 0, 50, 100]; // Default if not set in Object style
+                        rect.appliedObjectStyle = oStyle;
+                        try {
+                            rect.place(imageFile);
+                        }
+                        catch (e) {
+                            log.warn("Cannot place " + imageFile.name + "\nError: " + e);
+                        }
+
+                        if (rect.getElements()[0] instanceof TextFrame) {
+                            log.warn("Found text instead of image data for [" + fileURL + "]");
+                            rect.getElements()[0].parentStory.contents = "File not found [" + imageFile + "] The URL [" + fileURL + "] is probably broken?";
+                        }
+
+                        rect.fit(FitOptions.PROPORTIONALLY);
+                        rect.fit(FitOptions.FRAME_TO_CONTENT);
 
                         if (configObject.runMode == RunModes.PLACE_GUN && configObject.loadImagesToPlaceGun) {
-                            placeGunArray.push(imageFile);
+                            var tempFile = File(Folder.temp + "/px_" + imageFile.name + ".idms");
+                            var captionXML = imgXML.parent.xmlElements.itemByName("figcaption");
+                            if (!captionXML.isValid) {
+                                captionXML = imgXML.parent.parent.xmlElements.itemByName("figcaption");
+                            }
+                            if (captionXML.isValid) {
+                                // Add Caption to image
+                                var captionTf = styleTemplateDok.textFrames.add();
+                                var rgb = rect.geometricBounds;
+                                captionTf.geometricBounds = [rgb[2], rgb[1], rgb[2] + 50, rgb[3]];
+                                captionXML.xmlContent.move(LocationOptions.AT_BEGINNING, captionTf);
+                                findOrChangeGrep(captionTf, "\\A\\s*", "");
+                                findOrChangeGrep(captionTf, "\\s*\\Z", "");
+                                captionTf.recompose();
+                                captionTf.fit(FitOptions.FRAME_TO_CONTENT);
+                                var tgb = captionTf.geometricBounds;
+                                // fix width if only one line... 
+                                captionTf.geometricBounds = [tgb[0], rgb[1], tgb[2], rgb[3]];
+                                var group = styleTemplateDok.groups.add([rect, captionTf]);
+                                group.exportFile(ExportFormat.INDESIGN_SNIPPET, tempFile);
+                                group.remove();
+                            }
+                            else {
+                                rect.exportFile(ExportFormat.INDESIGN_SNIPPET, tempFile);
+                                rect.remove();
+                            }
+
+                            placeGunArray.push(tempFile);
+                            px.tempFileArray.push(tempFile);
                         }
                         else {
-                            var rect = styleTemplateDok.rectangles.add();
-                            rect.geometricBounds = [0, 0, 50, 100]; // Default if not set in Object style
-                            rect.appliedObjectStyle = oStyle;
-                            try {
-                                rect.place(imageFile);
-                            }
-                            catch (e) {
-                                log.warn("Cannot place " + imageFile.name + "\nError: " + e);
-                            }
-
-                            if (rect.getElements()[0] instanceof TextFrame) {
-                                log.warn("Found text instead of image data for [" + fileURL + "]");
-                                rect.getElements()[0].parentStory.contents = "File not found [" + imageFile + "] The URL [" + fileURL + "] is probably broken?";
-                            }
-
-                            rect.fit(FitOptions.PROPORTIONALLY);
-                            rect.fit(FitOptions.FRAME_TO_CONTENT);
                             rect.anchoredObjectSettings.insertAnchoredObject(imgXML.xmlContent.insertionPoints[0]);
                             rect.anchoredObjectSettings.properties = rect.appliedObjectStyle.anchoredObjectSettings.properties;
-
                             // rect.clearObjectStyleOverrides(); // Geht nicht, weil die Größe über das Objektformat gesteuert werden soll
                             // TODO fix image height > textFrame height
-
                         }
                     }
                     else {
@@ -460,6 +487,7 @@ function processDok(dok) {
                 try {
                     var tempICMLFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp.icml");
                     currentEntryStory.insertLabel(px.postIDLabel, postObject.id + "");
+                    findOrChangeGrep(currentEntryStory, "\\A\\s*", "");
                     currentEntryStory.exportFile(ExportFormat.INCOPY_MARKUP, tempICMLFile);
                     placeGunArray.unshift(tempICMLFile);
 
@@ -477,9 +505,18 @@ function processDok(dok) {
                             throw e;
                         }
                     }
-                    tempICMLFile.remove();
-                    dok.links.itemByName(tempICMLFile.name).unlink();
-                    styleTemplateDok.links.everyItem().unlink();
+                    try {
+                        dok.links.itemByName(tempICMLFile.name).unlink();
+                        styleTemplateDok.links.everyItem().unlink();
+                        tempICMLFile.remove();
+                        for (var g = 0; g < px.tempFileArray.length; g++) {
+                            px.tempFileArray[g].remove();
+                        }
+                    }
+                    catch (e) {
+                        // we don't care about temp files ... 
+                        log.info(e);
+                    }
                 }
                 catch (e) {
                     log.warn(e);

@@ -2,8 +2,8 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:aid="http://ns.adobe.com/AdobeInDesign/4.0/"
                 xmlns:aid5="http://ns.adobe.com/AdobeInDesign/5.0/" version="1.0">
-    <xsl:variable name="pxTransformationName">wp2id_import.xsl</xsl:variable>
-    <xsl:variable name="pxVersion">2018-04-23 v1.0</xsl:variable>
+    <xsl:variable name="pxTransformationName">wordrepss_basic.xsl</xsl:variable>
+    <xsl:variable name="pxVersion">2023-02-15 v1.0</xsl:variable>
     <xsl:variable name="pxCreator">Gregor Fellenz – https://www.publishingx.de/</xsl:variable>
     
     <!--Insert Version Info-->
@@ -61,36 +61,19 @@
     </xsl:template>
     
     <xsl:template match="figure[@id = 'featuredImage']">
-        <featuredImage>
-            <xsl:attribute name="src">
-                <xsl:value-of select="img/@src"/>
-            </xsl:attribute>
-            <!--<xsl:attribute name="ostyle">
-                 <xsl:text>featuredImage</xsl:text>
-                 </xsl:attribute>-->
-         </featuredImage>
-        <xsl:text>&#x0A;</xsl:text>
-        <xsl:apply-templates select="figcaption"/>
-    </xsl:template>
-
-    <xsl:template match="p[ancestor::figcaption]">
-        <xsl:variable name="textContents" select="normalize-space(.)"/>
-        
-        <!--Remove empty (whitespace only elements) blocks -->
-        <xsl:if test="$textContents != ''">
-            <xsl:copy>
-                <xsl:attribute name="aid:pstyle">
-                    <xsl:text>featuredImageCaption</xsl:text>
+        <figure>
+            <featuredImage>
+                <xsl:attribute name="src">
+                    <xsl:value-of select="img/@src"/>
                 </xsl:attribute>
-                <xsl:copy-of select="@*"/>
-                <xsl:apply-templates/>
-            </xsl:copy>
+                <!--<xsl:attribute name="ostyle">
+                     <xsl:text>featuredImage</xsl:text>
+                     </xsl:attribute>-->
+             </featuredImage>
             <xsl:text>&#x0A;</xsl:text>
-        </xsl:if>
-        
-    </xsl:template>
-
-    
+            <xsl:apply-templates select="descendant::figcaption"/>
+        </figure>
+    </xsl:template>  
     
     <!--Simple Block Elements-->
     <xsl:template match="title | h1 | h2 | h3 | h4 | h5 | h6">
@@ -129,12 +112,18 @@
             <xsl:copy>
                 <xsl:attribute name="aid:pstyle">
                     <xsl:choose>
+                        <xsl:when test="ancestor::figure[@id = 'featuredImage']">
+                            <xsl:text>featuredImageCaption</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="ancestor::figure[@id = 'figCaption']">
+                            <xsl:text>figCaption</xsl:text>
+                        </xsl:when>
                         <xsl:when test="@class = 'has-text-align-center'">
                             <xsl:text>mittig</xsl:text>
                         </xsl:when>
                         <xsl:when test="@class">
                             <xsl:value-of select="@class"/>
-                        </xsl:when>
+                        </xsl:when>                        
                         <xsl:otherwise>
                             <xsl:value-of select="name()"/>
                         </xsl:otherwise>
@@ -264,15 +253,29 @@
     </xsl:template>
     
     <xsl:template match="figure">
-        <p_img aid:pstyle="p_img">
-            <xsl:apply-templates select="descendant::img"/>
-        </p_img>
-        <xsl:text>&#x0A;</xsl:text>
-        <xsl:apply-templates select="descendant::figcaption"/>
+        <figure>
+            <p_img aid:pstyle="p_img">
+                <xsl:apply-templates select="descendant::img"/>
+            </p_img>
+            <xsl:text>&#x0A;</xsl:text>
+            <xsl:apply-templates select="descendant::figcaption"/>
+        </figure>
     </xsl:template>
     
     <xsl:template match="figcaption">
-        <figcaption aid:pstyle="figcaption">
+        <figcaption>
+            <xsl:choose>
+                <xsl:when test="ancestor::figure[@id = 'featuredImage']">                    
+                    <xsl:attribute name="aid:pstyle">
+                        <xsl:text>featuredImageCaption</xsl:text>
+                    </xsl:attribute>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:attribute name="aid:pstyle">
+                        <xsl:text>figcaption</xsl:text>
+                    </xsl:attribute>
+                </xsl:otherwise>
+            </xsl:choose>            
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>
         </figcaption>
