@@ -1,14 +1,14 @@
 ﻿/****************
 # Connect InDesign to the web
 * HTTPS supported 
-* Works form CS4 to CC 2018 (ExtendScript based library)
+* Works form CS4 to CC 2022 (ExtendScript based library)
 * Based on VBScript/ServerXMLHTTP (Win) AppleScript/curl (Mac) relies on app.doScript()
 
 ## Getting started
 See examples/connect.jsx
 
-* @Version: 1.32
-* @Date: 2021-11-20
+* @Version: 1.34
+* @Date: 2023-01-23
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Autret https://forums.adobe.com/thread/1111415
@@ -21,7 +21,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 	* PRIVATE
 	*/
 	var INNER = {};
-	INNER.version = "2021-10-13-1.31";
+	INNER.version = "2022-03-29-1.33";
 
 
 	/** Returns if the operating system is windows 
@@ -58,6 +58,10 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			request.fullURL = request.fullURL + "/" + request.command;
 		}
 
+		// not encoded, we need to encode;
+		if (decodeURI(request.fullURL) == request.fullURL) {
+			request.fullURL = encodeURI(request.fullURL);
+		}
 
 		if (request.method == undefined || request.method == "") request.method = "GET";
 		if (!(request.method == "GET" || request.method == "POST" || request.method == "PUT" || request.method == "PATCH" || request.method == "DELETE" || request.method == "HEAD")) throw Error("Method " + request.method + " is not supported");  // Missing HEAD 
@@ -89,7 +93,6 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 		};
 
 		var scriptCommands = [];
-		var systemCmd = "";
 		var result = "";
 
 		if (INNER.isWindows()) {
@@ -110,7 +113,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			}
 
 			for (var i = 0; i < request.headers.length; i++) {
-				scriptCommands.push('xHttp.setRequestHeader "' + request.headers[i].name + '","' + request.headers[i].value + '"');
+				scriptCommands.push('xHttp.setRequestHeader "' + request.headers[i].name + '","' + request.headers[i].value.replace(/"/g, '""') + '"');
 			}
 			if (request.unsafe) {
 				//~ ' 2 stands for SXH_OPTION_IGNORE_SERVER_SSL_CERT_ERROR_FLAGS
@@ -121,7 +124,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			if (request.body) {
 				scriptCommands.push('xHttp.Send "' + request.body.replace(/"/g, '""').replace(/\n|\r/g, '') + '"');
 			}
-			else if (request.method == "POST" && request.binaryFilePath) {
+			else if ((request.method == "POST" || request.method == "PUT") && request.binaryFilePath) {
 				// http://www.vbforums.com/showthread.php?418570-RESOLVED-HTTP-POST-a-zip-file
 				scriptCommands.push('    Dim sFile');
 				scriptCommands.push('    sFile = "' + request.binaryFilePath + '"');
@@ -224,7 +227,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			if (request.body) {
 				curlString += ' -d \'' + request.body.replace(/"/g, '\\"').replace(/\n|\r/g, '') + '\'';
 			}
-			else if (request.method == "POST" && request.binaryFilePath) {
+			else if ((request.method == "POST" || request.method == "PUT") && request.binaryFilePath) {
 				curlString += ' --data-binary \'@' + request.binaryFilePath + '\'';
 			}
 
@@ -234,10 +237,6 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			}
 			else {
 				curlString += ' -w \'\n-----http-----%{http_code}\'';
-			}
-			// not encoded, we need to encode;
-			if (decodeURI(request.fullURL) == request.fullURL) {
-				request.fullURL = encodeURI(request.fullURL);
 			}
 			curlString += ' \'' + request.fullURL + '\'';
 			// log.info(curlString);
@@ -332,25 +331,13 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 		return response;
 	}
 
-
-
 })($.global, { toString: function () { return 'restix'; } });
 
 
 // Example Request
 //  var request = {
-//  	url:"https://www.publishingx.de/dfdf",
-//  	method:"HEAD", // defaults to GET
+//  	url:"https://www.publishingx.de/",
 // }
-
-
 // var response = restix.fetch(request);
-// $.writeln(response.head.toSource());
-// $.writeln(response.httpStatus);
-
-//~ if (response.error) {
-//~ 	$.writeln("Response Error: " + response.error);
-//~ 	$.writeln("Response errorMsg: " + response.errorMsg);
-//~ }
-//~ $.writeln("Response HTTP Status: " + response.httpStatus);
-//~ $.writeln("Response Body: " + response.body);
+// $.writeln("Response HTTP Status: " + response.httpStatus);
+// $.writeln("Response Body: " + response.body);
