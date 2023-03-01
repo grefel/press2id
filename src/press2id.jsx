@@ -7,7 +7,8 @@ var RunModes = {
     DATABASE: "database"
 }
 
-//@include config/defaultConfig.jsx
+//isDefault//@include config/defaultConfig.jsx
+//@include config/wirindortmund.jsx //removeDefault
 
 //<remove>
 try {
@@ -317,7 +318,7 @@ function processDok(dok) {
                     var imgXML = imgArray[i];
                     if (imgXML.xmlAttributes.itemByName("ostyle").isValid) {
                         var oStyleName = imgXML.xmlAttributes.itemByName("ostyle").value;
-                        var oStyle = styleTemplateDok.objectStyles.itemByName(oStyleName);
+                        var oStyle = getStyleByString(styleTemplateDok, oStyleName, "objectStyles");
                         if (!oStyle.isValid) {
                             log.info("Create Objectstyle [" + oStyleName + "]")
                             oStyle = styleTemplateDok.objectStyles.add({ name: oStyleName });
@@ -365,6 +366,15 @@ function processDok(dok) {
                             if (captionXML.isValid) {
                                 // Add Caption to image
                                 var captionTf = styleTemplateDok.textFrames.add();
+                                if (captionXML.xmlAttributes.itemByName("ostyle").isValid) {
+                                    var oStyleName = captionXML.xmlAttributes.itemByName("ostyle").value;
+                                    var oStyle = getStyleByString(styleTemplateDok, oStyleName, "objectStyles");
+                                    if (!oStyle.isValid) {
+                                        log.info("Create Objectstyle [" + oStyleName + "]")
+                                        oStyle = styleTemplateDok.objectStyles.add({ name: oStyleName });
+                                    }
+                                    captionTf.appliedObjectStyle = oStyle;
+                                }
                                 var rgb = rect.geometricBounds;
                                 captionTf.geometricBounds = [rgb[2], rgb[1], rgb[2] + 50, rgb[3]];
                                 captionXML.xmlContent.move(LocationOptions.AT_BEGINNING, captionTf);
@@ -446,7 +456,7 @@ function processDok(dok) {
                     }
                 }
 
-                // Kill Last white space.
+                findOrChangeGrep(currentEntryStory, "\\A\\s*", "");                
                 fixStoryEnd(currentEntryStory);
 
                 if (!px.debug && configObject.selectedPostsArray.length == 1) {
@@ -470,13 +480,12 @@ function processDok(dok) {
                 var oldUserName = app.userName;
                 log.debug("Setze einen generischen userName = press2id, war vorher " + oldUserName);
                 app.userName = "press2id";
-                try {
-                    var tempICMLFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp.icml");
+                try {                    
                     currentEntryStory.insertLabel(px.postIDLabel, postObject.id + "");
-                    findOrChangeGrep(currentEntryStory, "\\A\\s*", "");
+                    var tempICMLFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp.icml");
                     currentEntryStory.exportFile(ExportFormat.INCOPY_MARKUP, tempICMLFile);
+                    currentEntryStory.itemLink.unlink();
                     placeGunArray.unshift(tempICMLFile);
-
                     try {
                         app.activeDocument = dok;
                         dok.placeGuns.loadPlaceGun(placeGunArray);
@@ -493,7 +502,6 @@ function processDok(dok) {
                         }
                     }
                     try {
-                        dok.links.itemByName(tempICMLFile.name).unlink();
                         styleTemplateDok.links.everyItem().unlink();
                         tempICMLFile.remove();
                         for (var g = 0; g < px.tempFileArray.length; g++) {
