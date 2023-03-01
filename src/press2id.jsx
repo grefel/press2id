@@ -7,7 +7,7 @@ var RunModes = {
     DATABASE: "database"
 }
 
-//@include defaultConfig.jsx
+//@include config/defaultConfig.jsx
 
 //<remove>
 try {

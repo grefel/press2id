@@ -9,3 +9,5 @@ jsconfig.json
 src/skriptIdeen/*
 src/templates/*
 !src/templates/wordrepss_basic*
+src/config/*
+!src/config/defaultConfig.jsx
