@@ -7,3 +7,5 @@ concat.json
 concatJSX.js
 jsconfig.json
 src/skriptIdeen/*
+src/templates/*
+!src/templates/wordrepss_basic*

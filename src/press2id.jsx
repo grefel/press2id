@@ -7,56 +7,20 @@ var RunModes = {
     DATABASE: "database"
 }
 
-var px = {
-    projectName: "@px:project@",
-    version: "@px:date@-@px:version@",
+//@include defaultConfig.jsx
 
-    siteURL: null, // Wenn ein Wert eingetragen wird, wird die Startseite übersprungen z.B, siteURL: "https://www.indesignblog.com",
-    // siteURL: "https://www.indesignblog.com",
-    runMode: null, // Wenn ein Wert eingetragen ist, wird die Modus Auswahlseite übersprungen
-    // runMode: RunModes.TEMPLATE,
-
-    authenticate: false,
-    user: "",
-    password: "",
-
-    defaultHeader: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:110.0) Gecko/20100101 Firefox/110.0" }],
-
-    postIDLabel: "px:postID:px",
-
-    // Verwaltung
-    tempFileArray: [],
-    showGUI: true,
-    appendLog: true,
-    debug: true // release with false
+//<remove>
+try {
+    px.projectName = app.activeScript.name;
 }
-
-var configObject = {
-    version: "2.29",
-    urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/"],
-    siteURL: undefined,
-    restURL: undefined,
-    basicAuthentication: {  // Do not put values here! Defaults are defined in px.authenticate
-        authenticate: false,
-        user: "",
-        password: ""
-    },
-
-    runMode: RunModes.PLACE_GUN,
-
-    filterAfterDate: "2003-05-27",
-    filterBeforeDate: "2030-01-01",
-    orderBy: "desc", // asc oder desc
-    categoryID: undefined,
-    downloadFeaturedImage: true,
-    loadImagesToPlaceGun: true, // if false, all images are anchored into the text flow    
-    styleTemplateFile: undefined,
-    downloadImages: true,
-    localImageFolder: undefined,
-    endPoint: "posts",
-    category: undefined,
-    xsltFile: "wordrepss_basic.xsl"
+catch (e) {
+    /* We're running from the VSC */
+    px.projectName = File(e.fileName).name;
 }
+px.projectName = px.projectName.replace(/\.jsx$/, "");
+//</remove>
+
+
 
 var jsonFieldType = {
     TEXT: "TEXT",
@@ -2639,9 +2603,14 @@ function setValues(dok, values) {
 }
 
 /* Search Template File */
-function getTemplateFile() {
+function getTemplateFile(configObject) {
     var scriptFolderPath = getScriptFolderPath();
-    var templatePath = Folder(scriptFolderPath + "/templates")
+    var templatePath = Folder(scriptFolderPath + "/templates");
+    var templateFile = File (templatePath + "/" + configObject.styleTemplateFile);
+    if (templateFile.exists) {
+        return templateFile;
+    }
+
     var templateFiles = templatePath.getFiles();
     for (var i = 0; i < templateFiles.length; i++) {
         var templateFile = templateFiles[i];

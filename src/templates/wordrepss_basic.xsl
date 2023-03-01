@@ -3,7 +3,7 @@
                 xmlns:aid="http://ns.adobe.com/AdobeInDesign/4.0/"
                 xmlns:aid5="http://ns.adobe.com/AdobeInDesign/5.0/" version="1.0">
     <xsl:variable name="pxTransformationName">wordrepss_basic.xsl</xsl:variable>
-    <xsl:variable name="pxVersion">2023-03-01 v1.1</xsl:variable>
+    <xsl:variable name="pxVersion">2023-03-01 v2.30</xsl:variable>
     <xsl:variable name="pxCreator">Gregor Fellenz – https://www.publishingx.de/</xsl:variable>
     
     <!--Insert Version Info-->
