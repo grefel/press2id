@@ -82,7 +82,8 @@
         <!--Remove empty (whitespace only elements) blocks -->
         <xsl:if test="$textContents != ''">
             <xsl:copy>
-                <xsl:attribute name="aid:pstyle">
+                <xsl:attribute name="pstyle">
+                    <xsl:text>titles:</xsl:text>
                     <xsl:choose>
                         <!--simple example of class evaluating a wordpress class-->
                         <xsl:when test="@class = 'has-text-align-center'">
@@ -110,7 +111,7 @@
         <!--Remove empty (whitespace only elements) blocks -->
         <xsl:if test="$textContents != ''">
             <xsl:copy>
-                <xsl:attribute name="aid:pstyle">
+                <xsl:attribute name="pstyle">
                     <xsl:choose>
                         <xsl:when test="ancestor::figure[@id = 'featuredImage']">
                             <xsl:text>featuredImageCaption</xsl:text>
@@ -140,7 +141,7 @@
     
     <xsl:template match="cite">
         <xsl:element name="cite">
-            <xsl:attribute name="aid:pstyle">zitatquelle</xsl:attribute>
+            <xsl:attribute name="pstyle">zitatquelle</xsl:attribute>
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>
         </xsl:element>
@@ -150,7 +151,7 @@
     <!--Flatten blockquotes-->
     <xsl:template match="blockquote/p">
         <xsl:element name="blockquote">
-            <xsl:attribute name="aid:pstyle">blockquote</xsl:attribute>
+            <xsl:attribute name="pstyle">blockquote</xsl:attribute>
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>
         </xsl:element>
@@ -163,7 +164,7 @@
     <!--Flatten Lists-->
     <xsl:template match="ol/li">
         <xsl:element name="ol">
-            <xsl:attribute name="aid:pstyle">orderedList</xsl:attribute>
+            <xsl:attribute name="pstyle">orderedList</xsl:attribute>
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>
         </xsl:element>
@@ -175,7 +176,7 @@
     
     <xsl:template match="ul/li">
         <xsl:element name="ul">
-            <xsl:attribute name="aid:pstyle">unorderedList</xsl:attribute>
+            <xsl:attribute name="pstyle">unorderedList</xsl:attribute>
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>
         </xsl:element>
@@ -189,7 +190,7 @@
     <!--Inline Elements -->
     <xsl:template match="strong | em">
         <xsl:copy>
-            <xsl:attribute name="aid:cstyle">
+            <xsl:attribute name="cstyle">
                 <xsl:value-of select="name()"/>
             </xsl:attribute>
             <xsl:copy-of select="@*"/>
@@ -201,12 +202,12 @@
         <xsl:copy>
             <xsl:choose>
                 <xsl:when test="@class">
-                    <xsl:attribute name="aid:cstyle">
+                    <xsl:attribute name="cstyle">
                         <xsl:value-of select="@class"/>
                     </xsl:attribute>
                 </xsl:when>
                 <xsl:otherwise>
-                    <xsl:attribute name="aid:cstyle">spanWithoutClass</xsl:attribute>
+                    <xsl:attribute name="cstyle">spanWithoutClass</xsl:attribute>
                 </xsl:otherwise>
             </xsl:choose>
             <xsl:copy-of select="@*"/>
@@ -216,7 +217,7 @@
     
     <xsl:template match="code/span | code[count(*) = 0]" priority="2">
         <xsl:copy>
-            <xsl:attribute name="aid:cstyle">code</xsl:attribute>
+            <xsl:attribute name="cstyle">code</xsl:attribute>
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>
         </xsl:copy>
@@ -227,7 +228,7 @@
     
     <!--Links Process Links and anchors -->
     <xsl:template match="a[@href]" priority="1">
-        <hyperlink aid:cstyle="hyperlink">
+        <hyperlink cstyle="hyperlink">
             <xsl:copy-of select="@href"/>
             <xsl:apply-templates/>
         </hyperlink>
@@ -239,7 +240,7 @@
     <!--Images -->
     <xsl:template match="p[img][count(img) = count(*)] | p[a/img][count(a) = count(*)] | div[img][count(img) = count(*)]">
         <xsl:for-each select="descendant::img">
-            <p_img aid:pstyle="p_img">
+            <p_img pstyle="p_img">
                 <xsl:apply-templates select="."/>
             </p_img>
             <xsl:text>&#x0A;</xsl:text>
@@ -254,7 +255,7 @@
     
     <xsl:template match="figure">
         <figure>
-            <p_img aid:pstyle="p_img">
+            <p_img pstyle="p_img">
                 <xsl:apply-templates select="descendant::img"/>
             </p_img>
             <xsl:text>&#x0A;</xsl:text>
@@ -266,12 +267,12 @@
         <figcaption>
             <xsl:choose>
                 <xsl:when test="ancestor::figure[@id = 'featuredImage']">                    
-                    <xsl:attribute name="aid:pstyle">
+                    <xsl:attribute name="pstyle">
                         <xsl:text>featuredImageCaption</xsl:text>
                     </xsl:attribute>
                 </xsl:when>
                 <xsl:otherwise>
-                    <xsl:attribute name="aid:pstyle">
+                    <xsl:attribute name="pstyle">
                         <xsl:text>figcaption</xsl:text>
                     </xsl:attribute>
                 </xsl:otherwise>
@@ -283,7 +284,7 @@
     </xsl:template>
     
     <xsl:template match="video">
-        <p_video aid:pstyle="p_video">
+        <p_video pstyle="p_video">
             <video ostyle="img">
                 <xsl:choose>
                     <xsl:when test="@poster">

@@ -20,7 +20,7 @@ var px = {
     user: "",
     password: "",
 
-    defaultHeader: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" }],
+    defaultHeader: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:110.0) Gecko/20100101 Firefox/110.0" }],
 
     postIDLabel: "px:postID:px",
 
@@ -318,6 +318,34 @@ function processDok(dok) {
                 contentFrame.geometricBounds = [0, 0, 1000, 5000]
                 contentFrame.placeXML(postXML);
 
+                // Absatzformate anwenden
+                blocks = postXML.evaluateXPathExpression("//*[@pstyle]");
+                log.debug("Block Elemente mit @pstyle " + blocks.length);
+                for (i = 0; i < blocks.length; i++) {
+                    node = blocks[i];
+                    var pStyleName = node.xmlAttributes.itemByName("pstyle").value;
+                    var pStyle = getStyleByString(styleTemplateDok, pStyleName, "paragraphStyles");
+                    if (!pStyle.isValid) {
+                        log.warn("Absatzformat mit dem Namen [" + pStyleName + "] ist nicht vorhanden!");
+                        pStyle = styleTemplateDok.paragraphStyles[0];
+                        log.warn("Verwende stattdessen [" + pStyle.name + "]");
+                    }
+                    node.applyParagraphStyle(pStyle);                
+                }
+
+                // Zeichenformate anwenden
+                blocks = postXML.evaluateXPathExpression("//*[@cstyle]");
+                for (i = 0; i < blocks.length; i++) {
+                    node = blocks[i];
+                    cStyleName = node.xmlAttributes.itemByName("cstyle").value;
+                    cStyle = getStyleByString(styleTemplateDok, cStyleName, "characterStyles");
+                    if (!cStyle.isValid) {
+                        log.warn("Zeichenformat mit dem Namen [" + cStyleName + "] ist nicht vorhanden!");
+                        cStyle = styleTemplateDok.characterStyles[0];
+                        log.warn("Verwende stattdessen [" + cStyle.name + "]");
+                    }
+                    node.applyCharacterStyle(cStyle);
+                }
 
                 // Bilder platzieren
                 var imgArray = postXML.evaluateXPathExpression("//*[@src]");
@@ -409,33 +437,27 @@ function processDok(dok) {
 
                 var currentEntryStory = contentFrame.parentStory;
 
-                // Fix whitespace at beginning of paragraph
                 app.findGrepPreferences = NothingEnum.NOTHING;
                 app.changeGrepPreferences = NothingEnum.NOTHING;
+                // Fix mehrere Leerzeichen 
                 app.findGrepPreferences.findWhat = " (?= )";
                 app.changeGrepPreferences.changeTo = "";
                 currentEntryStory.changeGrep();
+                // Fix whitespace at beginning of paragraph
                 app.findGrepPreferences.findWhat = "^\\h+";
                 app.changeGrepPreferences.changeTo = "";
-
                 currentEntryStory.changeGrep();
-
                 // Fix forced Line break at end of paragraph
-                app.findGrepPreferences = NothingEnum.NOTHING;
-                app.changeGrepPreferences = NothingEnum.NOTHING;
                 app.findGrepPreferences.findWhat = "\\n(?=\\r)";
+                app.changeGrepPreferences.changeTo = "";
                 currentEntryStory.changeGrep();
-
                 // Fix empty lines
-                app.findGrepPreferences = NothingEnum.NOTHING;
-                app.changeGrepPreferences = NothingEnum.NOTHING;
                 app.findGrepPreferences.findWhat = "\\r\\h*(?=\\r)";
+                app.changeGrepPreferences.changeTo = "";
                 currentEntryStory.changeGrep();
-
                 // Fix empty lines
-                app.findGrepPreferences = NothingEnum.NOTHING;
-                app.changeGrepPreferences = NothingEnum.NOTHING;
                 app.findGrepPreferences.findWhat = "^\\t+~b";
+                app.changeGrepPreferences.changeTo = "";
                 currentEntryStory.changeGrep();
 
                 // Create Hyperlinks 
@@ -492,6 +514,7 @@ function processDok(dok) {
                     placeGunArray.unshift(tempICMLFile);
 
                     try {
+                        app.activeDocument = dok;
                         dok.placeGuns.loadPlaceGun(placeGunArray);
                     }
                     catch (e) {
@@ -2417,6 +2440,26 @@ function getDatenfelder(jsonDatenfeldPage) {
         }
     }
     return jsonDatenfelder;
+}
+
+/** Gets a Style by its Name Groups are separated with :
+ * @param {Documente|StyleGroup} docOrGroup 
+ * @param {String} string 
+ * @param {String} property paragraphStyles|characterStyles|cellStyles
+ * @returns 
+ */
+function getStyleByString(docOrGroup, string, property) {
+    if (string == '[No character style]') return docOrGroup[property][0];
+    if (string == '[No paragraph style]') return docOrGroup[property][0];
+    if (string == 'NormalParagraphStyle') return docOrGroup[property][1];
+    stringResult = string.match(/^(.*?[^\\]):(.*)$/);
+    var styleName = (stringResult) ? stringResult[1] : string;
+    styleName = styleName.replace(/\\:/g, ':');
+    remainingString = (stringResult) ? stringResult[2] : '';
+    var newProperty = (stringResult) ? property.replace(/s$/, '') + 'Groups' : property;
+    var styleOrGroup = docOrGroup[newProperty].itemByName(styleName);
+    if (remainingString.length > 0 && styleOrGroup.isValid) styleOrGroup = getStyleByString(styleOrGroup, remainingString, property);
+    return styleOrGroup;
 }
 
 /**
