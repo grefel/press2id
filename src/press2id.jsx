@@ -388,6 +388,8 @@ function processDok(dok) {
                                 captionTf.parentStory.characters[-1].contents = "";
                                 captionTf.recompose();
                                 captionTf.fit(FitOptions.FRAME_TO_CONTENT);
+                                var tgb = captionTf.geometricBounds;
+                                captionTf.geometricBounds = [tgb[0], rgb[1], tgb[2], rgb[3]];
                                 var group = styleTemplateDok.groups.add([rect, captionTf]);
                                 group.exportFile(ExportFormat.INDESIGN_SNIPPET, tempFile);
                                 group.remove();
