@@ -380,16 +380,11 @@ function processDok(dok) {
                                 captionXML.xmlContent.move(LocationOptions.AT_BEGINNING, captionTf);
                                 findOrChangeGrep(captionTf, "\\A\\s*", "");
                                 findOrChangeGrep(captionTf, "\\s*\\Z", "");
-                                // two lines for fit! one line expands horizontally!
-                                captionTf.parentStory.insertionPoints[-1].contents = "\rx";
-                                captionTf.recompose();
-                                captionTf.fit(FitOptions.FRAME_TO_CONTENT);
-                                captionTf.parentStory.characters[-1].contents = "";
-                                captionTf.parentStory.characters[-1].contents = "";
-                                captionTf.recompose();
-                                captionTf.fit(FitOptions.FRAME_TO_CONTENT);
+                                captionTf.textFramePreferences.autoSizingReferencePoint = AutoSizingReferenceEnum.TOP_CENTER_POINT;
+                                captionTf.textFramePreferences.autoSizingType = AutoSizingTypeEnum.HEIGHT_ONLY;
                                 var tgb = captionTf.geometricBounds;
-                                captionTf.geometricBounds = [tgb[0], rgb[1], tgb[2], rgb[3]];
+                                captionTf.textFramePreferences.autoSizingType = AutoSizingTypeEnum.OFF;
+                                captionTf.geometricBounds = [tgb[0], tgb[1], tgb[2], tgb[3]];
                                 var group = styleTemplateDok.groups.add([rect, captionTf]);
                                 group.exportFile(ExportFormat.INDESIGN_SNIPPET, tempFile);
                                 group.remove();
@@ -1529,13 +1524,15 @@ function getConfig(newConfigObject) {
                 }
             }
             if (setNewCategory) {
+                // this triggers onCange() and subsequent getListOfBlogEntries() and fillListboxSelectPost() from else
                 categoryDropDown.selection = 0;
                 newConfigObject.categoryID = categoryDropDown.selection.categoryID;
             }
-
-            // Fill
-            listItems = getListOfBlogEntries(newConfigObject, loadMaxPages, false);
-            fillListboxSelectPost(listItems);
+            else {
+                // Fill
+                listItems = getListOfBlogEntries(newConfigObject, loadMaxPages, false);
+                fillListboxSelectPost(listItems);
+            }
 
             filterPanel.text = localize(ui.staticTextFilterElements) + " - " + newConfigObject.siteURL;
         }
