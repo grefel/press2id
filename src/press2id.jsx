@@ -295,7 +295,7 @@ function processDok(dok) {
                         pStyle = styleTemplateDok.paragraphStyles[0];
                         log.warn("Verwende stattdessen [" + pStyle.name + "]");
                     }
-                    node.applyParagraphStyle(pStyle);                
+                    node.applyParagraphStyle(pStyle);
                 }
 
                 // Zeichenformate anwenden
@@ -340,7 +340,7 @@ function processDok(dok) {
 
                     if (imageFile != null && imageFile.exists && imageFile.length > 0) {
                         var rect = styleTemplateDok.rectangles.add();
-                        rect.geometricBounds = [0, 0, 50, 100]; // Default if not set in Object style
+                        rect.geometricBounds = [0, 0, 500, 94]; // Default if not set in Object style
                         rect.appliedObjectStyle = oStyle;
                         try {
                             rect.place(imageFile);
@@ -380,11 +380,14 @@ function processDok(dok) {
                                 captionXML.xmlContent.move(LocationOptions.AT_BEGINNING, captionTf);
                                 findOrChangeGrep(captionTf, "\\A\\s*", "");
                                 findOrChangeGrep(captionTf, "\\s*\\Z", "");
+                                // two lines for fit! one line expands horizontally!
+                                captionTf.parentStory.insertionPoints[-1].contents = "\rx";
                                 captionTf.recompose();
                                 captionTf.fit(FitOptions.FRAME_TO_CONTENT);
-                                var tgb = captionTf.geometricBounds;
-                                // fix width if only one line... 
-                                captionTf.geometricBounds = [tgb[0], rgb[1], tgb[2], rgb[3]];
+                                captionTf.parentStory.characters[-1].contents = "";
+                                captionTf.parentStory.characters[-1].contents = "";
+                                captionTf.recompose();
+                                captionTf.fit(FitOptions.FRAME_TO_CONTENT);
                                 var group = styleTemplateDok.groups.add([rect, captionTf]);
                                 group.exportFile(ExportFormat.INDESIGN_SNIPPET, tempFile);
                                 group.remove();
@@ -456,12 +459,13 @@ function processDok(dok) {
                     }
                 }
 
-                findOrChangeGrep(currentEntryStory, "\\A\\s*", "");                
-                fixStoryEnd(currentEntryStory);
-
                 if (!px.debug && configObject.selectedPostsArray.length == 1) {
                     untag(root);
                 }
+
+                findOrChangeGrep(currentEntryStory, "\\A\\s*", "");
+                fixStoryEnd(currentEntryStory);
+
             }
             else if (configObject.runMode == RunModes.DATABASE) {
                 var singleACFBlock = oneBlogEntry.acf;
@@ -480,11 +484,10 @@ function processDok(dok) {
                 var oldUserName = app.userName;
                 log.debug("Setze einen generischen userName = press2id, war vorher " + oldUserName);
                 app.userName = "press2id";
-                try {                    
+                try {
                     currentEntryStory.insertLabel(px.postIDLabel, postObject.id + "");
                     var tempICMLFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp.icml");
                     currentEntryStory.exportFile(ExportFormat.INCOPY_MARKUP, tempICMLFile);
-                    currentEntryStory.itemLink.unlink();
                     placeGunArray.unshift(tempICMLFile);
                     try {
                         app.activeDocument = dok;
@@ -493,15 +496,21 @@ function processDok(dok) {
                     catch (e) {
                         // // Windows Async File Export Problems (Error: Die Datei existiert nicht bzw. wird von einer anderen Anwendung verwendet, oder Sie haben nicht die entsprechenden Zugriffsrechte.)
                         if (e.number == 29446) {
-                            for (var i = 0; i < placeGunArray.length; i++) {
-                                if (!placeGunArray[i].exists) throw e;
-                            }
+                            placeGunArray.shift();
+                            var nexTempFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp.icml");
+                            tempICMLFile.copy(nexTempFile);
+                            placeGunArray.unshift(nexTempFile);
+                            dok.placeGuns.loadPlaceGun(placeGunArray);
+                            // for (var i = 0; i < placeGunArray.length; i++) {
+                            //     if (!placeGunArray[i].exists) throw e;
+                            // }
                         }
                         else {
                             throw e;
                         }
                     }
                     try {
+                        dok.links.itemByName(tempICMLFile.name).unlink();
                         styleTemplateDok.links.everyItem().unlink();
                         tempICMLFile.remove();
                         for (var g = 0; g < px.tempFileArray.length; g++) {
@@ -873,6 +882,7 @@ function createXMLFile(singlePost, postObject, blogURL) {
 
     var xmlDoc = pjXML.parse(htmlString);
     var xmlString = xmlDoc.xml();
+    xmlString = xmlString.replace(/\n/g, " ");
 
     xmlTempFile = File(log.getLogFolder() + "/download.xml");
     writeTextFile(xmlTempFile, xmlString);
@@ -2614,7 +2624,7 @@ function setValues(dok, values) {
 function getTemplateFile(configObject) {
     var scriptFolderPath = getScriptFolderPath();
     var templatePath = Folder(scriptFolderPath + "/templates");
-    var templateFile = File (templatePath + "/" + configObject.styleTemplateFile);
+    var templateFile = File(templatePath + "/" + configObject.styleTemplateFile);
     if (templateFile.exists) {
         return templateFile;
     }
