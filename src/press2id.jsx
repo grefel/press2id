@@ -386,12 +386,32 @@ function processDok(dok) {
                                 captionTf.textFramePreferences.autoSizingType = AutoSizingTypeEnum.OFF;
                                 captionTf.geometricBounds = [tgb[0], tgb[1], tgb[2], tgb[3]];
                                 var group = styleTemplateDok.groups.add([rect, captionTf]);
-                                group.exportFile(ExportFormat.INDESIGN_SNIPPET, tempFile);
-                                group.remove();
+                                try {
+                                    if (captionTf.parentStory.characters.length > 0) {
+                                        group.exportFile(ExportFormat.INDESIGN_SNIPPET, tempFile);
+                                        group.remove();
+                                    }
+                                    else {
+                                        // Bildunterschrift war leer
+                                        rect.exportFile(ExportFormat.INDESIGN_SNIPPET, tempFile);
+                                        rect.remove();    
+                                        captionTf.remove();
+                                    }
+                                }
+                                catch (e) {
+                                    log.warn(e);
+                                    log.warn("Problem bei Export der Bilddatei [" + imageFile.name + "]")
+                                }
                             }
                             else {
-                                rect.exportFile(ExportFormat.INDESIGN_SNIPPET, tempFile);
-                                rect.remove();
+                                try {
+                                    rect.exportFile(ExportFormat.INDESIGN_SNIPPET, tempFile);
+                                    rect.remove();
+                                }
+                                catch (e) {
+                                    log.warn(e);
+                                    log.warn("Problem bei Export der Bilddatei [" + imageFile.name + "]")
+                                }
                             }
 
                             placeGunArray.push(tempFile);
@@ -2323,11 +2343,27 @@ function getConfig(newConfigObject) {
                 if (response.error) {
                     throw Error(response.errorMsg);
                 }
-                else if (response.httpStatus >= 400) {
+                var postEmbed = JSON.parse(response.body);
+                if (postEmbed.hasOwnProperty("code")) {
+                    if (postEmbed.code == "rest_post_invalid_page_number" && maxPages > 1) {
+                        log.info("Ende der Paginierung auf Seite [" + page + "]. Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message + " httpStatus: " + response.httpStatus);
+                        break;
+                    }
+                    else {
+                        var msg = "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message + " httpStatus: " + response.httpStatus;
+                        if (verbose) {
+                            log.infoAlert(msg);
+                        }
+                        else {
+                            log.info(msg);
+                        }
+                        return [];
+                    }
+                }
+                if (response.httpStatus >= 400) {
                     log.infoAlert("Fehler httpStatus " + response.httpStatus + "\n" + response.body);
                     return [];
                 }
-                var postEmbed = JSON.parse(response.body);
             }
             catch (e) {
                 var msg = "Could not connect to\n" + restURL + "\n\n" + e;
@@ -2339,23 +2375,6 @@ function getConfig(newConfigObject) {
                 }
                 log.info(e);
                 return [];
-            }
-
-            if (postEmbed.hasOwnProperty("code")) {
-                if (postEmbed.code == "rest_post_invalid_page_number" && maxPages > 1) {
-                    log.info("Ende der Paginierung auf Seite [" + page + "]. Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message + " httpStatus: " + response.httpStatus);
-                    break;
-                }
-                else {
-                    var msg = "Es konnte kein Beitrag heruntergeladen werden:\nCode: " + postEmbed.code + " Message: " + postEmbed.message + " httpStatus: " + response.httpStatus;
-                    if (verbose) {
-                        log.infoAlert(msg);
-                    }
-                    else {
-                        log.info(msg);
-                    }
-                    return [];
-                }
             }
             for (var i = 0; i < postEmbed.length; i++) {
                 localListItems.push({
@@ -2451,6 +2470,11 @@ function getStyleByString(docOrGroup, string, property) {
  * @param {Boolean} includeMaster Defaults to false
  */
 function findOrChangeGrep(where, find, change, includeMaster) {
+    if (where.hasOwnProperty("contents")) {
+        if (where.contents.length == 0) {
+            return;
+        }
+    }
     if (change == undefined) {
         change = null;
     }

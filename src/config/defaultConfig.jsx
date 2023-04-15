@@ -39,6 +39,7 @@ var configObject = {
     filterBeforeDate: "2030-01-01",
     orderBy: "desc", // asc oder desc
     categoryID: undefined,
+    categoryArray: [],
     downloadFeaturedImage: true,
     loadImagesToPlaceGun: true, // if false, all images are anchored into the text flow    
     downloadImages: true,
