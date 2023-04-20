@@ -744,20 +744,43 @@ function getImageFile(configObject, fileURL) {
     if (!fileURL.match(/^http/)) {
         fileURL = configObject.siteURL + fileURL;
     }
-    var fileName = getFileNameFromURL(fileURL)
+    // fix to unscaled version if available
+    var scaleRegex = /-.+(\.[a-zA-Z]+)$/;
+
+    if (fileURL.match(scaleRegex)) {
+        var fixedURL = fileURL.replace(scaleRegex, "$1");
+        if (configObject.downloadImages) {
+            var request = {
+                url: fixedURL,
+                headers: px.defaultHeader,
+                method: "HEAD"
+            }
+    
+            var response = restix.fetch(request);
+            if (response.httpStatus == 200) {
+                log.info("Ersetze URL [" + fileURL + "] mit Highres URL [" + fixedURL + "]");
+                fileURL = fixedURL;
+            }
+        }
+        else {
+            fileURL = fixedURL;
+        }
+    }
+    var fileName = getFileNameFromURL(fileURL);
+
     if (configObject.downloadImages) {
         // Bilder herunterladen
         var linkPath = Folder(px.documentFolder + "/Links");
         linkPath.create();
         if (!linkPath.exists) {
-            log.warn("Could not find or create Folder [Links] use Desktop to download links instead!");
+            log.warn("Could not find or create Folder [Links] next to document. Script will use Desktop to download links instead!");
             linkPath = Folder.desktop;
         }
         log.info("Download image from URL " + fileURL);
         var imageFile = File(linkPath + "/" + fileName);
 
         var request = {
-            url: fileURL.toString(),
+            url: fileURL,
             headers: px.defaultHeader
         }
 
@@ -772,8 +795,7 @@ function getImageFile(configObject, fileURL) {
         }
     }
     else {
-        // TODO fix WP size endings...
-        var imageFile = File(configObject.localImageFolder + "/" + fileName.replace(/-.+(\.[a-z]+)$/, "$1"));
+        var imageFile = File(configObject.localImageFolder + "/" + fileName);
         log.info("Link to local folder " + imageFile);
     }
 
