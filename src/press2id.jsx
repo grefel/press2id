@@ -745,7 +745,7 @@ function getImageFile(configObject, fileURL) {
         fileURL = configObject.siteURL + fileURL;
     }
     // fix to unscaled version if available
-    var scaleRegex = /-.+?(\.[a-zA-Z]+)$/;
+    var scaleRegex = /-\d+x\d+(\.[a-z]+)$/i
 
     if (fileURL.match(scaleRegex)) {
         var fixedURL = fileURL.replace(scaleRegex, "$1");
