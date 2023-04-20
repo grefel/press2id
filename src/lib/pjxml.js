@@ -183,7 +183,7 @@ var pjXML = (function () {
 	Lexer.prototype.readName = function () {
 		var ch, name = '';
 
-		while ((ch = this.peek()) && !(Lexer.isSpace(ch) || Lexer.isMarkup(ch) || ch == "/")) {
+		while ((ch = this.peek()) && !(Lexer.isSpace(ch) || Lexer.isMarkup(ch) || ch == "/" || ch == "\"")) {
 			name += this.read();
 		}
 
@@ -443,6 +443,8 @@ var pjXML = (function () {
 }());
 
 // var xml = '<p>Users/&lt;username&gt;/Library</p>'
+// var xml = '<p><a data-id="0" data-title="Gestern noch Abfall, heute ein Grill: So manch ein Kind bewies beim "Skulpturen-basteln" viel Fantasie." class="jeg_preview_item active">a</a></p>'
+// var xml = '<a data-title="x"yx" class="jeg_preview_item active">'
 // var xml = '<p>Absat<x>xxxx </x>z 1 <strong>bold</strong></p><p>[[Absatz 2 <sup>h<x>ddd</x>och</sup></p><p>Absatz 3 <sub>tief</sub></p>'
 // var doc = pjXML.parse(xml);
 // $.writeln(doc.xml());
