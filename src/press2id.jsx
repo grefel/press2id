@@ -7,8 +7,8 @@ var RunModes = {
     DATABASE: "database"
 }
 
-//isDefault//@include config/defaultConfig.jsx
-//@include config/wirindortmund.jsx //removeDefault
+//@include config/defaultConfig.jsx
+// //@include config/wirindortmund.jsx //removeDefault
 
 //<remove>
 try {
@@ -363,7 +363,7 @@ function processDok(dok) {
                             if (!captionXML.isValid) {
                                 captionXML = imgXML.parent.parent.xmlElements.itemByName("figcaption");
                             }
-                            if (captionXML.isValid) {
+                            if (captionXML.isValid && captionXML.xmlContent.constructor.name == "Text") {
                                 // Add Caption to image
                                 var captionTf = styleTemplateDok.textFrames.add();
                                 if (captionXML.xmlAttributes.itemByName("ostyle").isValid) {
@@ -913,6 +913,9 @@ function createXMLFile(singlePost, postObject, blogURL) {
     htmlString = htmlString.replace(/<script[^>]*>[\s\S]*?<\/script>/g, '');
     // remove iframe
     htmlString = htmlString.replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/g, '');
+
+    htmlString = htmlString.replace(/class="[^"]*wp-block-gallery[^"]*"/g, 'class="wp-block-gallery"');
+
     // not escaped & in html...
     htmlString = htmlString.replace(/&(?=\s)/, "&amp;");
 

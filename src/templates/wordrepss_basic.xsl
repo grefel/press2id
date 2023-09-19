@@ -252,7 +252,11 @@
             <xsl:copy-of select="@src"/>
         </img>
     </xsl:template>
-    
+
+    <xsl:template match="figure[@class='wp-block-gallery']" priority="2">
+        <xsl:apply-templates/>
+    </xsl:template>
+
     <xsl:template match="figure">
         <figure>
             <p_img pstyle="p_img">
