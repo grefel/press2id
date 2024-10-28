@@ -7,8 +7,8 @@
 ## Getting started
 See examples/connect.jsx
 
-* @Version: 1.34
-* @Date: 2023-01-23
+* @Version: 1.36
+* @Date: 2023-06-29
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Autret https://forums.adobe.com/thread/1111415
@@ -47,15 +47,15 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 		// Add port
 		if (request.port != "") {
-			request.fullURL = request.url + ":" + request.port;
+			request.fullURL = request.url + ":" + request.port + "/";
 		}
 		else {
-			request.fullURL = request.url;
+			request.fullURL = request.url + "/";
 		}
 
 		// Add command 
 		if (request.command != "") {
-			request.fullURL = request.fullURL + "/" + request.command;
+			request.fullURL = request.fullURL + request.command;
 		}
 
 		// not encoded, we need to encode;
@@ -200,6 +200,9 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			}
 			catch (e) {
 				result = "doScriptError: " + e.message + " #" + e.number;
+				if (e.number == 104705) {
+					result += " Please start InDesign once with administrator rights. Close it and start it again as a normal user.";
+				}
 			}
 
 		}
@@ -324,6 +327,9 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 		request = INNER.checkRequest(request);
 		var response = INNER.processRequest(request, outFile);
+		if (outFile.length == 0) {
+			outFile.remove();
+		}
 		if (!outFile.exists) {
 			response.error = true;
 			response.errorMsg = "File was not created\n" + response.errorMsg;
