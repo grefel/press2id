@@ -23,7 +23,7 @@ var px = {
 }
 
 var configObject = {
-    version: "2.30",
+    version: "2.40",
     urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/"],
     siteURL: undefined,
     restURL: undefined,
@@ -47,5 +47,9 @@ var configObject = {
     endPoint: "posts",
     category: undefined,
     styleTemplateFile: "wordrepss_basic.idml",
-    xsltFile: "wordrepss_basic.xsl"
+    xsltFile: "wordrepss_basic.xsl",
+    masterSpreadStart: "W-WordPress",
+    masterSpreadFollow: "W-WordPress-follow",
+    startPage: "NEXT", // LEFT OR RIGHT
+    fixOverflow: true, // TEMPLATE Mode only fix overflow with masterSpreadFollow
 }
