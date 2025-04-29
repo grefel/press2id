@@ -582,16 +582,15 @@ function processDok(dok) {
                         dok.pages.add();
                     }
                     var page = dok.pages.add();
-                    page.appliedMaster = templateMasterpread;
                 }
                 else if (configObject.startPage == "RIGHT") {
                     if (dok.pages[-1].side == PageSideOptions.RIGHT_HAND) {
                         dok.pages.add();
                     }
                     var page = dok.pages.add();
-                    page.appliedMaster = templateMasterpread;
                 }
 
+                page.appliedMaster = templateMasterpread;
 
                 if (postObject.featuredImageURL) {
                     if (page.side == PageSideOptions.RIGHT_HAND) {
@@ -623,7 +622,6 @@ function processDok(dok) {
                     }
                 }
 
-                page.appliedMaster = templateMasterpread;
                 if (page.side == PageSideOptions.RIGHT_HAND) {
                     var textFrameContent = templateMasterpread.pages[1].textFrames.itemByName("content");
                 }
