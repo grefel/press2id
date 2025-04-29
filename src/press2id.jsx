@@ -841,7 +841,7 @@ function getImageFile(configObject, fileURL) {
         var lastSlash = fileURL.lastIndexOf("/");
         var baseUrl = fileURL.substring(0, lastSlash + 1); // includes the last slash
         var filename = fileURL.substring(lastSlash + 1);
-        fileName = fileName.replace(/\?.+?$/, "");
+        filename = filename.replace(/\?.+?$/, "");
         
         log.info("Base URL: " + baseUrl + "\nFilename: " + filename);
 
