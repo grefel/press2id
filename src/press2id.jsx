@@ -161,7 +161,7 @@ function processDok(dok) {
     ui.couldNotOpenTemplate = { en: "Could not open Template %1", de: "Konnte Template %1 nicht öffnen." };
     ui.progressBarInit = { en: "Process %1 entries. %2", de: "Verarbeite %1 Einträge. %2" };
     ui.progressBarProcess = localize({ en: "Load data from: ", de: "Lade Daten von: " });
-    ui.progressBarPlace = localize({ en: "Place ", de: "Platziere " });
+    ui.progressBarPlace = localize({ en: "Place: ", de: "Platziere: " });
     ui.missingMasterSpreadStart = localize({ en: "A masterspread with the name [" + configObject.masterSpreadStart + "] is required.", de: "Es wird eine Musterseite mit dem Namen [" + configObject.masterSpreadStart + "] benötigt." });
     ui.missingMasterSpreadFollow = localize({ en: "A masterspread with the name [" + configObject.missingMasterSpreadFollow + "] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [" + configObject.missingMasterSpreadFollow + "] benötigt." });
     ui.missingContentTextFrame = localize({ en: "There is no text frame named [content] on the masterspread [" + configObject.masterSpreadStart + "]", de: "Auf der Musterseite [" + configObject.masterSpreadStart + "] ist kein Textrahmen mit dem Namen [content] enthalten." });
