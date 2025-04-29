@@ -838,8 +838,16 @@ function getImageFile(configObject, fileURL) {
         log.info("Download image from URL " + fileURL);
         var imageFile = File(linkPath + "/" + fileName);
 
+        var lastSlash = fileURL.lastIndexOf("/");
+        var baseUrl = fileURL.substring(0, lastSlash + 1); // includes the last slash
+        var filename = fileURL.substring(lastSlash + 1);
+        fileName = fileName.replace(/\?.+?$/, "");
+        
+        log.info("Base URL: " + baseUrl + "\nFilename: " + filename);
+
         var request = {
-            url: fileURL,
+            url: baseUrl,
+            command: filename,
             headers: px.defaultHeader
         }
 
