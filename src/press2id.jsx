@@ -160,15 +160,16 @@ function processDok(dok) {
     var ui = {}
     ui.couldNotOpenTemplate = { en: "Could not open Template %1", de: "Konnte Template %1 nicht öffnen." };
     ui.progressBarInit = { en: "Process %1 entries. %2", de: "Verarbeite %1 Einträge. %2" };
-    ui.progressBarProcess = localize({ en: "Load data from ", de: "Lade Daten von " });
+    ui.progressBarProcess = localize({ en: "Load data from: ", de: "Lade Daten von: " });
     ui.progressBarPlace = localize({ en: "Place ", de: "Platziere " });
-    ui.missingMasterSpread = localize({ en: "A masterspread with the name [W-Wordpress] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [W-Wordpress] benötigt." });
-    ui.missingContentTextFrame = localize({ en: "There is no text frame named [content] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [content] enthalten." });
-    ui.missingFeaturedImageFrame = localize({ en: "There is no text frame named [featured-image] on the masterspread [W-Wordpress]", de: "Auf der Musterseite [W-Wordpress] ist kein Textrahmen mit dem Namen [featured-image] enthalten." });
+    ui.missingMasterSpreadStart = localize({ en: "A masterspread with the name [" + configObject.masterSpreadStart + "] is required.", de: "Es wird eine Musterseite mit dem Namen [" + configObject.masterSpreadStart + "] benötigt." });
+    ui.missingMasterSpreadFollow = localize({ en: "A masterspread with the name [" + configObject.missingMasterSpreadFollow + "] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [" + configObject.missingMasterSpreadFollow + "] benötigt." });
+    ui.missingContentTextFrame = localize({ en: "There is no text frame named [content] on the masterspread [" + configObject.masterSpreadStart + "]", de: "Auf der Musterseite [" + configObject.masterSpreadStart + "] ist kein Textrahmen mit dem Namen [content] enthalten." });
+    ui.missingFeaturedImageFrame = localize({ en: "There is no text frame named [featured-image] on the masterspread [" + configObject.masterSpreadStart + "]", de: "Auf der Musterseite [" + configObject.masterSpreadStart + "] ist kein Textrahmen mit dem Namen [featured-image] enthalten." });
     ui.missingDataFields = localize({ en: "No data field (<<data field name>> or named graphics frame) could be found in the current document!", de: "Im aktuellen Dokument konnt kein Datenfeld (<<Datenfeldname>> oder benannter Grafikrahmen) gefunden werden!" });
     ui.undefinedACFBlock = localize({ en: "JSON Object has no acf property. You need the Plugins https://wordpress.org/plugins/advanced-custom-fields/ and https://de.wordpress.org/plugins/acf-to-rest-api/", de: "Die Eigenschaft acf konnte nicht im JSON Objekt gefunden werden. Du brauchst das Plugin https://wordpress.org/plugins/advanced-custom-fields/ und https://de.wordpress.org/plugins/acf-to-rest-api/" });
     ui.invalidGraphicDatafiled = { en: "Datafield [%1] has no URL. Cannot place image", de: "Datenfeld [%1] hat keine Eigenschaft url. Das Bild kann nicht platziert werden!" };
-    ui.invalidMediaID = { en: "media ID [%1] not dound", de: "Medien ID [%1] nicht gefunden!" };
+    ui.invalidMediaID = { en: "media ID [%1] not found", de: "Medien ID [%1] nicht gefunden!" };
 
     log.debug(JSON.stringify(configObject));
 
@@ -178,9 +179,14 @@ function processDok(dok) {
         var modeName = localize({ en: "Fill Place Gun", de: "Platzierungs-Einfügemarke befüllen" });
     }
     else if (configObject.runMode == RunModes.TEMPLATE) {
-        var templateMasterpread = dok.masterSpreads.itemByName("W-Wordpress");
+        var templateMasterpread = dok.masterSpreads.itemByName(configObject.masterSpreadStart);
         if (!templateMasterpread.isValid) {
-            log.warn(ui.missingMasterSpread);
+            log.warn(ui.missingMasterSpreadStart);
+            return;
+        }
+        var templateMasterpreadFollow = dok.masterSpreads.itemByName(configObject.masterSpreadFollow);
+        if (!templateMasterpreadFollow.isValid) {
+            log.warn(ui.missingMasterSpreadFollow);
             return;
         }
         var modeName = localize({ en: "Fill Masterspread", de: "Musterseiten befüllen" });
@@ -222,7 +228,14 @@ function processDok(dok) {
                 writeTextFile(jsonTempFile, JSON.stringify(oneBlogEntry));
             }
 
-            progressbar.step(ui.progressBarProcess + postObject.entryTitle); // label, [step]
+            if (postObject.entryTitle.length > 35) {
+                var guiTitle = postObject.entryTitle.substring(0, 35) + "...";
+            }
+            else {
+                var guiTitle = postObject.entryTitle
+            }
+
+            progressbar.step(ui.progressBarProcess + guiTitle); // label, [step]
 
             // Prepare Data
             if (configObject.runMode == RunModes.PLACE_GUN) {
@@ -394,7 +407,7 @@ function processDok(dok) {
                                     else {
                                         // Bildunterschrift war leer
                                         rect.exportFile(ExportFormat.INDESIGN_SNIPPET, tempFile);
-                                        rect.remove();    
+                                        rect.remove();
                                         captionTf.remove();
                                     }
                                 }
@@ -556,31 +569,29 @@ function processDok(dok) {
             }
             else if (configObject.runMode == RunModes.TEMPLATE) {
                 // Wenn das Template nur eine Seite enthält, wird diese zum Einstieg verwendet. Ansonsten wird eine neue Seite hinten angehangen
-                if (r == 0 && dok.pages.length == 1) {
-                    var page = dok.pages[0];
+                if (configObject.startPage == "NEXT") {
+                    if (r == 0 && dok.pages.length == 1) {
+                        var page = dok.pages[0];
+                    }
+                    else {
+                        var page = dok.pages.add();
+                    }
                 }
-                else {
+                else if (configObject.startPage == "LEFT") {
+                    if (dok.pages[-1].side == PageSideOptions.LEFT_HAND) {
+                        dok.pages.add();
+                    }
                     var page = dok.pages.add();
+                    page.appliedMaster = templateMasterpread;
+                }
+                else if (configObject.startPage == "RIGHT") {
+                    if (dok.pages[-1].side == PageSideOptions.RIGHT_HAND) {
+                        dok.pages.add();
+                    }
+                    var page = dok.pages.add();
+                    page.appliedMaster = templateMasterpread;
                 }
 
-                page.appliedMaster = templateMasterpread;
-                if (page.side == PageSideOptions.RIGHT_HAND) {
-                    var textFrameContent = templateMasterpread.pages[1].textFrames.itemByName("content");
-                }
-                else {
-                    var textFrameContent = templateMasterpread.pages[0].textFrames.itemByName("content");
-                }
-                if (textFrameContent.isValid) {
-                    var gb = textFrameContent.geometricBounds;
-                    var tf = textFrameContent.override(page);
-                    tf.geometricBounds = gb;
-                }
-                else {
-                    log.warn(ui.missingContentTextFrame);
-                    return;
-                }
-
-                currentEntryStory.move(LocationOptions.AT_BEGINNING, tf.insertionPoints[0]);
 
                 if (postObject.featuredImageURL) {
                     if (page.side == PageSideOptions.RIGHT_HAND) {
@@ -612,6 +623,54 @@ function processDok(dok) {
                     }
                 }
 
+                page.appliedMaster = templateMasterpread;
+                if (page.side == PageSideOptions.RIGHT_HAND) {
+                    var textFrameContent = templateMasterpread.pages[1].textFrames.itemByName("content");
+                }
+                else {
+                    var textFrameContent = templateMasterpread.pages[0].textFrames.itemByName("content");
+                }
+                if (textFrameContent.isValid) {
+                    var gb = textFrameContent.geometricBounds;
+                    var tf = textFrameContent.override(page);
+                    tf.geometricBounds = gb;
+                }
+                else {
+                    log.warn(ui.missingContentTextFrame);
+                    return;
+                }
+
+                currentEntryStory.move(LocationOptions.AT_BEGINNING, tf.insertionPoints[0]);
+
+                if (configObject.fixOverflow) {
+
+                    var story = tf.parentStory
+                    var lastTextContainer = story.textContainers[story.textContainers.length - 1];
+
+                    while (lastTextContainer.overflows) {
+                        var page = dok.pages.add();
+                        page.appliedMaster = templateMasterpreadFollow;
+
+                        if (page.side == PageSideOptions.RIGHT_HAND) {
+                            var textFrameContent = templateMasterpreadFollow.pages[1].textFrames.itemByName("content");
+                        }
+                        else {
+                            var textFrameContent = templateMasterpreadFollow.pages[0].textFrames.itemByName("content");
+                        }
+                        if (textFrameContent.isValid) {
+                            var gb = textFrameContent.geometricBounds;
+                            var tf = textFrameContent.override(page);
+                            tf.geometricBounds = gb;
+                        }
+                        else {
+                            log.warn(ui.missingContentTextFrame);
+                            return;
+                        }
+
+                        lastTextContainer.nextTextFrame = tf;
+                        lastTextContainer = tf;
+                    }
+                }
             }
             else if (configObject.runMode == RunModes.DATABASE) {
                 dok.pages[0].duplicate(LocationOptions.AT_END);
@@ -755,7 +814,7 @@ function getImageFile(configObject, fileURL) {
                 headers: px.defaultHeader,
                 method: "HEAD"
             }
-    
+
             var response = restix.fetch(request);
             if (response.httpStatus == 200) {
                 log.info("Ersetze URL [" + fileURL + "] mit Highres URL [" + fixedURL + "]");
@@ -1437,7 +1496,7 @@ function getConfig(newConfigObject) {
 
         statictext5.add("statictext", undefined, "Wähle einen oder mehrere WordPress Beiträge aus.", { name: "statictext5" });
         statictext5.add("statictext", undefined, "Die Beiträge werden automatisch platziert. Der Import benötigt eine", { name: "statictext5" });
-        statictext5.add("statictext", undefined, "konfigurierte Musterseite mit dem Namen W-Wordpress.  ", { name: "statictext5" });
+        statictext5.add("statictext", undefined, "konfigurierte Musterseite mit dem Namen " + configObject.masterSpreadStart + ".  ", { name: "statictext5" });
 
         // GROUP10
         // =======
