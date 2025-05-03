@@ -982,7 +982,10 @@ function createXMLFile(singlePost, postObject, blogURL) {
     htmlString = htmlString.replace(/class="[^"]*wp-block-gallery[^"]*"/g, 'class="wp-block-gallery"');
 
     // not escaped & in html...
+    htmlString = htmlString.replace((/&gt;/g), "px:gt:px");
+    htmlString = htmlString.replace((/&lt;/g), "px:lt:px");
     htmlString = htmlString.replace(/&(?=\s)/, "&amp;");
+    htmlString = htmlString.replace((/&amp;/g), "px:amp:px");
 
     var xmlTempFile = File(log.getLogFolder() + "/download.html");
     writeTextFile(xmlTempFile, htmlString);
@@ -990,6 +993,10 @@ function createXMLFile(singlePost, postObject, blogURL) {
     var xmlDoc = pjXML.parse(htmlString);
     var xmlString = xmlDoc.xml();
     xmlString = xmlString.replace(/\n/g, " ");
+
+    xmlString = xmlString.replace(/px:gt:px/g, "&gt;");
+    xmlString = xmlString.replace(/px:lt:px/g, "&lt;");
+    xmlString = xmlString.replace(/px:amp:px/g, "&amp;");
 
     xmlTempFile = File(log.getLogFolder() + "/download.xml");
     writeTextFile(xmlTempFile, xmlString);
