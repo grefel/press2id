@@ -2,8 +2,10 @@ var px = {
     projectName: "@px:project@",
     version: "@px:date@-@px:version@",
 
-    siteURL: "https://www.macwelt.de/",
-    runMode: RunModes.TEMPLATE,
+    siteURL: null, // Wenn ein Wert eingetragen wird, wird die Startseite übersprungen z.B, siteURL: "https://www.indesignblog.com",
+    // siteURL: "https://www.indesignblog.com",
+    runMode: null, // Wenn ein Wert eingetragen ist, wird die Modus Auswahlseite übersprungen
+    // runMode: RunModes.TEMPLATE,
 
     authenticate: false,
     user: "",
@@ -22,8 +24,8 @@ var px = {
 
 var configObject = {
     version: "2.39",
-    urlList: ["https://www.macwelt.de/"],
-    siteURL: "https://www.macwelt.de/",
+    urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/"],
+    siteURL: undefined,
     restURL: undefined,
     basicAuthentication: {  // Do not put values here! Defaults are defined in px.authenticate
         authenticate: false,
@@ -31,7 +33,7 @@ var configObject = {
         password: ""
     },
 
-    runMode: RunModes.TEMPLATE,
+    runMode: RunModes.PLACE_GUN,
 
     filterAfterDate: "2003-05-27",
     filterBeforeDate: "2030-01-01",
@@ -48,6 +50,6 @@ var configObject = {
     xsltFile: "wordrepss_basic.xsl",
     masterSpreadStart: "A-Artikelstart",
     masterSpreadFollow: "F-Folgeseite",
-    startPage: "LEFT", // LEFT OR RIGHT
-    fixOverflow: true // TEMPLATE Mode only fix overflow with masterSpreadFollow
+    startPage: "NEXT", // LEFT OR RIGHT
+    fixOverflow: true, // TEMPLATE Mode only fix overflow with masterSpreadFollow
 }
