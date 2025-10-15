@@ -260,20 +260,18 @@ function processDok(dok) {
                 }
 
                 // Set Import Preferences
-                with (styleTemplateDok.xmlImportPreferences) {
-                    allowTransform = true;
-                    transformFilename = xsltFile;
-                    transformParameters = [];
-                    createLinkToXML = false;
-                    ignoreUnmatchedIncoming = false;
-                    ignoreWhitespace = false;
-                    importCALSTables = false;
-                    importStyle = XMLImportStyles.APPEND_IMPORT;
-                    importTextIntoTables = false;
-                    importToSelected = false;
-                    removeUnmatchedExisting = true;
-                    repeatTextElements = false;
-                }
+                styleTemplateDok.xmlImportPreferences.allowTransform = true;
+                styleTemplateDok.xmlImportPreferences.transformFilename = xsltFile;
+                styleTemplateDok.xmlImportPreferences.transformParameters = [];
+                styleTemplateDok.xmlImportPreferences.createLinkToXML = false;
+                styleTemplateDok.xmlImportPreferences.ignoreUnmatchedIncoming = false;
+                styleTemplateDok.xmlImportPreferences.ignoreWhitespace = false;
+                styleTemplateDok.xmlImportPreferences.importCALSTables = false;
+                styleTemplateDok.xmlImportPreferences.importStyle = XMLImportStyles.APPEND_IMPORT;
+                styleTemplateDok.xmlImportPreferences.importTextIntoTables = false;
+                styleTemplateDok.xmlImportPreferences.importToSelected = false;
+                styleTemplateDok.xmlImportPreferences.removeUnmatchedExisting = true;
+                styleTemplateDok.xmlImportPreferences.repeatTextElements = false;
 
                 try {
                     styleTemplateDok.importXML(xmlTempFile);

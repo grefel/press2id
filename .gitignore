@@ -11,3 +11,4 @@ src/templates/*
 !src/templates/wordrepss_basic*
 src/config/*
 !src/config/defaultConfig.jsx
+.DS_Store
