@@ -11,7 +11,7 @@ var px = {
     user: "",
     password: "",
 
-    defaultHeader: [{ name: "User-Agent", value: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:110.0) Gecko/20100101 Firefox/110.0" }],
+    defaultHeader: [{ name: "User-Agent", value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0" }],
 
     postIDLabel: "px:postID:px",
 
@@ -23,8 +23,8 @@ var px = {
 }
 
 var configObject = {
-    version: "2.39",
-    urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/"],
+    version: "2.40",
+    urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/", "https://www.publishingx.de/press2id"],
     siteURL: undefined,
     restURL: undefined,
     basicAuthentication: {  // Do not put values here! Defaults are defined in px.authenticate
@@ -40,6 +40,7 @@ var configObject = {
     orderBy: "desc", // asc oder desc
     categoryID: undefined,
     categoryArray: [],
+    statusArray: ["publish"], // valid values: publish, future, draft, pending, private
     downloadFeaturedImage: true,
     loadImagesToPlaceGun: true, // if false, all images are anchored into the text flow    
     downloadImages: true,
