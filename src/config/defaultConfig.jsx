@@ -7,7 +7,7 @@ var px = {
     runMode: null, // Wenn ein Wert eingetragen ist, wird die Modus Auswahlseite übersprungen
     // runMode: RunModes.TEMPLATE,
 
-    authenticate: false,
+    authenticate: false, // if you want to use basic authentication you must set an siteURL above 
     user: "",
     password: "",
 
