@@ -8,7 +8,7 @@ var RunModes = {
 }
 
 //@include config/defaultConfig.jsx
-// //@include config/wirindortmund.jsx //removeDefault
+// //@include config/specialConfig.jsx //removeDefault
 
 //<remove>
 try {
@@ -838,7 +838,7 @@ function getImageFile(configObject, fileURL) {
         var baseUrl = fileURL.substring(0, lastSlash + 1); // includes the last slash
         var filename = fileURL.substring(lastSlash + 1);
         filename = filename.replace(/\?.+?$/, "");
-        
+
         log.info("Base URL: " + baseUrl + "\nFilename: " + filename);
 
         var request = {
@@ -1747,6 +1747,58 @@ function getConfig(newConfigObject) {
             fillListboxSelectPost(listItems);
         }
 
+        
+        if (px.authenticate && px.siteURL) {
+            // Status Checkboxes
+            var groupStatus = group1.add('group');
+            groupStatus.orientation = "column";
+            groupStatus.alignChildren = ["left", "center"];
+            groupStatus.spacing = 5;
+            groupStatus.margins = 0;
+    
+            var statusLabelGroup = groupStatus.add('group');
+            statusLabelGroup.add('statictext {text: "' + localize({ de: "Status Filter", en: "Status Filter" }) + '"}');
+    
+            var statusCheckboxGroup = groupStatus.add('group');
+            statusCheckboxGroup.orientation = "row";
+            statusCheckboxGroup.spacing = 10;
+    
+            var statusValues = [
+                { value: "publish", label: { de: "Veröffentlicht", en: "Published" } },
+                { value: "future", label: { de: "Geplant", en: "Scheduled" } },
+                { value: "draft", label: { de: "Entwurf", en: "Draft" } },
+                { value: "pending", label: { de: "Ausstehend", en: "Pending" } },
+                { value: "private", label: { de: "Privat", en: "Private" } }
+            ];
+            var statusCheckboxes = {};
+            for (var i = 0; i < statusValues.length; i++) {
+                var cb = statusCheckboxGroup.add('checkbox', undefined, localize(statusValues[i].label));
+                // Check if value exists in array without using indexOf
+                var isChecked = false;
+                for (var j = 0; j < newConfigObject.statusArray.length; j++) {
+                    if (newConfigObject.statusArray[j] === statusValues[i].value) {
+                        isChecked = true;
+                        break;
+                    }
+                }
+                cb.value = isChecked;
+                cb.statusValue = statusValues[i].value;
+                statusCheckboxes[statusValues[i].value] = cb;
+
+                cb.onClick = function () {
+                    var newStatusArray = [];
+                    for (var key in statusCheckboxes) {
+                        if (statusCheckboxes[key].value) {
+                            newStatusArray.push(statusCheckboxes[key].statusValue);
+                        }
+                    }
+                    newConfigObject.statusArray = newStatusArray;
+                    listItems = getListOfBlogEntries(newConfigObject, loadMaxPages, false);
+                    fillListboxSelectPost(listItems);
+                };
+            }
+        }
+
         var groupRefilter = group1.add('group');
         groupRefilter.orientation = "row";
         stNumberOfEntries = groupRefilter.add("statictext");
@@ -2415,6 +2467,7 @@ function getConfig(newConfigObject) {
         var afterDate = newConfigObject.filterAfterDate;
         var categoryID = newConfigObject.categoryID;
         var orderBy = newConfigObject.orderBy;
+        var statusArray = newConfigObject.statusArray || ["publish"];
         var localListItems = [];
         var ui = {};
         ui.noBlogPostsOnSite = { en: "No content entries on [%1] for endpoint [%2]", de: "Keine Inhalte auf [%1] für endpoint [%2]" };
@@ -2424,6 +2477,9 @@ function getConfig(newConfigObject) {
             var action = urlCommandChar + "_fields[]=title&_fields[]=id&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&filter[orderby]=date&order=" + orderBy;
             if (categoryID && categoryID * 1 > -1) {
                 action += "&categories=" + categoryID;
+            }
+            if (statusArray && statusArray.length > 0) {
+                action += "&status=" + statusArray.join(",");
             }
             log.info("fn ListOfBlogEntries: " + restURL + endPoint + "/" + action + " mode verbose " + verbose);
 
@@ -2437,6 +2493,10 @@ function getConfig(newConfigObject) {
             try {
                 if (response.error) {
                     throw Error(response.errorMsg);
+                }
+                if (response.httpStatus >= 400) {
+                    log.infoAlert("Fehler httpStatus " + response.httpStatus + "\n" + response.body);
+                    return [];
                 }
                 var postEmbed = JSON.parse(response.body);
                 if (postEmbed.hasOwnProperty("code")) {
@@ -2454,10 +2514,6 @@ function getConfig(newConfigObject) {
                         }
                         return [];
                     }
-                }
-                if (response.httpStatus >= 400) {
-                    log.infoAlert("Fehler httpStatus " + response.httpStatus + "\n" + response.body);
-                    return [];
                 }
             }
             catch (e) {
