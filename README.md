@@ -59,7 +59,7 @@ With a authentication enabled the filter posts view will get an extra `Status Fi
 
 ### Configuration
 
-Currently, authentication information can only be entered permanently in the script file. Please note that the WordPress access password will then be stored in plain text in the script file. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/authenticate.jpg" width="500" alt="Configure authentication">
+Currently, authentication information can only be entered permanently in the script file. Please note that the WordPress access password will then be stored in plain text in the script file. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/authenticate.jpg" width="800" alt="Configure authentication">
 
 1. In line 16, the URL of the blog must be entered in the `siteURL` property. The first selection screen will then be skipped.
 2. In line 21, the `authenticate` property must be set to `true`.
@@ -67,6 +67,7 @@ Currently, authentication information can only be entered permanently in the scr
 
 To get an application password got to the Edit User page of your WordPress Site. You can generate new, and view or revoke existing application passwords. <br/>
 <img src="https://make.wordpress.org/core/files/2020/10/Screen-Shot-2020-10-21-at-12.32.37-PM.png" width="500" alt="Get an application password">
+
 Note that you use your username in the property `user` and not the name of the application password!  
 
 
