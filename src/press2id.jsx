@@ -8,7 +8,7 @@ var RunModes = {
 }
 
 //@include config/defaultConfig.jsx
-// //@include config/specialConfig.jsx //removeDefault
+// //@include config/defaultConfig_auth.jsx //removeDefault
 
 //<remove>
 try {
@@ -1119,8 +1119,12 @@ function getConfig(newConfigObject) {
     ui.staticTextFilterElements = { en: "Filter elements", de: "Auswahl verfeinern" };
     ui.datePatternError = { en: "Wrong Date format YYYY-MM-DD", de: "Falsches Datumsformat JJJJ-MM-TT" };
 
-
-    var listBounds = [0, 0, 520, 256];
+    if (px.authenticate) {
+        var listBounds = [0, 0, 520, 229];
+    }
+    else {
+        var listBounds = [0, 0, 520, 256];
+    }
     var listItems = [];
     var etPostFilter;
     var endPointDropdown;
@@ -1751,13 +1755,14 @@ function getConfig(newConfigObject) {
         if (px.authenticate && px.siteURL) {
             // Status Checkboxes
             var groupStatus = group1.add('group');
-            groupStatus.orientation = "column";
+            groupStatus.orientation = "row";
             groupStatus.alignChildren = ["left", "center"];
             groupStatus.spacing = 5;
             groupStatus.margins = 0;
     
             var statusLabelGroup = groupStatus.add('group');
             statusLabelGroup.add('statictext {text: "' + localize({ de: "Status Filter", en: "Status Filter" }) + '"}');
+            statusLabelGroup.margins = [0, 0, 5, 5];
     
             var statusCheckboxGroup = groupStatus.add('group');
             statusCheckboxGroup.orientation = "row";
@@ -2478,7 +2483,7 @@ function getConfig(newConfigObject) {
             if (categoryID && categoryID * 1 > -1) {
                 action += "&categories=" + categoryID;
             }
-            if (statusArray && statusArray.length > 0) {
+            if (px.authenticate && statusArray && statusArray.length > 0) {
                 action += "&status=" + statusArray.join(",");
             }
             log.info("fn ListOfBlogEntries: " + restURL + endPoint + "/" + action + " mode verbose " + verbose);
