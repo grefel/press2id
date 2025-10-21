@@ -20,8 +20,8 @@ press2id is successfully used with the following publications. If you also use i
 # Table of contents
 * [Download and Install](#download-and-install)
 * [Quick start guide](#quick-start-guide)
-* [Authentication](#authentication)
-* [Technical notes on the Workflow](#technical-notes-on-the-workflow)
+* [Retrieve drafts and Authentication](#authentication)
+* [Technical notes on the Workflow](#technical-details-of-the-script)
 
 ## Download and Install
 1. Download the current version [press2id-latest.zip](https://raw.githubusercontent.com/grefel/press2id/master/release/press2id-latest.zip).
