@@ -18,9 +18,10 @@ press2id is successfully used with the following publications. If you also use i
   * https://biasiada.de/
 
 # Table of contents
-* [Download and Install](#install)
+* [Download and Install](#download-and-install)
 * [Quick start guide](#quick-start-guide)
-* [Technical notes on the Workflow](#some-notes-on-the-workflow)
+* [Retrieve drafts and Authentication](#authentication)
+* [Technical notes on the Workflow](#technical-details-of-the-script)
 
 ## Download and Install
 1. Download the current version [press2id-latest.zip](https://raw.githubusercontent.com/grefel/press2id/master/release/press2id-latest.zip).
@@ -50,7 +51,26 @@ If you want to add several Posts in document you can try the ***Fill Mastersprea
 1. Choose the mode  <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/masterSpreadMode.png" width="500" alt="Fill Masterspread Mode">
 2. Select several posts.
 
-### Technical details of the script
+## Authentication
+### Get drafts or other statuses that are not publicly available
+Without authentication, the plugin can only retrieve posts with the status “published.” To retrieve unpublished posts e.g. drafts, you must specify a fixed WordPress URL. 
+
+With a authentication enabled the filter posts view will get an extra `Status Filter` section: <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/filter_status.jpg" width="500" alt="Filter posts">
+
+### Configuration
+
+Currently, authentication information can only be entered permanently in the script file. Please note that the WordPress access password will then be stored in plain text in the script file. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/authenticate.jpg" width="500" alt="Configure authentication">
+
+1. In line 16, the URL of the blog must be entered in the `siteURL` property. The first selection screen will then be skipped.
+2. In line 21, the `authenticate` property must be set to `true`.
+3. In lines 22 and 23, user name and application password must be entered.
+
+To get an application password got to the Edit User page of your WordPress Site. You can generate new, and view or revoke existing application passwords. <br/>
+<img src="https://make.wordpress.org/core/files/2020/10/Screen-Shot-2020-10-21-at-12.32.37-PM.png" width="500" alt="Get an application password">
+Note that you use your username in the property `user` and not the name of the application password!  
+
+
+## Technical details of the script
 * InDesign is managed with [JavaScript](https://www.indesignjs.de/auflage2/).
 * REST access with [restix](https://github.com/grefel/restix) to the [WordPress API](https://developer.wordpress.org/rest-api/)
 * Post content needs to be XHTML and is processed via InDesign XML Import. 
