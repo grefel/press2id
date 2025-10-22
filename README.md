@@ -1,7 +1,7 @@
 tl;dr – I just want the script: [press2id-latest.zip](https://raw.githubusercontent.com/grefel/press2id/master/release/press2id-latest.zip).
 
 # press2id
-Connect Adobe InDesign to a WordPress Blog
+Connect Adobe InDesign to a WordPress Website
 * Works with *Adobe InDesign* CS 6 and higher
 * Connects to any *WordPress* 4.7 or higher
 
@@ -36,14 +36,14 @@ If you never installed a script, help is here:
 ## Quick start guide 
 The script places WordPress posts in the active Document. See details in the [german how to](#Wie geht das?)
 1. For a simple start open a new document or use the file `press2id_PlaceGun.idml` from the `examples` folder.
-1. Start the script and enter a WordPress blog URL. Unsure which, just enter `https://www.indesignblog.com/` <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/enterURL.png" width="500" alt="Enter URL">
-1. Press ***Next***
-1. Select ***Fill Place Gun*** mode. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/placeGunMode.png" width="500" alt="Place Gun Mode">
-1. Press ***Next***
-4. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/selectAPost.png" width="500" alt="Select Post">
-5. Press ***Start***
-6. The script loads the post content and images in the place gun.
-7. Change styles according to your needs (you can do this also before placing)
+2. Start the script and enter a WordPress URL. Unsure which, just enter `https://www.indesignblog.com/` <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/enterURL.png" width="500" alt="Enter URL">
+3. Press ***Next***
+4. Select ***Fill Place Gun*** mode. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/placeGunMode.png" width="500" alt="Place Gun Mode">
+5. Press ***Next***
+6. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/selectAPost.png" width="500" alt="Select Post">
+7. Press ***Start***
+8. The script loads the post content and images in the place gun.
+9. Change styles according to your needs (you can do this also before placing)
 
 ### Fill Masterspread Mode
 If you want to add several Posts in document you can try the ***Fill Masterspread*** mode. 
@@ -61,7 +61,7 @@ With a authentication enabled the filter posts view will get an extra `Status Fi
 
 Currently, authentication information can only be entered permanently in the script file. Please note that the WordPress access password will then be stored in plain text in the script file. <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/authenticate.jpg" width="800" alt="Configure authentication">
 
-1. In line 16, the URL of the blog must be entered in the `siteURL` property. The first selection screen will then be skipped.
+1. In line 16, the URL of the WordPress site must be entered in the `siteURL` property. The first selection screen will then be skipped.
 2. In line 21, the `authenticate` property must be set to `true`.
 3. In lines 22 and 23, user name and application password must be entered.
 
@@ -92,13 +92,13 @@ Note that you use your username in the property `user` and not the name of the a
 * Bevor du loslegen kannst, brauchst du ein geöffnetes Dokument. Das kann ganz leer sein. Wichtig ist nur, dass es gespeichert ist. Der Speicherort ist notwendig, da *press2id* die Bilder im Ordner Links neben dem Dokument speichert. Alternativ kannst du auch das CC 2020 Dokument `press2id_PlaceGun.idml` (CC 2020) aus dem Ordner `Example Files` verwenden. Hier sind dann alle Schriften aus dem danebenliegenden Ordner `Document Fonts` aktiviert.
 * Starte jetzt das Skript mit einem Doppelklick auf `press2id.jsx`. Das Fenster mit den Einstellungen erscheint.
 
-* Du kannst deinen eigenen WordPress-Blog eintragen oder erstmal einen Artikel von meinem [Blog](https://www.indesignblog.com/) verwenden z.B. den Beitrag [	
+* Du kannst deine eigene WordPress-Seite eintragen oder erstmal einen Artikel von meinem [Blog](https://www.indesignblog.com/) verwenden z.B. den Beitrag [	
 XML suchen und Text hinzufügen
 ](https://www.indesignblog.com/2017/05/xml-suchen-und-text-hinzufuegen/).
 
   ![Screenshot](https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/blog.png)
 
-* Mit dem Datumsfilter kannst du die Auswahl der Beiträge eingrenzen. Wenn du ihn unverändert lässt, werden alle Beiträge des Blogs angezeigt.
+* Mit dem Datumsfilter kannst du die Auswahl der Beiträge eingrenzen. Wenn du ihn unverändert lässt, werden alle Beiträge der Webseite angezeigt.
 
 ### Einen Beitrag platzieren 
 * Wähle einen Beitrag aus der Liste aus und drücke auf **Platzieren**. 
