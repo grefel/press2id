@@ -5,7 +5,7 @@ Connect Adobe InDesign to a WordPress Blog
 * Works with *Adobe InDesign* CS 6 and higher
 * Connects to any *WordPress* 4.7 or higher
 
-Detailed infos are found at [publishing.blog [DE]](https://publishing.blog/press2id) and [publishing.blog ACF [DE]](https://publishing.blog/WordPress-nach-indesign-press2id-jetzt-mit-custom-fields-und-custom-post-types/) by @haemeulrich
+Detailed information is found at [publishing.blog [DE]](https://publishing.blog/press2id) and [publishing.blog ACF [DE]](https://publishing.blog/WordPress-nach-indesign-press2id-jetzt-mit-custom-fields-und-custom-post-types/) by @haemeulrich
 
 press2id is successfully used with the following publications. If you also use it and want to be added to this list, just send a message!
 #### Fill Place Gun Mode
@@ -42,7 +42,7 @@ The script places WordPress posts in the active Document. See details in the [ge
 1. Press ***Next***
 4. Select a post and press ***Start*** <br/> <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/selectAPost.png" width="500" alt="Select Post">
 5. Press ***Start***
-6. The script loads the post content an images in the place gun.
+6. The script loads the post content and images in the place gun.
 7. Change styles according to your needs (you can do this also before placing)
 
 ### Fill Masterspread Mode
@@ -65,10 +65,10 @@ Currently, authentication information can only be entered permanently in the scr
 2. In line 21, the `authenticate` property must be set to `true`.
 3. In lines 22 and 23, user name and application password must be entered.
 
-To get an application password got to the Edit User page of your WordPress Site. You can generate new, and view or revoke existing application passwords. <br/>
+To get an application password go to the Edit User page of your WordPress Site. You can generate new, and view or revoke existing application passwords. <br/>
 <img src="https://make.wordpress.org/core/files/2020/10/Screen-Shot-2020-10-21-at-12.32.37-PM.png" width="500" alt="Get an application password">
 
-Note that you use your username in the property `user` and not the name of the application password!  
+Note that you use your username in the property `user` and not the name of the application password! The complete technical background can be found here at the [WordPress Documentation](https://make.wordpress.org/core/2020/11/05/application-passwords-integration-guide/)
 
 
 ## Technical details of the script
@@ -76,7 +76,7 @@ Note that you use your username in the property `user` and not the name of the a
 * REST access with [restix](https://github.com/grefel/restix) to the [WordPress API](https://developer.wordpress.org/rest-api/)
 * Post content needs to be XHTML and is processed via InDesign XML Import. 
 * Styling is template based. The script uses the InDesign file `wordrepss_basic.idml` and a XSL-Transformation `wordrepss_basic.xsl` from the folder `templates`  for basic styling. HTML element names are mapped to InDesign styles by element names. Change any style definition here.
-* Suported HTML
+* Supported HTML
   * Block elements `h1`...`h6`, `p`, `quote` and some more
   * Lists `ul` and `ol`
   * Inline elements `b`, `i`, `em`, `strong`, `span`
@@ -89,7 +89,7 @@ Note that you use your username in the property `user` and not the name of the a
 
 <img src="https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/scriptsPanel.png" width="250" alt="Scripts Panel">
 
-* Bevor du loslegen kannst, brauchst du ein geöffnetes Dokument. Das kann ganz leer sein. Wichtig ist nur, dass es gespeichert ist. Der Speicherort ist notwendig, da *press2id* die Bider im Ordner Links neben dem Dokument speichert. Alternativ kannst du auch das CC 2020 Dokument `press2id_PlaceGun.idml` (CC 2020) aus dem Ordner `Example Files` verwenden. Hier sind dann alle Schriften aus dem danebenliegenden Ordner `Document Fonts` aktiviert.
+* Bevor du loslegen kannst, brauchst du ein geöffnetes Dokument. Das kann ganz leer sein. Wichtig ist nur, dass es gespeichert ist. Der Speicherort ist notwendig, da *press2id* die Bilder im Ordner Links neben dem Dokument speichert. Alternativ kannst du auch das CC 2020 Dokument `press2id_PlaceGun.idml` (CC 2020) aus dem Ordner `Example Files` verwenden. Hier sind dann alle Schriften aus dem danebenliegenden Ordner `Document Fonts` aktiviert.
 * Starte jetzt das Skript mit einem Doppelklick auf `press2id.jsx`. Das Fenster mit den Einstellungen erscheint.
 
 * Du kannst deinen eigenen WordPress-Blog eintragen oder erstmal einen Artikel von meinem [Blog](https://www.indesignblog.com/) verwenden z.B. den Beitrag [	
@@ -102,7 +102,7 @@ XML suchen und Text hinzufügen
 
 ### Einen Beitrag platzieren 
 * Wähle einen Beitrag aus der Liste aus und drücke auf **Platzieren**. 
-* *press2id* lädt nun den Inhalt und die Bilder herunter und lädt Sie in die PlaceGun des Mauszeigers. Die benötigten Formate werden automatisch erstellt.  Nach dem Platzieren sieht das Ergebnis so aus:
+* *press2id* lädt nun den Inhalt und die Bilder herunter und lädt sie in die PlaceGun des Mauszeigers. Die benötigten Formate werden automatisch erstellt.  Nach dem Platzieren sieht das Ergebnis so aus:
 
   ![InDesign Import](https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/result.png)
 
@@ -116,10 +116,10 @@ XML suchen und Text hinzufügen
 ![Named Frames](https://raw.githubusercontent.com/grefel/press2id/master/doc/assets/namedFrames.png)
 Im Dokument `press2id_example.indd` ist das schon erledigt!
 
-* Wähle nun die gewünschten Beiträg aus der Liste aus und drücke auf **Platzieren**. 
-* Das Skript setze jeden Beitrag auf eine Seite und befüllt die benannten Rahmen mit dem Inhalt. Wenn er länger als eine Seite ist, löst es den Textüberlauf auf. Für die Formatierung gelten die gleichen Regeln wie für einzelne Beiträge.
+* Wähle nun die gewünschten Beiträge aus der Liste aus und drücke auf **Platzieren**. 
+* Das Skript setzt jeden Beitrag auf eine Seite und befüllt die benannten Rahmen mit dem Inhalt. Wenn er länger als eine Seite ist, löst es den Textüberlauf auf. Für die Formatierung gelten die gleichen Regeln wie für einzelne Beiträge.
 
 ### Das Layout anpassen
 * Du kannst nun einfach die Formate nach deinen Wünschen anpassen. 
-* Wenn die Formate bereits **vor** dem Platzieren existieren, werden die Werte aus den Formaten erstellt. Du kannst dir so einfach eine Vorlage bauen und die Standardformate von *press2id* überschreiben. Das ist auch der empfohlene Weg für Layoutanpassungen!
+* Wenn die Formate bereits **vor** dem Platzieren existieren, werden die Werte aus den Formaten verwendet. Du kannst dir so einfach eine Vorlage bauen und die Standardformate von *press2id* überschreiben. Das ist auch der empfohlene Weg für Layoutanpassungen!
 * Die Formate kommen übrigens aus der Datei `wordrepss_basic.idml`, die im Ordner `templates` neben dem Skript liegt. Diese kannst du natürlich auch anpassen oder austauschen. Allerdings musst du dann bei einem Update aufpassen, dass deine Datei nicht überschrieben wird. Wenn du ein neues Template für dein individuelles Layout anlegen möchtest, kann es jedoch sinnvoll sein die Formate aus dieser Datei zu laden. 
