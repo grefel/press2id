@@ -63,12 +63,12 @@ Currently, authentication information can only be entered permanently in the scr
 
 1. In line 16, the URL of the WordPress site must be entered in the `siteURL` property. The first selection screen will then be skipped.
 2. In line 21, the `authenticate` property must be set to `true`.
-3. In lines 22 and 23, user name and application password must be entered.
+3. In lines 22 and 23, user name and application password must be entered. Note that you use your **Wordpress username** in the property `user` and not the name of the application password! 
 
 To get an application password go to the Edit User page of your WordPress Site. You can generate new, and view or revoke existing application passwords. <br/>
 <img src="https://make.wordpress.org/core/files/2020/10/Screen-Shot-2020-10-21-at-12.32.37-PM.png" width="500" alt="Get an application password">
 
-Note that you use your username in the property `user` and not the name of the application password! The complete technical background can be found here at the [WordPress Documentation](https://make.wordpress.org/core/2020/11/05/application-passwords-integration-guide/)
+The complete technical background can be found here at the [WordPress Documentation](https://make.wordpress.org/core/2020/11/05/application-passwords-integration-guide/)
 
 
 ## Technical details of the script
