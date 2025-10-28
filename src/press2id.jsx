@@ -1751,7 +1751,7 @@ function getConfig(newConfigObject) {
             fillListboxSelectPost(listItems);
         }
 
-        
+
         if (px.authenticate && px.siteURL) {
             // Status Checkboxes
             var groupStatus = group1.add('group');
@@ -1759,15 +1759,15 @@ function getConfig(newConfigObject) {
             groupStatus.alignChildren = ["left", "center"];
             groupStatus.spacing = 5;
             groupStatus.margins = 0;
-    
+
             var statusLabelGroup = groupStatus.add('group');
             statusLabelGroup.add('statictext {text: "' + localize({ de: "Status Filter", en: "Status Filter" }) + '"}');
             statusLabelGroup.margins = [0, 0, 5, 5];
-    
+
             var statusCheckboxGroup = groupStatus.add('group');
             statusCheckboxGroup.orientation = "row";
             statusCheckboxGroup.spacing = 10;
-    
+
             var statusValues = [
                 { value: "publish", label: { de: "Veröffentlicht", en: "Published" } },
                 { value: "future", label: { de: "Geplant", en: "Scheduled" } },
@@ -2479,7 +2479,7 @@ function getConfig(newConfigObject) {
         var urlCommandChar = (restURL.match(/\?rest_route/)) ? "&" : "?";
 
         for (var page = 1; page <= maxPages; page++) {
-            var action = urlCommandChar + "_fields[]=title&_fields[]=id&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&filter[orderby]=date&order=" + orderBy;
+            var action = urlCommandChar + "_fields[]=title&_fields[]=id&_fields[]=status&per_page=100&page=" + page + "&before=" + beforeDate + "T00:00:00&after=" + afterDate + "T00:00:00&filter[orderby]=date&order=" + orderBy;
             if (categoryID && categoryID * 1 > -1) {
                 action += "&categories=" + categoryID;
             }
@@ -2533,10 +2533,19 @@ function getConfig(newConfigObject) {
                 return [];
             }
             for (var i = 0; i < postEmbed.length; i++) {
-                localListItems.push({
-                    id: postEmbed[i].id,
-                    entryTitle: Encoder.htmlDecode(postEmbed[i].title.rendered)
-                });
+                if (px.authenticate) {
+                    localListItems.push({
+                        id: postEmbed[i].id,
+                        entryTitle: postEmbed[i].status + " | " + Encoder.htmlDecode(postEmbed[i].title.rendered)
+                    });
+
+                }
+                else {
+                    localListItems.push({
+                        id: postEmbed[i].id,
+                        entryTitle: Encoder.htmlDecode(postEmbed[i].title.rendered)
+                    });
+                }
             }
             log.info("localListItems.length " + localListItems.length + " response.httpStatus " + response.httpStatus);
             if (verbose && postEmbed.length == 0 && localListItems.length == 0 && response.httpStatus == 200) {
