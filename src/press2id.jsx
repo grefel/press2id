@@ -163,7 +163,7 @@ function processDok(dok) {
     ui.progressBarProcess = localize({ en: "Load data from: ", de: "Lade Daten von: " });
     ui.progressBarPlace = localize({ en: "Place: ", de: "Platziere: " });
     ui.missingMasterSpreadStart = localize({ en: "A masterspread with the name [" + configObject.masterSpreadStart + "] is required.", de: "Es wird eine Musterseite mit dem Namen [" + configObject.masterSpreadStart + "] benötigt." });
-    ui.missingMasterSpreadFollow = localize({ en: "A masterspread with the name [" + configObject.missingMasterSpreadFollow + "] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [" + configObject.missingMasterSpreadFollow + "] benötigt." });
+    ui.missingMasterSpreadFollow = localize({ en: "A masterspread with the name [" + configObject.missingMasterSpreadFollow + "] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [" + configObject.masterSpreadFollow + "] benötigt." });
     ui.missingContentTextFrame = localize({ en: "There is no text frame named [content] on the masterspread [" + configObject.masterSpreadStart + "]", de: "Auf der Musterseite [" + configObject.masterSpreadStart + "] ist kein Textrahmen mit dem Namen [content] enthalten." });
     ui.missingFeaturedImageFrame = localize({ en: "There is no text frame named [featured-image] on the masterspread [" + configObject.masterSpreadStart + "]", de: "Auf der Musterseite [" + configObject.masterSpreadStart + "] ist kein Textrahmen mit dem Namen [featured-image] enthalten." });
     ui.missingDataFields = localize({ en: "No data field (<<data field name>> or named graphics frame) could be found in the current document!", de: "Im aktuellen Dokument konnt kein Datenfeld (<<Datenfeldname>> oder benannter Grafikrahmen) gefunden werden!" });
@@ -2244,7 +2244,10 @@ function getConfig(newConfigObject) {
             listboxSelectPost.selection = 0;
         }
         buttonStartOkFilterPanel.enabled = true;
-        if (loadMaxPages > 1) {
+        if (px.totalEntries > -1) {
+            stNumberOfEntries.text = "Es wurden " + localListItems.length + " von " + px.totalEntries + " Einträgen geladen";
+        }
+        else if (loadMaxPages > 1) {
             stNumberOfEntries.text = "Es wurden " + localListItems.length + " Einträge geladen";
         }
         else {
@@ -2503,6 +2506,17 @@ function getConfig(newConfigObject) {
                     log.infoAlert("Fehler httpStatus " + response.httpStatus + "\n" + response.body);
                     return [];
                 }
+                if (response.head["x-wp-totalpages"] != undefined) {
+                    var totalPages = response.head["x-wp-totalpages"] * 1;
+                    log.info("totalPages " + totalPages + " maxPages " + maxPages + " page " + page);
+                    if (maxPages > totalPages) {
+                        maxPages = totalPages;
+                    }
+                }
+                if (response.head["x-wp-total"] != undefined) {
+                    px.totalEntries = response.head["x-wp-total"] * 1;
+                }
+
                 var postEmbed = JSON.parse(response.body);
                 if (postEmbed.hasOwnProperty("code")) {
                     if (postEmbed.code == "rest_post_invalid_page_number" && maxPages > 1) {

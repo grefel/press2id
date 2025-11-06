@@ -16,6 +16,7 @@ var px = {
     postIDLabel: "px:postID:px",
 
     // Verwaltung
+    totalEntries: -1,
     tempFileArray: [],
     showGUI: true,
     appendLog: true,
