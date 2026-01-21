@@ -519,15 +519,18 @@ function processDok(dok) {
                     placeGunArray.unshift(tempICMLFile);
                     try {
                         app.activeDocument = dok;
+                        app.activate();
+                        dok.placeGuns.abortPlaceGun();
                         dok.placeGuns.loadPlaceGun(placeGunArray);
                     }
                     catch (e) {
                         // // Windows Async File Export Problems (Error: Die Datei existiert nicht bzw. wird von einer anderen Anwendung verwendet, oder Sie haben nicht die entsprechenden Zugriffsrechte.)
-                        if (e.number == 29446) {
+                        if (e.number == 29446 || e.number == 29442) {
                             placeGunArray.shift();
                             var nexTempFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp.icml");
                             tempICMLFile.copy(nexTempFile);
                             placeGunArray.unshift(nexTempFile);
+                            dok.placeGuns.abortPlaceGun();
                             dok.placeGuns.loadPlaceGun(placeGunArray);
                             // for (var i = 0; i < placeGunArray.length; i++) {
                             //     if (!placeGunArray[i].exists) throw e;
