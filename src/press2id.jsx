@@ -7,8 +7,13 @@ var RunModes = {
     DATABASE: "database"
 }
 
+var ImageProcessingModes = {
+    PLACE_GUN: "placeGun",
+    GROUPED_PLACE_GUN: "groupedPlaceGun",
+    ANCHOR: "anchor"
+}
+
 //@include config/defaultConfig.jsx
-// //@include config/defaultConfig_auth.jsx //removeDefault
 
 //<remove>
 try {
@@ -81,7 +86,7 @@ function main() {
         else {
             log.info("saved config object has an old version is ignored!");
         }
-        configObject.siteURL = undefined;
+        // configObject.siteURL = undefined;
         configObject.restURL = undefined;
     }
 
@@ -163,7 +168,7 @@ function processDok(dok) {
     ui.progressBarProcess = localize({ en: "Load data from: ", de: "Lade Daten von: " });
     ui.progressBarPlace = localize({ en: "Place: ", de: "Platziere: " });
     ui.missingMasterSpreadStart = localize({ en: "A masterspread with the name [" + configObject.masterSpreadStart + "] is required.", de: "Es wird eine Musterseite mit dem Namen [" + configObject.masterSpreadStart + "] benötigt." });
-    ui.missingMasterSpreadFollow = localize({ en: "A masterspread with the name [" + configObject.missingMasterSpreadFollow + "] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [" + configObject.masterSpreadFollow + "] benötigt." });
+    ui.missingMasterSpreadFollow = localize({ en: "A masterspread with the name [" + configObject.masterSpreadFollow + "] is required to place several posts.", de: "Für die Platzierung von mehreren Posts wird eine Musterseite mit dem Namen [" + configObject.masterSpreadFollow + "] benötigt." });
     ui.missingContentTextFrame = localize({ en: "There is no text frame named [content] on the masterspread [" + configObject.masterSpreadStart + "]", de: "Auf der Musterseite [" + configObject.masterSpreadStart + "] ist kein Textrahmen mit dem Namen [content] enthalten." });
     ui.missingFeaturedImageFrame = localize({ en: "There is no text frame named [featured-image] on the masterspread [" + configObject.masterSpreadStart + "]", de: "Auf der Musterseite [" + configObject.masterSpreadStart + "] ist kein Textrahmen mit dem Namen [featured-image] enthalten." });
     ui.missingDataFields = localize({ en: "No data field (<<data field name>> or named graphics frame) could be found in the current document!", de: "Im aktuellen Dokument konnt kein Datenfeld (<<Datenfeldname>> oder benannter Grafikrahmen) gefunden werden!" });
@@ -351,7 +356,7 @@ function processDok(dok) {
 
                     if (imageFile != null && imageFile.exists && imageFile.length > 0) {
                         var rect = styleTemplateDok.rectangles.add();
-                        rect.geometricBounds = [0, 0, 500, 94]; // Default if not set in Object style
+                        rect.geometricBounds = [0, 0, configObject.imageHeight, configObject.imageWidth]; // Default if not set in Object style
                         rect.appliedObjectStyle = oStyle;
                         try {
                             rect.place(imageFile);
@@ -368,7 +373,7 @@ function processDok(dok) {
                         rect.fit(FitOptions.PROPORTIONALLY);
                         rect.fit(FitOptions.FRAME_TO_CONTENT);
 
-                        if (configObject.runMode == RunModes.PLACE_GUN && configObject.loadImagesToPlaceGun) {
+                        if (configObject.runMode == RunModes.PLACE_GUN && configObject.imageProcessingMode != ImageProcessingModes.ANCHOR) {
                             var tempFile = File(Folder.temp + "/px_" + imageFile.name + ".idms");
                             var captionXML = imgXML.parent.xmlElements.itemByName("figcaption");
                             if (!captionXML.isValid) {
@@ -507,6 +512,60 @@ function processDok(dok) {
 
             // Place data in destination
             if (configObject.runMode == RunModes.PLACE_GUN) {
+
+                if (configObject.imageProcessingMode == ImageProcessingModes.GROUPED_PLACE_GUN && placeGunArray.length > 1) {
+                    var columns = 4;
+                    var maxheight = -1;
+                    var x = 0;
+                    var y = 0;
+                    var gap = 10;
+                    var groupArray = [];
+
+                    while (placeGunArray.length > 0) {
+                        // imageCounter++;
+                        var tempPlaceGunFile = placeGunArray.pop();
+                        try {
+                            var tempFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp.idms");
+                            tempPlaceGunFile.copy(tempFile);
+
+                            var snip = dok.pages[0].place(tempFile, [0, 0])[0];
+                            if (snip.parent.constructor.name == "Rectangle") {
+                                snip = snip.parent;
+                            }
+                        } catch (error) {
+                            log.warn("Error placing image file " + tempPlaceGunFile.name + ": " + error);
+                        }
+                        var width = snip.geometricBounds[3] - snip.geometricBounds[1];
+                        var height = snip.geometricBounds[2] - snip.geometricBounds[0];
+                        if (height > maxheight) {
+                            maxheight = height;
+                        }
+
+                        snip.move([x, y]);
+                        snip.fit(FitOptions.PROPORTIONALLY);
+                        x = x + width + gap;
+                        if (x + width > columns * (width + gap)) {
+                            x = 0;
+                            maxheight = -1;
+                            y = y + height + gap;
+                        }
+                        groupArray.push(snip);
+                    }
+
+                    if (groupArray.length > 1) {
+                        var group = dok.groups.add(groupArray);                        
+                    }
+                    else {
+                        var group = groupArray[0];
+                    }
+                    var tempImageGroupFile = File(Folder.temp + "/" + new Date().getTime() + Math.random().toString().replace(/\./, '') + "temp_images.idms");
+                    group.exportFile(ExportFormat.INDESIGN_SNIPPET, tempImageGroupFile);
+                    group.remove();
+                    placeGunArray.push(tempImageGroupFile);
+
+                }
+
+
 
                 // Export to TEMP ICML
                 var oldUserName = app.userName;
@@ -1121,12 +1180,18 @@ function getConfig(newConfigObject) {
     ui.panelACFFileds = { en: "Fill prepared data fields", de: "Vorbereitete Datenfelder befüllen" };
     ui.staticTextFilterElements = { en: "Filter elements", de: "Auswahl verfeinern" };
     ui.datePatternError = { en: "Wrong Date format YYYY-MM-DD", de: "Falsches Datumsformat JJJJ-MM-TT" };
+    ui.staticTextSelectLanguage = { en: "Select language:", de: "Sprache auswählen:" };
+    ui.errorUpdateRestURL = { en: "Could not update REST URL: ", de: "REST-URL konnte nicht aktualisiert werden: " };
+    ui.imageDimensionsLabel = { en: "Image dimensions:", de: "Bildabmessungen:" };
+    ui.imageWidthLabel = { en: "Width:", de: "Breite:" };
+    ui.imageHeightLabel = { en: "Height:", de: "Höhe:" };
+    ui.imageDimensionObjectPriorityHint = { en: "Values in object styles take precedence!", de: "Werte im Objektformat haben Priorität!" };
 
     if (px.authenticate) {
-        var listBounds = [0, 0, 520, 229];
+        var listBounds = [0, 0, 520, 229]; //229
     }
     else {
-        var listBounds = [0, 0, 520, 256];
+        var listBounds = [0, 0, 520, 286];
     }
     var listItems = [];
     var etPostFilter;
@@ -1138,11 +1203,12 @@ function getConfig(newConfigObject) {
     var buttonNextMode;
     var filterPanel;
     var loadMaxPages = 1;
+    var panelHeight = 540;
 
     var dialog = new Window("dialog");
     dialog.text = px.projectName + " " + px.version;
     dialog.preferredSize.width = 560;
-    dialog.preferredSize.height = 540;
+    dialog.preferredSize.height = 590;
     dialog.orientation = "stack";
     dialog.alignChildren = ["left", "top"];
     dialog.spacing = 10;
@@ -1263,7 +1329,7 @@ function getConfig(newConfigObject) {
         var panel1 = geturl.add("panel", undefined, undefined, { name: "panel1" });
         panel1.text = "Datenquelle festlegen";
         panel1.preferredSize.width = 540;
-        panel1.preferredSize.height = 510;
+        panel1.preferredSize.height = panelHeight;
         panel1.orientation = "column";
         panel1.alignChildren = ["left", "top"];
         panel1.spacing = 10;
@@ -1291,7 +1357,7 @@ function getConfig(newConfigObject) {
         var urlListDropdown = groupBlogInfo.add("dropdownlist", undefined, newConfigObject.urlList);
         urlListDropdown.preferredSize.width = 450;
         urlListDropdown.preferredSize.height = 24;
-        var edittextBlogInfoURL = groupBlogInfo.add('edittext {text: "' + newConfigObject.urlList[0] + '"}');
+        var edittextBlogInfoURL = groupBlogInfo.add('edittext {text: "' + newConfigObject.siteURL + '"}');
         edittextBlogInfoURL.helpTip = "Die URL startet üblicherweise mit https:// ";
         edittextBlogInfoURL.preferredSize.width = 450 - 18;
         edittextBlogInfoURL.preferredSize.height = 24;
@@ -1348,7 +1414,7 @@ function getConfig(newConfigObject) {
                 group3.graphics.backgroundColor = redBrush;
                 return;
             }
-            if (newConfigObject.siteURL == edittextBlogInfoURL.text) {
+            if (newConfigObject.siteURL == edittextBlogInfoURL.text && !firstDiscovery) {
                 return;
             }
             if (!edittextBlogInfoURL.text.match(/^https?:\/\//)) {
@@ -1376,6 +1442,7 @@ function getConfig(newConfigObject) {
                 if (!found) {
                     urlListDropdown.add('item', newConfigObject.siteURL);
                 }
+                firstDiscovery = false;
                 buttonNext.enabled = buttonNext.active = true;
             }
             catch (e) {
@@ -1387,6 +1454,7 @@ function getConfig(newConfigObject) {
             }
         }
         // init!
+        firstDiscovery = true;
         edittextBlogInfoURL.onChange();
     }
     function createModePanel() {
@@ -1398,7 +1466,7 @@ function getConfig(newConfigObject) {
         var panel1 = processingMode.add("panel", undefined, undefined, { name: "panel1" });
         panel1.text = "Was willst du tun?";
         panel1.preferredSize.width = 540;
-        panel1.preferredSize.height = 510;
+        panel1.preferredSize.height = panelHeight;
         panel1.orientation = "column";
         panel1.alignChildren = ["left", "top"];
         panel1.spacing = 10;
@@ -1852,12 +1920,12 @@ function getConfig(newConfigObject) {
 
         // WIZARDCONTROL
         // =============
-        var wizardControl = filterEntries.add("group", undefined, { name: "wizardControl" });
+        var wizardControl = filterEntries.add("group");
         wizardControl.orientation = "row";
         wizardControl.alignChildren = ["right", "center"];
         wizardControl.spacing = 10;
         wizardControl.margins = [0, 10, 0, 0];
-        wizardControl.alignment = ["fill", "center"];
+        wizardControl.alignment = ["fill", "bottom"];
 
         var buttonCancel = wizardControl.add("button", undefined, undefined, { name: "cancel" });
         buttonCancel.text = "Abbrechen";
@@ -1902,7 +1970,7 @@ function getConfig(newConfigObject) {
         var panel1 = optionsPlaceGun.add("panel", undefined, undefined, { name: "panel1" });
         panel1.text = "Einstellungen PlaceGun";
         panel1.preferredSize.width = 540;
-        panel1.preferredSize.height = 510;
+        panel1.preferredSize.height = panelHeight;
         panel1.orientation = "column";
         panel1.alignChildren = ["left", "top"];
         panel1.spacing = 10;
@@ -1916,17 +1984,51 @@ function getConfig(newConfigObject) {
         group1.spacing = 10;
         group1.margins = [0, 20, 0, 0];
         group1.add("statictext", undefined, "Platziere Bilder im Textfluss oder einzeln");
+
+        var selectedImageProcessingMode = newConfigObject.imageProcessingMode;
+        if (selectedImageProcessingMode != ImageProcessingModes.PLACE_GUN &&
+            selectedImageProcessingMode != ImageProcessingModes.GROUPED_PLACE_GUN &&
+            selectedImageProcessingMode != ImageProcessingModes.ANCHOR) {
+            if (newConfigObject.loadImagesToPlaceGun) {
+                selectedImageProcessingMode = newConfigObject.loadImagesGroupedToPlaceGun ? ImageProcessingModes.GROUPED_PLACE_GUN : ImageProcessingModes.PLACE_GUN;
+            }
+            else {
+                selectedImageProcessingMode = ImageProcessingModes.ANCHOR;
+            }
+        }
+
+        function setPlaceGunImageProcessingMode(mode) {
+            newConfigObject.imageProcessingMode = mode;
+            // Keep legacy config fields in sync for older code paths and stored settings.
+            newConfigObject.loadImagesToPlaceGun = mode != ImageProcessingModes.ANCHOR;
+            newConfigObject.loadImagesGroupedToPlaceGun = mode == ImageProcessingModes.GROUPED_PLACE_GUN;
+        }
+
+        setPlaceGunImageProcessingMode(selectedImageProcessingMode);
+
         var placeGunImageProcessingSingleFiles = group1.add("radiobutton");
         placeGunImageProcessingSingleFiles.text = "Jedes Bild einzeln in den Platzierungs-Einfügemarke »Place Gun« laden";
-        placeGunImageProcessingSingleFiles.value = newConfigObject.loadImagesToPlaceGun;
+        placeGunImageProcessingSingleFiles.value = newConfigObject.imageProcessingMode == ImageProcessingModes.PLACE_GUN;
         placeGunImageProcessingSingleFiles.alignment = ["left", "top"];
+        var placeGunImageProcessingAllFiles = group1.add("radiobutton");
+        placeGunImageProcessingAllFiles.text = "Alle Bilder gruppiert in die Platzierungs-Einfügemarke »Place Gun« laden";
+        placeGunImageProcessingAllFiles.value = newConfigObject.imageProcessingMode == ImageProcessingModes.GROUPED_PLACE_GUN;
+        placeGunImageProcessingAllFiles.alignment = ["left", "top"];
         var placeGunImageProcessingAnchor = group1.add("radiobutton");
         placeGunImageProcessingAnchor.text = "Alle Bilder im Textfluss verankern. Pro Eintrag entsteht ein Textfluss!";
-        placeGunImageProcessingAnchor.value = !newConfigObject.loadImagesToPlaceGun;
+        placeGunImageProcessingAnchor.value = newConfigObject.imageProcessingMode == ImageProcessingModes.ANCHOR;
         placeGunImageProcessingAnchor.alignment = ["left", "top"];
 
-        placeGunImageProcessingSingleFiles.onClick = placeGunImageProcessingAnchor.onClick = function () {
-            newConfigObject.loadImagesToPlaceGun = placeGunImageProcessingSingleFiles.value;
+        placeGunImageProcessingSingleFiles.onClick = function () {
+            setPlaceGunImageProcessingMode(ImageProcessingModes.PLACE_GUN);
+        }
+
+        placeGunImageProcessingAllFiles.onClick = function () {
+            setPlaceGunImageProcessingMode(ImageProcessingModes.GROUPED_PLACE_GUN);
+        }
+
+        placeGunImageProcessingAnchor.onClick = function () {
+            setPlaceGunImageProcessingMode(ImageProcessingModes.ANCHOR);
         }
 
         var group2 = panel1.add("group", undefined, { name: "group2" });
@@ -1951,7 +2053,7 @@ function getConfig(newConfigObject) {
         wizardControl.alignChildren = ["right", "center"];
         wizardControl.spacing = 10;
         wizardControl.margins = [0, 10, 0, 0];
-        wizardControl.alignment = ["fill", "center"];
+        wizardControl.alignment = ["fill", "bottom"];
 
         var buttonCancel = wizardControl.add("button", undefined, undefined, { name: "cancel" });
         buttonCancel.text = "Abbrechen";
@@ -1986,7 +2088,7 @@ function getConfig(newConfigObject) {
         var panel1 = imageOptions.add("panel", undefined, undefined, { name: "panel1" });
         panel1.text = localize(ui.imagePanelHead);
         panel1.preferredSize.width = 540;
-        panel1.preferredSize.height = 510;
+        panel1.preferredSize.height = panelHeight;
         panel1.orientation = "column";
         panel1.alignChildren = ["left", "top"];
         panel1.spacing = 10;
@@ -2067,6 +2169,43 @@ function getConfig(newConfigObject) {
             }
         }
 
+        // Image Dimensions
+        var groupImageDimensions = group1.add("group", undefined, { name: "groupImageDimensions" });
+        groupImageDimensions.orientation = "row";
+        groupImageDimensions.alignChildren = ["left", "center"];
+        groupImageDimensions.spacing = 10;
+        groupImageDimensions.margins = [0, 10, 0, 0];
+
+        groupImageDimensions.add("statictext", undefined, localize(ui.imageDimensionsLabel));
+
+        groupImageDimensions.add("statictext", undefined, localize(ui.imageWidthLabel));
+        var edittextImageWidth = groupImageDimensions.add("edittext", undefined, String(configObject.imageWidth));
+        edittextImageWidth.characters = 5;
+        edittextImageWidth.onChange = function () {
+            var value = parseFloat(this.text);
+            if (!isNaN(value) && value > 0) {
+                configObject.imageWidth = value;
+            }
+        }
+
+        groupImageDimensions.add("statictext", undefined, localize(ui.imageHeightLabel));
+        var edittextImageHeight = groupImageDimensions.add("edittext", undefined, String(configObject.imageHeight));
+        edittextImageHeight.characters = 5;
+        edittextImageHeight.onChange = function () {
+            var value = parseFloat(this.text);
+            if (!isNaN(value) && value > 0) {
+                configObject.imageHeight = value;
+            }
+        }
+        
+
+        var groupImageDimensions = group1.add("group", undefined, { name: "groupImageDimensions" });
+        groupImageDimensions.orientation = "row";
+        groupImageDimensions.margins = [0, 0, 0, 0];
+
+        groupImageDimensions.add("statictext", undefined, localize(ui.imageDimensionObjectPriorityHint));
+
+
         // WIZARDCONTROL
         // =============
         var wizardControl = imageOptions.add("group", undefined, { name: "wizardControl" });
@@ -2103,7 +2242,7 @@ function getConfig(newConfigObject) {
         var panel1 = optionsDatabase.add("panel", undefined, undefined, { name: "panel1" });
         panel1.text = "Einstellungen variable Datenfelder";
         panel1.preferredSize.width = 540;
-        panel1.preferredSize.height = 510;
+        panel1.preferredSize.height = panelHeight;
         panel1.orientation = "column";
         panel1.alignChildren = ["left", "top"];
         panel1.spacing = 10;
@@ -2163,7 +2302,7 @@ function getConfig(newConfigObject) {
         var panel1 = optionsTemplate.add("panel", undefined, undefined, { name: "panel1" });
         panel1.text = "Einstellungen Template";
         panel1.preferredSize.width = 540;
-        panel1.preferredSize.height = 510;
+        panel1.preferredSize.height = panelHeight;
         panel1.orientation = "column";
         panel1.alignChildren = ["left", "top"];
         panel1.spacing = 10;

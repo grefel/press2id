@@ -24,7 +24,7 @@ var px = {
 }
 
 var configObject = {
-    version: "2.40",
+    version: "2.41",
     urlList: ["https://www.indesignblog.com/", "https://www.publishingx.de/", "https://www.publishingx.de/press2id"],
     siteURL: undefined,
     restURL: undefined,
@@ -43,7 +43,10 @@ var configObject = {
     categoryArray: [],
     statusArray: ["publish"], // valid values: publish, future, draft, pending, private
     downloadFeaturedImage: true,
-    loadImagesToPlaceGun: true, // if false, all images are anchored into the text flow    
+    imageProcessingMode: ImageProcessingModes.GROUPED_PLACE_GUN, // placeGun, groupedPlaceGun,  anchor
+    imageWidth: 60,
+    imageHeight: 30,
+
     downloadImages: true,
     localImageFolder: undefined,
     endPoint: "posts",
